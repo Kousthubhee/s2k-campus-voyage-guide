@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { 
   School, 
-  Checklist, 
+  CheckSquare, 
   Users, 
   Book, 
   ChevronRight,
-  Translate
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,13 +17,13 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'checklist', label: 'Checklist', icon: Checklist },
+  { id: 'checklist', label: 'Checklist', icon: CheckSquare },
   { id: 'qa', label: 'Ask Me Anything', icon: School },
   { id: 'hub', label: 'Community Hub', icon: Users },
   { id: 'news', label: 'Stay Updated', icon: Book },
   { id: 'affiliation', label: 'Our Partners', icon: ChevronRight },
   { id: 'language', label: 'Learn French', icon: Book },
-  { id: 'translate', label: 'Translate', icon: Translate },
+  { id: 'translate', label: 'Translate', icon: Languages },
 ];
 
 export function Sidebar({ currentPage, onPageChange, userKeys }: SidebarProps) {
