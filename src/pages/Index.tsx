@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { ChecklistModule } from '@/components/ChecklistModule';
-import { SchoolsList } from '@/components/SchoolsList';
+import { CitiesList } from '@/components/CitiesList';
+import { CityDetails } from '@/components/CityDetails';
 import { SchoolInfo } from '@/components/SchoolInfo';
 import { ChecklistDetail } from '@/components/ChecklistDetail';
 import { QAPage } from '@/pages/QAPage';
@@ -16,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 interface AppState {
   currentPage: string;
   currentView: string;
+  selectedCity: string;
   selectedSchool: string;
   selectedModule: string;
   userKeys: number;
@@ -27,7 +29,7 @@ const checklistModules = [
   {
     id: 'school',
     title: 'School',
-    description: 'Explore French business schools and their offerings',
+    description: 'Explore French cities and their educational offerings',
     icon: '🏫',
     keysRequired: 0
   },
@@ -65,6 +67,7 @@ const Index = () => {
   const [state, setState] = useState<AppState>({
     currentPage: 'checklist',
     currentView: 'main',
+    selectedCity: '',
     selectedSchool: '',
     selectedModule: '',
     userKeys: 7,
@@ -104,10 +107,14 @@ const Index = () => {
 
   const handleModuleClick = (moduleId: string) => {
     if (moduleId === 'school') {
-      setState(prev => ({ ...prev, currentView: 'schools' }));
+      setState(prev => ({ ...prev, currentView: 'cities' }));
     } else {
       setState(prev => ({ ...prev, currentView: 'checklist-detail', selectedModule: moduleId }));
     }
+  };
+
+  const handleCitySelect = (cityId: string) => {
+    setState(prev => ({ ...prev, currentView: 'city-details', selectedCity: cityId }));
   };
 
   const handleSchoolSelect = (schoolId: string) => {
@@ -115,7 +122,13 @@ const Index = () => {
   };
 
   const handleBack = () => {
-    setState(prev => ({ ...prev, currentView: 'main', selectedSchool: '', selectedModule: '' }));
+    if (state.currentView === 'school-info') {
+      setState(prev => ({ ...prev, currentView: 'city-details', selectedSchool: '' }));
+    } else if (state.currentView === 'city-details') {
+      setState(prev => ({ ...prev, currentView: 'cities', selectedCity: '' }));
+    } else {
+      setState(prev => ({ ...prev, currentView: 'main', selectedCity: '', selectedSchool: '', selectedModule: '' }));
+    }
   };
 
   const handleItemToggle = (itemId: string) => {
@@ -130,8 +143,10 @@ const Index = () => {
   const renderContent = () => {
     if (state.currentPage === 'checklist') {
       switch (state.currentView) {
-        case 'schools':
-          return <SchoolsList onBack={handleBack} onSchoolSelect={handleSchoolSelect} />;
+        case 'cities':
+          return <CitiesList onBack={handleBack} onCitySelect={handleCitySelect} />;
+        case 'city-details':
+          return <CityDetails cityId={state.selectedCity} onBack={handleBack} onSchoolSelect={handleSchoolSelect} />;
         case 'school-info':
           return <SchoolInfo schoolId={state.selectedSchool} onBack={handleBack} />;
         case 'checklist-detail':
