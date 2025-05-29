@@ -10,6 +10,9 @@ import { NewsPage } from '@/pages/NewsPage';
 import { AffiliationPage } from '@/pages/AffiliationPage';
 import { LanguagePage } from '@/pages/LanguagePage';
 import { TranslatePage } from '@/pages/TranslatePage';
+import { ContactPage } from '@/pages/ContactPage';
+import { NotificationsPage } from '@/pages/NotificationsPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 import { AppState } from '@/types/AppState';
 
 interface ContentRendererProps {
@@ -66,6 +69,12 @@ export function ContentRenderer({
       return <HubPage />;
     case 'news':
       return <NewsPage />;
+    case 'notifications':
+      return <NotificationsPage />;
+    case 'profile':
+      return <ProfilePage />;
+    case 'contact':
+      return <ContactPage />;
     case 'affiliation':
       return <AffiliationPage />;
     case 'language':

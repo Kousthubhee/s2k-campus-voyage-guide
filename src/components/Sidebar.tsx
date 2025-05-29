@@ -6,7 +6,10 @@ import {
   Users, 
   Book, 
   ChevronRight,
-  Languages
+  Languages,
+  Bell,
+  User,
+  Phone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +24,9 @@ const menuItems = [
   { id: 'qa', label: 'Ask Me Anything', icon: School },
   { id: 'hub', label: 'Community Hub', icon: Users },
   { id: 'news', label: 'Stay Updated', icon: Book },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'profile', label: 'Profile', icon: User },
+  { id: 'contact', label: 'Contact Us', icon: Phone },
   { id: 'affiliation', label: 'Our Partners', icon: ChevronRight },
   { id: 'language', label: 'Learn French', icon: Book },
   { id: 'translate', label: 'Translate', icon: Languages },
