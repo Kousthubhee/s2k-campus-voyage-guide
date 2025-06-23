@@ -14,13 +14,13 @@ export function SorbonneDetail({ onBack }: SorbonneDetailProps) {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Schools
         </Button>
         
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-white mb-8">
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
           <div className="flex items-center mb-4">
-            <div className="text-6xl mr-4">🏛️</div>
+            <div className="text-5xl mr-4">🏛️</div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">Sorbonne University</h1>
-              <p className="text-xl opacity-90">Prestigious French University</p>
-              <div className="flex items-center mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Sorbonne University</h1>
+              <p className="text-lg text-gray-600">Prestigious French University</p>
+              <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>Paris, France</span>
               </div>

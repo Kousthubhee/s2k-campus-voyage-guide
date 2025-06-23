@@ -1,103 +1,122 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Plus, Download, Upload, Target, Bell, Shield } from 'lucide-react';
-import { ExpenseTable } from '@/components/finance/ExpenseTable';
-import { AnalyticsCharts } from '@/components/finance/AnalyticsCharts';
-import { QuickAddMobile } from '@/components/finance/QuickAddMobile';
-import { RecurringSetup } from '@/components/finance/RecurringSetup';
-import { CustomCategories } from '@/components/finance/CustomCategories';
-import { AlertsSettings } from '@/components/finance/AlertsSettings';
-import { CurrencyLiveRates } from '@/components/finance/CurrencyLiveRates';
-import { PartTimeJobLog } from '@/components/finance/PartTimeJobLog';
-import { DiscountIntegration } from '@/components/finance/DiscountIntegration';
-import { GamificationBadges } from '@/components/finance/GamificationBadges';
-import { CSVImportExport } from '@/components/finance/CSVImportExport';
-import { SnapshotReport } from '@/components/finance/SnapshotReport';
-import { SavingsGoals, BillReminders, PrivacyControls } from '@/components/finance/FinanceCards';
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus, TrendingUp, DollarSign, PieChart, BarChart3 } from "lucide-react";
+import { FinanceCards } from "@/components/finance/FinanceCards";
 
 interface FinanceTrackingPageProps {
   onBack: () => void;
-  onComplete: () => void;
-  isCompleted: boolean;
 }
 
-export function FinanceTrackingPage({ onBack, onComplete, isCompleted }: FinanceTrackingPageProps) {
-  const [expenses, setExpenses] = useState([
-    { id: 1, date: '2024-01-05', category: 'Food', description: 'Lunch with colleagues', amount: 25 },
-    { id: 2, date: '2024-01-04', category: 'Transport', description: 'Train ticket', amount: 15 },
-    { id: 3, date: '2024-01-03', category: 'Rent', description: 'Apartment rent', amount: 1200 },
+interface ExpenseEntry {
+  id: string;
+  date: string;
+  category: string;
+  description: string;
+  amount: number;
+}
+
+export function FinanceTrackingPage({ onBack }: FinanceTrackingPageProps) {
+  const [expenses, setExpenses] = useState<ExpenseEntry[]>([
+    { id: "1", date: "2024-01-15", category: "Food", description: "Groceries", amount: 45.50 },
+    { id: "2", date: "2024-01-14", category: "Transport", description: "Bus pass", amount: 30.00 },
+    { id: "3", date: "2024-01-13", category: "Housing", description: "Rent", amount: 800.00 },
   ]);
 
-  const addExpense = (newExpense: any) => {
-    setExpenses([...expenses, { ...newExpense, id: expenses.length + 1 }]);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const handleAddExpense = (newExpense: Omit<ExpenseEntry, 'id'>) => {
+    const expense: ExpenseEntry = {
+      ...newExpense,
+      id: Date.now().toString()
+    };
+    setExpenses(prev => [expense, ...prev]);
   };
 
-  const deleteExpense = (id: number) => {
-    setExpenses(expenses.filter(expense => expense.id !== id));
+  const handleDeleteExpense = (id: string) => {
+    setExpenses(prev => prev.filter(expense => expense.id !== id));
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Button variant="ghost" onClick={onBack} className="mr-4">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Checklist
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" onClick={onBack} className="mr-4">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Hub
+        </Button>
+        <h1 className="text-2xl font-bold text-gray-900">Finance Tracking</h1>
+      </div>
+
+      <div className="mb-6">
+        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <Button
+            variant={activeTab === "overview" ? "default" : "ghost"}
+            onClick={() => setActiveTab("overview")}
+            className="flex-1"
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Overview
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900">Finance Tracking</h1>
+          <Button
+            variant={activeTab === "expenses" ? "default" : "ghost"}
+            onClick={() => setActiveTab("expenses")}
+            className="flex-1"
+          >
+            <DollarSign className="h-4 w-4 mr-2" />
+            Expenses
+          </Button>
+          <Button
+            variant={activeTab === "analytics" ? "default" : "ghost"}
+            onClick={() => setActiveTab("analytics")}
+            className="flex-1"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </Button>
         </div>
-        {!isCompleted && (
-          <Button variant="primary" onClick={onComplete}>
-            Mark as Complete
-          </Button>
-        )}
-        {isCompleted && (
-          <Button variant="secondary" disabled>
-            Completed
-          </Button>
-        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <SavingsGoals />
-        <BillReminders />
-        <PrivacyControls />
-      </div>
+      {activeTab === "overview" && (
+        <FinanceCards expenses={expenses} />
+      )}
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Expenses Overview</h2>
-        <ExpenseTable expenses={expenses} onDelete={deleteExpense} />
-      </div>
+      {activeTab === "expenses" && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Recent Expenses
+                <Button onClick={() => handleAddExpense({
+                  date: new Date().toISOString().split('T')[0],
+                  category: "Other",
+                  description: "New expense",
+                  amount: 0
+                })}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Expense
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {expenses.map((expense) => (
+                  <div key={expense.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <div className="font-medium">{expense.description}</div>
+                      <div className="text-sm text-gray-500">{expense.category} • {expense.date}</div>
+                    </div>
+                    <div className="font-semibold">€{expense.amount.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Analytics & Insights</h2>
-        <AnalyticsCharts expenses={expenses} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <QuickAddMobile onAdd={addExpense} />
-        <RecurringSetup />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <CustomCategories />
-        <AlertsSettings />
-        <CurrencyLiveRates />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <PartTimeJobLog />
-        <DiscountIntegration />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <GamificationBadges />
-        <CSVImportExport expenses={expenses} onAdd={addExpense} />
-      </div>
-
-      <div className="mb-8">
-        <SnapshotReport expenses={expenses} />
-      </div>
+      {activeTab === "analytics" && (
+        <FinanceCards expenses={expenses} />
+      )}
     </div>
   );
 }

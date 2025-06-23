@@ -15,13 +15,13 @@ export function NEOMADetail({ onBack, campus }: NEOMADetailProps) {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Schools
         </Button>
         
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-8 text-white mb-8">
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
           <div className="flex items-center mb-4">
-            <div className="text-6xl mr-4">🏢</div>
+            <div className="text-5xl mr-4">🏢</div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">NEOMA Business School</h1>
-              <p className="text-xl opacity-90">{campus} Campus</p>
-              <div className="flex items-center mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">NEOMA Business School</h1>
+              <p className="text-lg text-gray-600">{campus} Campus</p>
+              <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>{campus}, France</span>
               </div>

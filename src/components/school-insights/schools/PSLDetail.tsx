@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, GraduationCap, Calendar, Globe, Phone, Mail, ExternalLink } from "lucide-react";
@@ -15,13 +14,13 @@ export function PSLDetail({ onBack }: PSLDetailProps) {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Schools
         </Button>
         
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-8 text-white mb-8">
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
           <div className="flex items-center mb-4">
-            <div className="text-6xl mr-4">🎓</div>
+            <div className="text-5xl mr-4">🎓</div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">PSL University</h1>
-              <p className="text-xl opacity-90">Paris Sciences et Lettres</p>
-              <div className="flex items-center mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">PSL University</h1>
+              <p className="text-lg text-gray-600">Paris Sciences et Lettres</p>
+              <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>Paris, France</span>
               </div>
