@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, TrendingUp, DollarSign, PieChart, BarChart3 } from "lucide-react";
-import { FinanceCards } from "@/components/finance/FinanceCards";
 
 interface FinanceTrackingPageProps {
   onBack: () => void;
@@ -15,6 +14,52 @@ interface ExpenseEntry {
   category: string;
   description: string;
   amount: number;
+}
+
+// Simple finance overview component
+function FinanceOverview({ expenses }: { expenses: ExpenseEntry[] }) {
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const categories = [...new Set(expenses.map(e => e.category))];
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+              <p className="text-2xl font-bold">€{totalExpenses.toFixed(2)}</p>
+            </div>
+            <DollarSign className="h-8 w-8 text-blue-600" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Categories</p>
+              <p className="text-2xl font-bold">{categories.length}</p>
+            </div>
+            <PieChart className="h-8 w-8 text-green-600" />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Transactions</p>
+              <p className="text-2xl font-bold">{expenses.length}</p>
+            </div>
+            <BarChart3 className="h-8 w-8 text-purple-600" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export function FinanceTrackingPage({ onBack }: FinanceTrackingPageProps) {
@@ -32,10 +77,6 @@ export function FinanceTrackingPage({ onBack }: FinanceTrackingPageProps) {
       id: Date.now().toString()
     };
     setExpenses(prev => [expense, ...prev]);
-  };
-
-  const handleDeleteExpense = (id: string) => {
-    setExpenses(prev => prev.filter(expense => expense.id !== id));
   };
 
   return (
@@ -77,7 +118,7 @@ export function FinanceTrackingPage({ onBack }: FinanceTrackingPageProps) {
       </div>
 
       {activeTab === "overview" && (
-        <FinanceCards expenses={expenses} />
+        <FinanceOverview expenses={expenses} />
       )}
 
       {activeTab === "expenses" && (
@@ -115,7 +156,7 @@ export function FinanceTrackingPage({ onBack }: FinanceTrackingPageProps) {
       )}
 
       {activeTab === "analytics" && (
-        <FinanceCards expenses={expenses} />
+        <FinanceOverview expenses={expenses} />
       )}
     </div>
   );
