@@ -1,4 +1,3 @@
-
 import { ChecklistModule } from '@/components/ChecklistModule';
 import { QAPage } from '@/components/QAPage';
 import { HubPage } from '@/components/HubPage';
@@ -136,16 +135,6 @@ export function MainRouter({
       return (
         <FinanceTrackingPage 
           onBack={() => setCurrentPage('checklist')} 
-          onComplete={() => {
-            const newProgress = {
-              ...userProgress,
-              completedModules: [...userProgress.completedModules, 'finance'],
-              keys: userProgress.keys + 1
-            };
-            handleProgressUpdate(newProgress);
-            setCurrentPage('checklist');
-          }}
-          isCompleted={userProgress.completedModules.includes('finance')}
         />
       );
     case 'qa':
