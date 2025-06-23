@@ -2,6 +2,7 @@
 import { HECParisDetail } from "./schools/HECParisDetail";
 import { SorbonneDetail } from "./schools/SorbonneDetail";
 import { NEOMADetail } from "./schools/NEOMADetail";
+import { PSLDetail } from "./schools/PSLDetail";
 import { SchoolDetail } from "./SchoolDetail";
 
 interface SchoolDetailRouterProps {
@@ -18,6 +19,9 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
     case "sorbonne":
       return <SorbonneDetail onBack={onBack} />;
       
+    case "psl":
+      return <PSLDetail onBack={onBack} />;
+      
     case "neoma-rouen":
       return <NEOMADetail onBack={onBack} campus="Rouen" />;
       
@@ -27,11 +31,8 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
     case "neoma-reims":
       return <NEOMADetail onBack={onBack} campus="Reims" />;
       
-    // Add more specific school components as needed
-    // case "polytechnique":
-    //   return <PolytechniqueDetail onBack={onBack} />;
-    
-    // For schools without specific detail pages, use the generic component
+    // All other schools will use the generic SchoolDetail component for now
+    // Individual detail components can be created for each school as needed
     default:
       return (
         <SchoolDetail

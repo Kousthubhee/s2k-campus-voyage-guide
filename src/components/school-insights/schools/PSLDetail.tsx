@@ -1,13 +1,13 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, GraduationCap, Calendar, Globe, Phone, Mail, ExternalLink } from "lucide-react";
 
-interface NEOMADetailProps {
+interface PSLDetailProps {
   onBack: () => void;
-  campus: string;
 }
 
-export function NEOMADetail({ onBack, campus }: NEOMADetailProps) {
+export function PSLDetail({ onBack }: PSLDetailProps) {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
@@ -15,15 +15,15 @@ export function NEOMADetail({ onBack, campus }: NEOMADetailProps) {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Schools
         </Button>
         
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-8 text-white mb-8">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-8 text-white mb-8">
           <div className="flex items-center mb-4">
-            <div className="text-6xl mr-4">🏢</div>
+            <div className="text-6xl mr-4">🎓</div>
             <div>
-              <h1 className="text-3xl font-bold mb-2">NEOMA Business School</h1>
-              <p className="text-xl opacity-90">{campus} Campus</p>
+              <h1 className="text-3xl font-bold mb-2">PSL University</h1>
+              <p className="text-xl opacity-90">Paris Sciences et Lettres</p>
               <div className="flex items-center mt-2">
                 <MapPin className="h-4 w-4 mr-2" />
-                <span>{campus}, France</span>
+                <span>Paris, France</span>
               </div>
             </div>
           </div>
@@ -38,9 +38,9 @@ export function NEOMADetail({ onBack, campus }: NEOMADetailProps) {
               Programs Offered
             </h3>
             <div className="text-gray-600">
-              <p>• Programme Grande École (PGE)</p>
-              <p>• Master of Science programs</p>
-              <p>• Bachelor of Business Administration (BBA)</p>
+              <p>• Science programs</p>
+              <p>• Economics programs</p>
+              <p>• Engineering programs</p>
               <p>• [Details to be updated]</p>
             </div>
           </CardContent>
@@ -78,26 +78,19 @@ export function NEOMADetail({ onBack, campus }: NEOMADetailProps) {
             </h3>
             <div className="space-y-3">
               <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                <a href="mailto:international.admissions@neoma-bs.fr" className="text-blue-600 hover:underline">
-                  international.admissions@neoma-bs.fr
-                </a>
-              </div>
-              <div className="flex items-center">
-                <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                <span>+33 3 44 63 33 00</span>
-              </div>
-              <div className="flex items-center">
                 <Globe className="h-4 w-4 mr-2 text-gray-400" />
                 <a 
-                  href="https://www.neoma-bs.com/en/"
+                  href="https://psl.eu/"
                   target="_blank"
                   rel="noopener noreferrer" 
                   className="text-blue-600 hover:underline flex items-center"
                 >
-                  www.neoma-bs.com/en/
+                  psl.eu
                   <ExternalLink className="h-3 w-3 ml-1" />
                 </a>
+              </div>
+              <div className="text-gray-600">
+                <p>[Contact details to be updated]</p>
               </div>
             </div>
           </CardContent>
