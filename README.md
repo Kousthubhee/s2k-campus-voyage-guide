@@ -1,73 +1,102 @@
-# Welcome to your Lovable project
+# pasS2Kampus - Your Guide to French Education
 
-## Project info
+A comprehensive React TypeScript application for international students studying in France. This platform provides a complete guide and tracking system for the entire French education journey.
 
-**URL**: https://lovable.dev/projects/c1ed4e75-6595-4f9c-a2a9-573267e5e36f
+## Features
 
-## How can I edit this code?
+- **Interactive Checklist System**: Gamified progress tracking with key-based module unlocking
+- **School & City Insights**: Detailed information about French universities and cities
+- **Document Management**: Track important documents and renewal deadlines
+- **Financial Tracking**: Comprehensive budget and expense management
+- **Community Hub**: Connect with fellow students and share experiences
+- **Language Learning**: Interactive French lessons and practice
+- **Cultural Integration**: Guide to French culture and customs
+- **Translation Tools**: Real-time translation assistance
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Routing**: React Router DOM
+- **State Management**: React hooks and local storage
+- **UI Components**: Radix UI primitives
+- **Icons**: Lucide React
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c1ed4e75-6595-4f9c-a2a9-573267e5e36f) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (version 16 or higher)
+- npm or yarn package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd pass2kampus
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Available Scripts
 
-**Use GitHub Codespaces**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # Reusable UI components
+├── pages/              # Page components
+├── hooks/              # Custom React hooks
+├── data/               # Static data and types
+├── constants/          # Application constants
+└── lib/                # Utility functions
+```
 
-This project is built with:
+## Key Features
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Gamified Learning System
+- Key-based progression system
+- Module unlocking mechanics
+- Progress tracking and achievements
 
-## How can I deploy this project?
+### Comprehensive Modules
+- **School Insights**: Explore French universities by city
+- **Pre-Arrival Checklists**: Campus France, VFS, and preparation guides
+- **Post-Arrival Tasks**: Bank accounts, social security, CAF applications
+- **Financial Management**: Budget tracking, expense management, currency tools
+- **Cultural Integration**: French customs, language, and social adaptation
 
-Simply open [Lovable](https://lovable.dev/projects/c1ed4e75-6595-4f9c-a2a9-573267e5e36f) and click on Share -> Publish.
+### Interactive Tools
+- Document renewal tracking
+- Translation assistance
+- Community forums
+- Language learning modules
+- Financial calculators
 
-## Can I connect a custom domain to my Lovable project?
+## Contributing
 
-Yes, you can!
+This project was created by Kousthubhee Krishna K and Srivatsava CK to help international students navigate their French education journey.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## License
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is private and proprietary.
+
+## Support
+
+For support and questions, please use the Contact Us feature within the application.
