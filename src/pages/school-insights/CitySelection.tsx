@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import { CityCard } from "@/components/school-insights/CityCard";
-import { getCityDetails } from "@/data/cityData";
-import { schools } from "@/data/schoolData";
+import { getCityDetails } from "@/data/cityUtils";
+import { schools } from "@/data/schoolList";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CitySelectionProps {

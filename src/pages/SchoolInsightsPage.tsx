@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +7,8 @@ import { CityCard } from "@/components/school-insights/CityCard";
 import { CityInsightsCard } from "@/components/school-insights/CityInsightsCard";
 import { InsightsDialog } from "@/components/school-insights/InsightsDialog";
 import { SchoolDetailRouter } from "@/components/school-insights/SchoolDetailRouter";
-import { schools, School } from "@/data/schoolData";
-import { cityData, getCityDetails, City } from "@/data/cityData";
+import { schools } from "@/data/schoolList";
+import { getCityDetails } from "@/data/cityUtils";
 import { CitySelection } from "./school-insights/CitySelection";
 import { SubjectFilter } from "./school-insights/SubjectFilter";
 import { SchoolsGrid } from "./school-insights/SchoolsGrid";
