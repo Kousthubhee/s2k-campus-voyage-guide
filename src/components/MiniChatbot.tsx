@@ -48,7 +48,7 @@ export function MiniChatbot({ pageContext }: MiniChatbotProps) {
           <MessageCircle className="h-6 w-6" />
         </Button>
       ) : (
-        <Card className="w-80 h-96 shadow-lg">
+        <Card className="w-80 h-96 shadow-lg translate-y-[-40px]">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Ask Me Anything</CardTitle>
