@@ -144,7 +144,6 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
       return <PaulSabatierDetail onBack={onBack} />;
       
     // All other schools will use the generic SchoolDetail component
-    // This covers the remaining schools in the database
     default:
       return (
         <SchoolDetail

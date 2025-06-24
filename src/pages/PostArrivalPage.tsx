@@ -5,6 +5,8 @@ import { ArrowLeft, CheckCircle, CreditCard, Home, Shield, FileText, Info } from
 import { ReminderButton } from "@/components/ReminderButton";
 import { PageTitle } from "@/components/PageTitle";
 import { PostArrivalTaskCards } from '@/components/PostArrivalTaskCards';
+import { CheckboxItem } from "@/components/CheckboxItem";
+import { MiniChatbot } from "@/components/MiniChatbot";
 import confetti from "canvas-confetti";
 import { useToast } from "@/hooks/use-toast";
 
@@ -177,6 +179,7 @@ const processOrder = [
 export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrivalPageProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [reminders, setReminders] = useState<{ [id: string]: string }>({});
+  const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
   const { toast } = useToast();
 
   // Confetti and toast when all are completed
@@ -192,8 +195,15 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
     onComplete();
   };
 
+  const handleDocumentCheck = (taskId: string, docIndex: number, checked: boolean) => {
+    const key = `${taskId}-${docIndex}`;
+    setDocumentChecks(prev => ({ ...prev, [key]: checked }));
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
+      <MiniChatbot pageContext="Post-Arrival Checklist" />
+      
       <div className="mb-6">
         <Button 
           variant="outline" 
@@ -288,33 +298,24 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
           <p className="text-gray-600 mb-4">
             You will need these documents at various stages. Always keep both originals and copies!
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-2">
             {[
               ...new Set(
                 tasks
                   .flatMap((task) => task.documents)
                   .sort()
               ),
-            ].map((doc) =>
-              glossaryItems.find((g) => doc.includes(g.term)) ? (
-                <div key={doc} className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                  <span className="text-sm">
-                    <span className="underline decoration-dotted cursor-help group relative">
-                      {doc}
-                      <span className="hidden group-hover:block absolute z-10 left-1/2 -translate-x-1/2 bg-white border border-gray-200 shadow-lg text-xs text-gray-900 px-3 py-1 rounded whitespace-pre w-60 mt-2">
-                        {glossaryItems.find((g) => doc.includes(g.term))?.explanation}
-                      </span>
-                    </span>
-                  </span>
-                </div>
-              ) : (
-                <div key={doc} className="flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                  <span className="text-sm">{doc}</span>
-                </div>
-              )
-            )}
+            ].map((doc, index) => (
+              <CheckboxItem
+                key={index}
+                id={`document-${index}`}
+                checked={documentChecks[`document-${index}`] || false}
+                onCheckedChange={(checked) => setDocumentChecks(prev => ({ ...prev, [`document-${index}`]: checked }))}
+                className="text-sm"
+              >
+                {doc}
+              </CheckboxItem>
+            ))}
           </div>
         </CardContent>
       </Card>

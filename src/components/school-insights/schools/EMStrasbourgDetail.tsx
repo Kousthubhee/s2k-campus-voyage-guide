@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, GraduationCap, Calendar, Globe, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, GraduationCap, Calendar, Globe, Award, ExternalLink } from "lucide-react";
 
 interface EMStrasbourgDetailProps {
   onBack: () => void;
@@ -20,7 +20,7 @@ export function EMStrasbourgDetail({ onBack }: EMStrasbourgDetailProps) {
             <div className="text-5xl mr-4">🏢</div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">EM Strasbourg Business School</h1>
-              <p className="text-lg text-gray-600">Part of Université de Strasbourg</p>
+              <p className="text-lg text-gray-600">Management School</p>
               <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>Strasbourg, France</span>
@@ -39,20 +39,12 @@ export function EMStrasbourgDetail({ onBack }: EMStrasbourgDetailProps) {
             </h3>
             <div className="space-y-3">
               <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                <div className="font-semibold text-blue-900">Grande École Master in Management</div>
-                <div className="text-sm text-blue-700">Core business program</div>
+                <div className="font-semibold text-blue-900">Master in Management</div>
+                <div className="text-sm text-blue-700">Grande École Program</div>
               </div>
               <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-900">MSc Finance</div>
-                <div className="text-sm text-green-700">Financial markets and analysis</div>
-              </div>
-              <div className="bg-purple-50 border border-purple-100 p-3 rounded-lg">
-                <div className="font-semibold text-purple-900">MSc Marketing</div>
-                <div className="text-sm text-purple-700">Digital and traditional marketing</div>
-              </div>
-              <div className="bg-orange-50 border border-orange-100 p-3 rounded-lg">
-                <div className="font-semibold text-orange-900">Other Specializations</div>
-                <div className="text-sm text-orange-700">Logistics, Sustainable Management</div>
+                <div className="font-semibold text-green-900">MSc Programs</div>
+                <div className="text-sm text-green-700">International Business</div>
               </div>
             </div>
           </CardContent>
@@ -61,45 +53,13 @@ export function EMStrasbourgDetail({ onBack }: EMStrasbourgDetailProps) {
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-green-600" />
-              Tuition & Fees
+              <Award className="h-5 w-5 mr-2 text-yellow-600" />
+              Accreditations
             </h3>
             <div className="space-y-3">
-              <div className="border-l-4 border-blue-500 bg-blue-50 pl-3 py-2">
-                <div className="font-semibold text-blue-900">EU/EEA Students</div>
-                <div className="text-sm text-gray-600">€250/year + CVEC</div>
-              </div>
-              <div className="border-l-4 border-green-500 bg-green-50 pl-3 py-2">
-                <div className="font-semibold text-green-900">Non-EU Students</div>
-                <div className="text-sm text-gray-600">€3,879/year</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Globe className="h-5 w-5 mr-2 text-purple-600" />
-              Admission Requirements
-            </h3>
-            <div className="space-y-2 text-sm">
-              <p>• Bachelor's degree</p>
-              <p>• GMAT/GRE for some programs</p>
-              <p>• English/French proficiency</p>
-              <p>• Application file & interview</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Recognition</h3>
-            <div className="space-y-3">
-              <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-800">Accreditations</div>
-                <div className="text-sm text-green-700">• Ranked among top French business schools</div>
-                <div className="text-sm text-green-700">• CGE member</div>
+              <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
+                <div className="font-semibold text-yellow-800">AACSB & EQUIS</div>
+                <div className="text-sm text-yellow-700">International accreditations</div>
               </div>
             </div>
           </CardContent>
@@ -121,9 +81,6 @@ export function EMStrasbourgDetail({ onBack }: EMStrasbourgDetailProps) {
                 www.em-strasbourg.eu
                 <ExternalLink className="h-3 w-3 ml-1" />
               </a>
-            </div>
-            <div className="text-gray-600">
-              <p>Business School Site at Strasbourg University</p>
             </div>
           </div>
         </CardContent>

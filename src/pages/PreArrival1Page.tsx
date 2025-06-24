@@ -6,6 +6,8 @@ import { ArrowLeft, CheckCircle, Calendar, ChevronDown, FileText, Clock, Info } 
 import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
+import { CheckboxItem } from "@/components/CheckboxItem";
+import { MiniChatbot } from "@/components/MiniChatbot";
 
 interface ProfileType {
   name: string;
@@ -30,6 +32,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [reminders, setReminders] = useState<{ [id: string]: string }>({});
   const [appointments, setAppointments] = useState<{ [id: string]: { date: string; location: string } }>({});
+  const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => 
@@ -175,6 +178,11 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     }
   ];
 
+  const handleDocumentCheck = (itemId: string, docIndex: number, checked: boolean) => {
+    const key = `${itemId}-${docIndex}`;
+    setDocumentChecks(prev => ({ ...prev, [key]: checked }));
+  };
+
   const handleStepComplete = (stepId: string) => {
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
@@ -185,6 +193,8 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
 
   return (
     <div className="max-w-4xl mx-auto">
+      <MiniChatbot pageContext="Pre-Arrival Checklist (Part 1)" />
+      
       <div className="mb-6">
         <Button 
           variant="outline" 
@@ -307,17 +317,22 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                     <CollapsibleContent className="mt-4 space-y-4">
                       <div className="bg-blue-50 p-4 rounded-lg">
                         <h4 className="font-semibold text-blue-900 mb-2">📋 Documents Required:</h4>
-                        <ul className="space-y-1">
+                        <div className="space-y-2">
                           {item.documents.map((doc, docIndex) => (
-                            <li key={docIndex} className="text-sm text-blue-800 flex items-start">
-                              <span className="mr-2">•</span>
+                            <CheckboxItem
+                              key={docIndex}
+                              id={`${item.id}-doc-${docIndex}`}
+                              checked={documentChecks[`${item.id}-${docIndex}`] || false}
+                              onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
+                              className="text-blue-800"
+                            >
                               {doc}
                               {extraDocs.includes(doc.split(" (")[0]) && (
                                 <span className="ml-2 px-2 inline rounded bg-yellow-100 text-yellow-700 text-xs font-medium">Personalized</span>
                               )}
-                            </li>
+                            </CheckboxItem>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                       <div className="bg-green-50 p-4 rounded-lg">
                         <h4 className="font-semibold text-green-900 mb-2">🔄 Process:</h4>
