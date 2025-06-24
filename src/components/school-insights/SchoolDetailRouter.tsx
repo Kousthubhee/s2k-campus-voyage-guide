@@ -23,6 +23,13 @@ import { ClaudeBernardLyonDetail } from "./schools/ClaudeBernardLyonDetail";
 import { EMLyonDetail } from "./schools/EMLyonDetail";
 import { LumiereLyon2Detail } from "./schools/LumiereLyon2Detail";
 import { ISAESUPAERODetail } from "./schools/ISAESUPAERODetail";
+import { EcolePolytechniqueDetail } from "./schools/EcolePolytechniqueDetail";
+import { ESCPDetail } from "./schools/ESCPDetail";
+import { SciencesPoParisDetail } from "./schools/SciencesPoParisDetail";
+import { TelecomParisDetail } from "./schools/TelecomParisDetail";
+import { ESSECDetail } from "./schools/ESSECDetail";
+import { INSAToulouseDetail } from "./schools/INSAToulouseDetail";
+import { PaulSabatierDetail } from "./schools/PaulSabatierDetail";
 import { SchoolDetail } from "./SchoolDetail";
 
 interface SchoolDetailRouterProps {
@@ -41,6 +48,21 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
       
     case "psl":
       return <PSLDetail onBack={onBack} />;
+
+    case "polytechnique":
+      return <EcolePolytechniqueDetail onBack={onBack} />;
+
+    case "escp":
+      return <ESCPDetail onBack={onBack} />;
+
+    case "sciencespo-paris":
+      return <SciencesPoParisDetail onBack={onBack} />;
+
+    case "telecom-paris":
+      return <TelecomParisDetail onBack={onBack} />;
+
+    case "essec":
+      return <ESSECDetail onBack={onBack} />;
       
     case "neoma-rouen":
       return <NEOMADetail onBack={onBack} campus="Rouen" />;
@@ -69,24 +91,28 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
     case "sciences-po-strasbourg":
       return <SciencesPoStrasbourgDetail onBack={onBack} />;
 
+    case "bordeaux-univ":
     case "universite-bordeaux":
       return <UniversiteBordeauxDetail onBack={onBack} />;
 
     case "kedge-bordeaux":
       return <KEDGEBordeauxDetail onBack={onBack} />;
 
+    case "enseirb":
     case "enseirb-matmeca":
       return <ENSEIRBMATMECADetail onBack={onBack} />;
 
     case "sciences-po-bordeaux":
       return <SciencesPoBordeauxDetail onBack={onBack} />;
 
+    case "amu":
     case "aix-marseille-universite":
       return <AixMarseilleUniversiteDetail onBack={onBack} />;
 
     case "kedge-marseille":
       return <KEDGEMarseilleDetail onBack={onBack} />;
 
+    case "grenoble-univ":
     case "universite-grenoble-alpes":
       return <UniversiteGrenobleAlpesDetail onBack={onBack} />;
 
@@ -110,9 +136,15 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
 
     case "supaero":
       return <ISAESUPAERODetail onBack={onBack} />;
+
+    case "insa-toulouse":
+      return <INSAToulouseDetail onBack={onBack} />;
+
+    case "paul-sabatier":
+      return <PaulSabatierDetail onBack={onBack} />;
       
-    // All other schools will use the generic SchoolDetail component for now
-    // Individual detail components can be created for each school as needed
+    // All other schools will use the generic SchoolDetail component
+    // This covers the remaining schools in the database
     default:
       return (
         <SchoolDetail

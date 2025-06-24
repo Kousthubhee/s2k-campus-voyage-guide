@@ -85,13 +85,11 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
         )}
       </div>
 
-      {/* Search functionality */}
-      {(selectedCity || searchTerm) && (
-        <SchoolSearch
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
-      )}
+      {/* Global search functionality - always visible */}
+      <SchoolSearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
 
       {!selectedCity && !searchTerm && (
         <CitySelection cityList={cityList} onSelect={setSelectedCity} />
