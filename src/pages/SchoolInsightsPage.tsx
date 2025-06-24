@@ -7,6 +7,7 @@ import { CityCard } from "@/components/school-insights/CityCard";
 import { CityInsightsCard } from "@/components/school-insights/CityInsightsCard";
 import { InsightsDialog } from "@/components/school-insights/InsightsDialog";
 import { SchoolDetailRouter } from "@/components/school-insights/SchoolDetailRouter";
+import { SchoolSearch } from "@/components/school-insights/SchoolSearch";
 import { schools } from "@/data/schoolList";
 import { getCityDetails } from "@/data/cityUtils";
 import { CitySelection } from "./school-insights/CitySelection";
@@ -20,22 +21,39 @@ interface SchoolInsightsPageProps {
 export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = useState<string>("All");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [showCityInsights, setShowCityInsights] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
 
   const cityList = Array.from(new Set(schools.map((s) => s.city)));
+  
+  // Filter schools based on search term
+  const searchFilteredSchools = searchTerm.trim()
+    ? schools.filter((school) =>
+        school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        school.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        school.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (school.subjects || []).some(subject => 
+          subject.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    : schools;
+
   const citySchools = selectedCity
-    ? schools.filter((school) => school.city === selectedCity)
-    : [];
+    ? searchFilteredSchools.filter((school) => school.city === selectedCity)
+    : searchFilteredSchools;
+    
   const availableSubjects = selectedCity
     ? Array.from(new Set(citySchools.flatMap((s) => s.subjects || []))).sort()
     : [];
+    
   let displayedSchools = citySchools;
   if (subjectFilter !== "All" && selectedCity) {
     displayedSchools = citySchools.filter((school) =>
       (school.subjects || []).includes(subjectFilter)
     );
   }
+  
   const cityDetails = selectedCity ? getCityDetails(selectedCity) : null;
 
   if (selectedSchool) {
@@ -66,9 +84,19 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
           </>
         )}
       </div>
-      {!selectedCity && (
+
+      {/* Search functionality */}
+      {(selectedCity || searchTerm) && (
+        <SchoolSearch
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+      )}
+
+      {!selectedCity && !searchTerm && (
         <CitySelection cityList={cityList} onSelect={setSelectedCity} />
       )}
+      
       {selectedCity && (
         <div className="mb-4">
           <CityInsightsCard
@@ -91,6 +119,7 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
           />
         </div>
       )}
+      
       {selectedCity && availableSubjects.length > 1 && (
         <SubjectFilter
           availableSubjects={availableSubjects}
@@ -98,7 +127,8 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
           setSubjectFilter={setSubjectFilter}
         />
       )}
-      {selectedCity ? (
+      
+      {(selectedCity || searchTerm) ? (
         <SchoolsGrid
           displayedSchools={displayedSchools}
           onSelectSchool={(school) =>
@@ -110,10 +140,11 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             })
           }
           selectedCity={selectedCity}
+          searchTerm={searchTerm}
         />
       ) : (
         <div className="text-gray-500 text-center">
-          Select a city to explore school insights.
+          Select a city to explore school insights or search for specific schools.
         </div>
       )}
     </div>

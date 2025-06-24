@@ -17,6 +17,12 @@ import { AixMarseilleUniversiteDetail } from "./schools/AixMarseilleUniversiteDe
 import { KEDGEMarseilleDetail } from "./schools/KEDGEMarseilleDetail";
 import { UniversiteGrenobleAlpesDetail } from "./schools/UniversiteGrenobleAlpesDetail";
 import { GrenobleINPDetail } from "./schools/GrenobleINPDetail";
+import { CentraleLyonDetail } from "./schools/CentraleLyonDetail";
+import { INSALyonDetail } from "./schools/INSALyonDetail";
+import { ClaudeBernardLyonDetail } from "./schools/ClaudeBernardLyonDetail";
+import { EMLyonDetail } from "./schools/EMLyonDetail";
+import { LumiereLyon2Detail } from "./schools/LumiereLyon2Detail";
+import { ISAESUPAERODetail } from "./schools/ISAESUPAERODetail";
 import { SchoolDetail } from "./SchoolDetail";
 
 interface SchoolDetailRouterProps {
@@ -86,6 +92,24 @@ export function SchoolDetailRouter({ school, onBack }: SchoolDetailRouterProps) 
 
     case "grenoble-inp":
       return <GrenobleINPDetail onBack={onBack} />;
+
+    case "centrale-lyon":
+      return <CentraleLyonDetail onBack={onBack} />;
+
+    case "insa-lyon":
+      return <INSALyonDetail onBack={onBack} />;
+
+    case "claude-bernard":
+      return <ClaudeBernardLyonDetail onBack={onBack} />;
+
+    case "em-lyon":
+      return <EMLyonDetail onBack={onBack} />;
+
+    case "lumiere-lyon2":
+      return <LumiereLyon2Detail onBack={onBack} />;
+
+    case "supaero":
+      return <ISAESUPAERODetail onBack={onBack} />;
       
     // All other schools will use the generic SchoolDetail component for now
     // Individual detail components can be created for each school as needed
