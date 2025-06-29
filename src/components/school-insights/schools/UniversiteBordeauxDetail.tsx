@@ -20,7 +20,7 @@ export function UniversiteBordeauxDetail({ onBack }: UniversiteBordeauxDetailPro
             <div className="text-5xl mr-4">🎓</div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Université de Bordeaux</h1>
-              <p className="text-lg text-gray-600">Research University</p>
+              <p className="text-lg text-gray-600">Comprehensive Research University</p>
               <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>Bordeaux, France</span>
@@ -40,50 +40,16 @@ export function UniversiteBordeauxDetail({ onBack }: UniversiteBordeauxDetailPro
             <div className="space-y-3">
               <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
                 <div className="font-semibold text-blue-900">Sciences & Technology</div>
-                <div className="text-sm text-blue-700">Computer Vision, Materials Science, Analytical Chemistry</div>
+                <div className="text-sm text-blue-700">Computer Science, Mathematics, Physics</div>
               </div>
               <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-900">Business & Management</div>
-                <div className="text-sm text-green-700">Business Administration, Economics, European Business</div>
+                <div className="font-semibold text-green-900">Life Sciences</div>
+                <div className="text-sm text-green-700">Biology, Medicine, Health Sciences</div>
               </div>
               <div className="bg-purple-50 border border-purple-100 p-3 rounded-lg">
-                <div className="font-semibold text-purple-900">Life & Health Sciences</div>
-                <div className="text-sm text-purple-700">Light Sciences & Technologies</div>
+                <div className="font-semibold text-purple-900">Social Sciences</div>
+                <div className="text-sm text-purple-700">Law, Economics, Humanities</div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-green-600" />
-              Tuition & Fees
-            </h3>
-            <div className="space-y-3">
-              <div className="border-l-4 border-blue-500 bg-blue-50 pl-3 py-2">
-                <div className="font-semibold text-blue-900">EU/EEA Students</div>
-                <div className="text-sm text-gray-600">Licence €170–243/year; Masters €243/year + CVEC</div>
-              </div>
-              <div className="border-l-4 border-green-500 bg-green-50 pl-3 py-2">
-                <div className="font-semibold text-green-900">Non-EU Students</div>
-                <div className="text-sm text-gray-600">Masters €3,879/year</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Globe className="h-5 w-5 mr-2 text-purple-600" />
-              Admission Requirements
-            </h3>
-            <div className="space-y-2 text-sm">
-              <p>• Bachelor's degree</p>
-              <p>• French/English proficiency</p>
-              <p>• Online application via "Études en France"</p>
-              <p>• Departmental deadlines Mar–May 2025</p>
             </div>
           </CardContent>
         </Card>
@@ -96,12 +62,8 @@ export function UniversiteBordeauxDetail({ onBack }: UniversiteBordeauxDetailPro
             </h3>
             <div className="space-y-3">
               <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
-                <div className="font-semibold text-yellow-800">Global Rankings</div>
-                <div className="text-sm text-yellow-700">QS top 801–1000 globally</div>
-              </div>
-              <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-800">Memberships</div>
-                <div className="text-sm text-green-700">LERU & Eucor member</div>
+                <div className="font-semibold text-yellow-800">Excellence Initiative</div>
+                <div className="text-sm text-yellow-700">IdEx Bordeaux laureate</div>
               </div>
             </div>
           </CardContent>

@@ -20,10 +20,10 @@ export function SciencesPoBordeauxDetail({ onBack }: SciencesPoBordeauxDetailPro
             <div className="text-5xl mr-4">🏛️</div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Sciences Po Bordeaux</h1>
-              <p className="text-lg text-gray-600">Institute of Political Studies</p>
+              <p className="text-lg text-gray-600">Institut d'Études Politiques de Bordeaux</p>
               <div className="flex items-center mt-2 text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
-                <span>11 allée Ausone, 33607 Pessac, France</span>
+                <span>Bordeaux, France</span>
               </div>
             </div>
           </div>
@@ -39,47 +39,13 @@ export function SciencesPoBordeauxDetail({ onBack }: SciencesPoBordeauxDetailPro
             </h3>
             <div className="space-y-3">
               <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                <div className="font-semibold text-blue-900">5-year Integrated Program</div>
-                <div className="text-sm text-blue-700">Diploma equivalent to Bachelor + Master's access</div>
+                <div className="font-semibold text-blue-900">Political Science</div>
+                <div className="text-sm text-blue-700">5-year integrated program</div>
               </div>
               <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-900">18 Master's Degrees</div>
-                <div className="text-sm text-green-700">Political Science, International Relations, Law & Finance, Public Affairs</div>
+                <div className="font-semibold text-green-900">Master's Programs</div>
+                <div className="text-sm text-green-700">Public Policy, International Relations</div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-green-600" />
-              Tuition & Fees
-            </h3>
-            <div className="space-y-3">
-              <div className="border-l-4 border-blue-500 bg-blue-50 pl-3 py-2">
-                <div className="font-semibold text-blue-900">Means-tested</div>
-                <div className="text-sm text-gray-600">€0–€20,380/year + CVEC</div>
-              </div>
-              <div className="border-l-4 border-green-500 bg-green-50 pl-3 py-2">
-                <div className="font-semibold text-green-900">Non-EU</div>
-                <div className="text-sm text-gray-600">Similar bracket structure</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Globe className="h-5 w-5 mr-2 text-purple-600" />
-              Admission Requirements
-            </h3>
-            <div className="space-y-2 text-sm">
-              <p>• French Baccalauréat or equivalent</p>
-              <p>• Competitive dossier</p>
-              <p>• Language tests (French & English)</p>
-              <p>• Interview for English-track</p>
             </div>
           </CardContent>
         </Card>
@@ -88,16 +54,12 @@ export function SciencesPoBordeauxDetail({ onBack }: SciencesPoBordeauxDetailPro
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
               <Award className="h-5 w-5 mr-2 text-yellow-600" />
-              Rankings & Recognition
+              Recognition
             </h3>
             <div className="space-y-3">
               <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
-                <div className="font-semibold text-yellow-800">Prestige</div>
-                <div className="text-sm text-yellow-700">Part of top-tier Sciences Po network</div>
-              </div>
-              <div className="bg-green-50 border border-green-100 p-3 rounded-lg">
-                <div className="font-semibold text-green-800">Accreditations</div>
-                <div className="text-sm text-green-700">CGE member, Ministry recognized</div>
+                <div className="font-semibold text-yellow-800">Grande École</div>
+                <div className="text-sm text-yellow-700">Prestigious political science institute</div>
               </div>
             </div>
           </CardContent>
