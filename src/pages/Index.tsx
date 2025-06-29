@@ -1,24 +1,40 @@
-
 import { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { MainRouter } from './MainRouter';
-import { useSupabaseProgress } from "@/hooks/useSupabaseProgress";
-import { useSupabaseProfile } from "@/hooks/useSupabaseProfile";
-import { useAuth } from "@/hooks/useAuth";
+import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { ProfilePage } from "@/components/ProfilePage";
-import { AuthPage } from "@/components/AuthPage";
 
 console.log("[Index.tsx] Rendering Index Page");
 
+interface UserProfile {
+  name: string;
+  email: string;
+  age: string;
+  nationality: string;
+  educationLevel: string;
+  hasWorkExperience: boolean;
+  hasGapYear: boolean;
+  gapYearDuration: number;
+  targetCity: string;
+  targetProgram: string;
+  hasHealthIssues: boolean;
+  isMarried: boolean;
+  hasChildren: boolean;
+  about: string;
+  memberSince: string;
+  photo: string;
+  prevEducation: string;
+  workExperience: string;
+}
+
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { profile } = useSupabaseProfile();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState('checklist');
-  const [userProgress, setUserProgress, resetProgress, progressLoading] = useSupabaseProgress();
+  const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const { toast } = useToast();
@@ -55,24 +71,14 @@ const Index = () => {
     });
   };
 
-  // Show loading state
-  if (authLoading || progressLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-3xl font-bold mb-4">
-            pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
-          </div>
-          <div className="text-gray-600">Loading...</div>
-        </div>
-      </div>
-    );
+  // DEBUG: Confirm at least Index renders before returning full JSX
+  if (!window["IndexDebugOnce"]) {
+    window["IndexDebugOnce"] = true;
+    console.log("[Index.tsx] Index component did mount");
   }
 
-  // Show auth page if not authenticated
-  if (!user) {
-    return <AuthPage />;
-  }
+  // DEBUG: Toggle this line to just show a test message and see if app renders anything at all
+  // return <div style={{ color: "red", fontWeight: 600 }}>DEBUG: Index.tsx Rendered</div>; 
 
   return (
     <SidebarProvider>
@@ -80,7 +86,7 @@ const Index = () => {
         <AppSidebar
           currentPage={currentPage}
           setCurrentPage={handlePageNavigation}
-          userName={profile?.name || 'User'}
+          userName={userProfile?.name || ''}
           userAvatarUrl=""
         />
         <div className="flex-1 flex flex-col">
@@ -88,24 +94,24 @@ const Index = () => {
             currentPage={currentPage} 
             setCurrentPage={handlePageNavigation}
             userProgress={userProgress}
-            userProfile={profile}
-            setUserProfile={() => {}} // We'll handle this through the profile hook
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
           />
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
-                <ProfilePage userProfile={profile} setUserProfile={() => {}} />
+                <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
               ) : (
                 <MainRouter
                   currentPage={currentPage}
                   setCurrentPage={setCurrentPage}
-                  userProfile={profile}
+                  userProfile={userProfile}
                   userProgress={userProgress}
                   setUserProgress={setUserProgress}
                   selectedSchool={selectedSchool}
                   setSelectedSchool={setSelectedSchool}
                   handleProgressUpdate={handleProgressUpdate}
-                  profile={profile}
+                  profile={userProfile}
                 />
               )}
             </div>
