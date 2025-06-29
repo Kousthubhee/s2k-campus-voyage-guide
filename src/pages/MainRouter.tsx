@@ -134,7 +134,17 @@ export function MainRouter({
     case 'finance-tracking':
       return (
         <FinanceTrackingPage 
-          onBack={() => setCurrentPage('checklist')} 
+          onBack={() => setCurrentPage('checklist')}
+          onComplete={() => {
+            const newProgress = {
+              ...userProgress,
+              completedModules: [...userProgress.completedModules, 'finance-tracking'],
+              keys: userProgress.keys + 1
+            };
+            handleProgressUpdate(newProgress);
+            setCurrentPage('checklist');
+          }}
+          isCompleted={userProgress.completedModules.includes('finance-tracking')}
         />
       );
     case 'qa':

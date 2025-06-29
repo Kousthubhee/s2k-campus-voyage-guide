@@ -30,23 +30,21 @@ import { AlertsSettings } from "@/components/finance/AlertsSettings";
 import { CSVImportExport } from "@/components/finance/CSVImportExport";
 import { SnapshotReport } from "@/components/finance/SnapshotReport";
 import { CurrencyLiveRates } from "@/components/finance/CurrencyLiveRates";
-import { BillReminders } from "@/components/finance/BillReminders";
-import { SavingsGoals } from "@/components/finance/SavingsGoals";
+import { BillReminders, SavingsGoals, PrivacyControls } from "@/components/finance/FinanceCards";
 import { PartTimeJobLog } from "@/components/finance/PartTimeJobLog";
 import { DiscountIntegration } from "@/components/finance/DiscountIntegration";
 import { GamificationBadges } from "@/components/finance/GamificationBadges";
-import { PrivacyControls } from "@/components/finance/PrivacyControls";
 import { QuickAddMobile } from "@/components/finance/QuickAddMobile";
 import { useFinanceData } from "@/hooks/useFinanceData";
 import { ExpenseTable } from "@/components/finance/ExpenseTable";
 
 interface FinanceTrackingPageProps {
   onBack: () => void;
-  onComplete: () => void;
-  isCompleted: boolean;
+  onComplete?: () => void;
+  isCompleted?: boolean;
 }
 
-export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted }: FinanceTrackingPageProps) => {
+export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }: FinanceTrackingPageProps) => {
   // Replace state budgeting with hook
   const {
     categories,
