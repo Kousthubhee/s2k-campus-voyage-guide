@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ChatMessage {
@@ -38,43 +37,55 @@ export function useChat() {
   const loadConversations = async () => {
     if (!user) return;
     
-    // Using raw SQL query since the tables might not be in the generated types yet
-    const { data, error } = await supabase.rpc('get_user_conversations', {
-      user_id_param: user.id
-    });
-
-    if (!error && data) {
-      setConversations(data);
-    } else {
-      // Fallback to empty array if function doesn't exist
-      console.log('Conversations function not available yet');
+    // For now, load from localStorage until database schema is updated
+    const stored = localStorage.getItem(`conversations_${user.id}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setConversations(parsed);
+      } catch (error) {
+        console.log('Error loading conversations:', error);
+      }
     }
   };
 
   const loadMessages = async (conversationId: string) => {
-    // Using raw SQL query since the tables might not be in the generated types yet
-    const { data, error } = await supabase.rpc('get_conversation_messages', {
-      conversation_id_param: conversationId
-    });
-
-    if (!error && data) {
-      setMessages(data);
-    } else {
-      console.log('Messages function not available yet');
+    if (!user) return;
+    
+    // For now, load from localStorage until database schema is updated
+    const stored = localStorage.getItem(`messages_${conversationId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setMessages(parsed);
+      } catch (error) {
+        console.log('Error loading messages:', error);
+      }
     }
+  };
+
+  const saveConversations = (convs: ChatConversation[]) => {
+    if (user) {
+      localStorage.setItem(`conversations_${user.id}`, JSON.stringify(convs));
+    }
+  };
+
+  const saveMessages = (conversationId: string, msgs: ChatMessage[]) => {
+    localStorage.setItem(`messages_${conversationId}`, JSON.stringify(msgs));
   };
 
   const createConversation = async (title: string = 'New Conversation') => {
     if (!user) return null;
 
-    // For now, create a local conversation until the database is ready
-    const newConversation = {
+    const newConversation: ChatConversation = {
       id: Date.now().toString(),
       title,
       created_at: new Date().toISOString()
     };
 
-    setConversations([newConversation, ...conversations]);
+    const updatedConversations = [newConversation, ...conversations];
+    setConversations(updatedConversations);
+    saveConversations(updatedConversations);
     setCurrentConversation(newConversation.id);
     return newConversation.id;
   };
@@ -84,7 +95,7 @@ export function useChat() {
 
     setLoading(true);
 
-    // Add user message locally
+    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
@@ -92,20 +103,27 @@ export function useChat() {
       created_at: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    saveMessages(currentConversation, updatedMessages);
 
-    // Generate AI response (mock responses for now)
+    // Generate AI response with French education focus
     const aiResponses = [
       "I can help you with information about studying in France. What specific aspect would you like to know about?",
       "For French university applications, you'll typically need to go through Campus France. Would you like me to explain the process?",
       "The cost of living in France varies by city. Paris is the most expensive, while cities like Lyon and Toulouse are more affordable.",
       "French student visas require proof of financial resources, usually around €615 per month. Do you need help calculating your budget?",
-      "Many French universities offer programs in English, especially at the master's level. What field are you interested in?"
+      "Many French universities offer programs in English, especially at the master's level. What field are you interested in?",
+      "To open a French bank account as a student, you'll need: residence proof, student card, passport, and initial deposit. Popular banks include BNP Paribas and Société Générale.",
+      "CAF (housing aid) can provide €100-200/month for students. You can apply online after arriving with your lease agreement and bank details.",
+      "Student transport passes offer great discounts. In Paris, get the Navigo student pass. Other cities have similar student rates.",
+      "EU students can work freely in France. Non-EU students can work 20 hours/week with a student residence permit.",
+      "Basic French helps with daily life, but many programs are taught in English. Consider taking French classes for better integration."
     ];
 
     const aiResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
 
-    // Add AI response
+    // Add AI response after a delay
     setTimeout(() => {
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -114,7 +132,9 @@ export function useChat() {
         created_at: new Date().toISOString()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      const finalMessages = [...updatedMessages, assistantMessage];
+      setMessages(finalMessages);
+      saveMessages(currentConversation, finalMessages);
       setLoading(false);
     }, 1000);
   };
