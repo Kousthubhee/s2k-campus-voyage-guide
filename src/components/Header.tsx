@@ -1,20 +1,9 @@
+
 import { Bell, User, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useState } from 'react';
 import { LoginPage } from './LoginPage';
-
-interface HeaderProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-  userProgress: {
-    keys: number;
-    completedModules: string[];
-    unlockedModules: string[];
-  };
-  userProfile: UserProfile | null;
-  setUserProfile: (profile: UserProfile | null) => void;
-}
 
 interface UserProfile {
   name: string;
@@ -37,13 +26,37 @@ interface UserProfile {
   workExperience: string;
 }
 
+interface HeaderProps {
+  currentPage: string;
+  setCurrentPage: (page: string) => void;
+  userProgress: {
+    keys: number;
+    completedModules: string[];
+    unlockedModules: string[];
+  };
+  userProfile: UserProfile | null;
+  setUserProfile: (profile: UserProfile | null) => void;
+}
+
 export const Header = ({ currentPage, setCurrentPage, userProgress, userProfile, setUserProfile }: HeaderProps) => {
   const [showLogin, setShowLogin] = useState(false);
 
-  const handleLogin = (profile: UserProfile) => {
+  const handleLogin = (profile: Partial<UserProfile>) => {
     // Add the missing properties with default values
-    const completeProfile = {
-      ...profile,
+    const completeProfile: UserProfile = {
+      name: profile.name || '',
+      email: profile.email || '',
+      age: profile.age || '',
+      nationality: profile.nationality || '',
+      educationLevel: profile.educationLevel || '',
+      hasWorkExperience: profile.hasWorkExperience || false,
+      hasGapYear: profile.hasGapYear || false,
+      gapYearDuration: profile.gapYearDuration || 0,
+      targetCity: profile.targetCity || '',
+      targetProgram: profile.targetProgram || '',
+      hasHealthIssues: profile.hasHealthIssues || false,
+      isMarried: profile.isMarried || false,
+      hasChildren: profile.hasChildren || false,
       about: profile.about || '',
       memberSince: profile.memberSince || new Date().toISOString().split('T')[0],
       photo: profile.photo || '',

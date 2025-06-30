@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -31,6 +32,13 @@ interface UserProfile {
   workExperience: string;
 }
 
+interface UserProgress {
+  keys: number;
+  completedModules: string[];
+  unlockedModules: string[];
+  currentPage?: string;
+}
+
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState('checklist');
@@ -39,7 +47,7 @@ const Index = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const { toast } = useToast();
 
-  const handleProgressUpdate = (newProgress: any) => {
+  const handleProgressUpdate = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
     if (newProgress.currentPage && newProgress.currentPage !== currentPage) {
       setCurrentPage(newProgress.currentPage);

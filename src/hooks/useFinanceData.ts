@@ -9,10 +9,12 @@ export interface ExpenseEntry {
   description: string;
   date: string; // ISO
 }
+
 export interface BudgetCategory {
   name: string;
   budgeted: number;
 }
+
 const STORAGE_KEY = "myFinanceData_v1";
 const defaultCategories: BudgetCategory[] = [
   { name: "Rent", budgeted: 600 },
