@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -234,7 +233,6 @@ export const DocumentsPage = () => {
     }
   };
 
-  // --- Document file actions ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, docId: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -247,7 +245,6 @@ export const DocumentsPage = () => {
     setDocuments(docs => docs.map(doc => doc.id === docId ? { ...doc, file: null, fileUrl: null } : doc));
   };
 
-  // --- New document dialog file upload ---
   const handleNewDocFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -258,9 +255,9 @@ export const DocumentsPage = () => {
     const fileUrl = URL.createObjectURL(file);
     setNewDocument(nd => ({ ...nd, file, fileUrl }));
   };
+  
   const handleRemoveNewDocFile = () => setNewDocument(nd => ({ ...nd, file: null, fileUrl: null }));
 
-  // Handler to open edit dialog and preload dates
   const openEditDialog = (doc: Document) => {
     setEditDocId(doc.id);
     setEditValues({
@@ -335,7 +332,6 @@ export const DocumentsPage = () => {
     toast.success("Important document deleted!");
   };
 
-  // Suggestions for documents (update as requested)
   const docSuggestions = [
     { name: "Residence Permit", type: "Immigration" },
     { name: "Student Visa", type: "Immigration" },
@@ -349,7 +345,6 @@ export const DocumentsPage = () => {
     { name: "Social Security Number (SSN)", type: "Social Security" }
   ];
 
-  // Function to use suggestion for regular documents
   const handleSuggestionClick = (suggestion: { name: string; type: string }) => {
     setNewDocument({
       ...newDocument,
@@ -359,7 +354,6 @@ export const DocumentsPage = () => {
     setIsAddDialogOpen(true);
   };
 
-  // Function to use suggestion for important docs
   const handleImportantSuggestionClick = (suggestion: { name: string; type: string }) => {
     setNewImportantDoc({
       ...newImportantDoc,
@@ -446,7 +440,6 @@ export const DocumentsPage = () => {
           />
         </TabsContent>
         <TabsContent value="all">
-          {/* Sensitive info warning */}
           <div className="mb-4">
             <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-yellow-900 text-sm font-medium">
               <AlertTriangle className="h-5 w-5 mr-2 text-yellow-500" />
