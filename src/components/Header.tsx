@@ -1,4 +1,5 @@
-import { Bell, User, LogOut } from 'lucide-react';
+
+import { Bell, User, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -78,10 +79,10 @@ export const Header = ({ currentPage, setCurrentPage, userProgress, userProfile,
             )}
           </Button>
 
-          {userProfile ? (
+          {user ? (
             <>
               <div className="text-sm text-gray-600">
-                Welcome, {userProfile?.name}
+                Welcome, {user.email}
               </div>
               <Button 
                 variant="ghost" 

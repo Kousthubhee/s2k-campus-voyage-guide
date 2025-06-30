@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ interface FileItem {
   name: string;
   file_size: number;
   created_at: string;
+  file_path: string;
 }
 
 export function FileUpload() {
@@ -20,6 +21,26 @@ export function FileUpload() {
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      loadFiles();
+    }
+  }, [user]);
+
+  const loadFiles = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('documents')
+      .select('id, name, file_size, created_at, file_path')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setFiles(data);
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || !user) return;
@@ -44,7 +65,8 @@ export function FileUpload() {
           name: file.name,
           file_path: fileName,
           file_size: file.size,
-          mime_type: file.type
+          mime_type: file.type,
+          type: 'upload' // Add required type field
         })
         .select()
         .single();
