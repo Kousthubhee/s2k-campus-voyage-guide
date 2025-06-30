@@ -1,3 +1,4 @@
+
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -6,8 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import NotFound from "./NotFound";
 import { NotificationProvider } from "@/hooks/useNotifications";
 import React, { useState, useEffect } from "react";
 
@@ -45,6 +45,10 @@ import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
 import { FileUpload } from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Header } from '@/components/Header';
+import { MainRouter } from './MainRouter';
 
 console.log("App.tsx is rendering");
 
