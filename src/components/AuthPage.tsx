@@ -12,6 +12,7 @@ export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const { signInWithGoogle } = useAuth();
   const { toast } = useToast();
@@ -33,13 +34,16 @@ export function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              name: username
+            }
           }
         });
         if (error) throw error;
         toast({ 
-          title: "Check your email!", 
-          description: "We've sent you a confirmation link to complete your signup." 
+          title: "Account created!", 
+          description: "Welcome to pasS2Kampus! You can now start using the platform." 
         });
       }
     } catch (error: any) {
@@ -94,6 +98,18 @@ export function AuthPage() {
           </div>
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
+            {!isLogin && (
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required={!isLogin}
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="email">Email</Label>
               <Input

@@ -1,8 +1,41 @@
-import { useState } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
-import { Header } from '@/components/Header';
-import { MainRouter } from './MainRouter';
+// ADDED: Top of file log
+console.log("[App.tsx] TOP OF FILE");
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import { NotificationProvider } from "@/hooks/useNotifications";
+import React, { useState, useEffect } from "react";
+
+// Simple error boundary for root app
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: undefined };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, info: any) {
+    console.error("Uncaught error in App:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div style={{color: "red", padding: 32, fontSize: 20}}>
+        <b>Critical Error:</b> {this.state.error?.message}
+        <br />
+        <small>See console for details.</small>
+      </div>
+    }
+    return this.props.children;
+  }
+}
+
+import { AuthProvider } from '@/hooks/useAuth';
 import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
@@ -11,8 +44,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
 import { FileUpload } from '@/components/FileUpload';
+import { supabase } from '@/integrations/supabase/client';
 
-console.log("[Index.tsx] Rendering Index Page");
+console.log("App.tsx is rendering");
 
 interface UserProfile {
   name: string;
@@ -42,6 +76,8 @@ interface UserProgress {
   currentPage?: string;
 }
 
+const queryClient = new QueryClient();
+
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState('checklist');
@@ -50,6 +86,51 @@ const Index = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const { toast } = useToast();
   const { user, loading } = useAuth();
+
+  // Load user profile when user is available
+  useEffect(() => {
+    if (user && !userProfile) {
+      loadUserProfile();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        const profile: UserProfile = {
+          name: data.name || user.email || '',
+          email: data.email || user.email || '',
+          age: data.age || '',
+          nationality: data.nationality || '',
+          educationLevel: data.education_level || '',
+          hasWorkExperience: data.has_work_experience || false,
+          hasGapYear: data.has_gap_year || false,
+          gapYearDuration: data.gap_year_duration || 0,
+          targetCity: data.target_city || '',
+          targetProgram: data.target_program || '',
+          hasHealthIssues: data.has_health_issues || false,
+          isMarried: data.is_married || false,
+          hasChildren: data.has_children || false,
+          about: data.about || '',
+          memberSince: new Date(data.created_at).toLocaleDateString(),
+          photo: data.photo_url || '',
+          prevEducation: '',
+          workExperience: ''
+        };
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
