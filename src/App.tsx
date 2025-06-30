@@ -1,4 +1,3 @@
-
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -36,6 +35,8 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
+import { AuthProvider } from '@/hooks/useAuth';
+
 const queryClient = new QueryClient();
 
 console.log("App.tsx is rendering");
@@ -44,16 +45,18 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/*" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/*" element={<Index />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </NotificationProvider>
     </QueryClientProvider>
   </ErrorBoundary>

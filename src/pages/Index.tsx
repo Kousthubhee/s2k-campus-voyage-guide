@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -8,6 +7,10 @@ import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { ProfilePage } from "@/components/ProfilePage";
+import { useAuth } from '@/hooks/useAuth';
+import { AuthPage } from '@/components/AuthPage';
+import { ChatInterface } from '@/components/ChatInterface';
+import { FileUpload } from '@/components/FileUpload';
 
 console.log("[Index.tsx] Rendering Index Page");
 
@@ -46,6 +49,7 @@ const Index = () => {
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const { toast } = useToast();
+  const { user, loading } = useAuth();
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
@@ -85,8 +89,22 @@ const Index = () => {
     console.log("[Index.tsx] Index component did mount");
   }
 
-  // DEBUG: Toggle this line to just show a test message and see if app renders anything at all
-  // return <div style={{ color: "red", fontWeight: 600 }}>DEBUG: Index.tsx Rendered</div>; 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-2">
+            pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   return (
     <SidebarProvider>
@@ -94,7 +112,7 @@ const Index = () => {
         <AppSidebar
           currentPage={currentPage}
           setCurrentPage={handlePageNavigation}
-          userName={userProfile?.name || ''}
+          userName={userProfile?.name || user.email || ''}
           userAvatarUrl=""
         />
         <div className="flex-1 flex flex-col">
@@ -109,6 +127,16 @@ const Index = () => {
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
                 <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
+              ) : currentPage === "qa" ? (
+                <div className="space-y-6">
+                  <h1 className="text-3xl font-bold">AI Assistant</h1>
+                  <ChatInterface />
+                </div>
+              ) : currentPage === "documents" ? (
+                <div className="space-y-6">
+                  <h1 className="text-3xl font-bold">Document Storage</h1>
+                  <FileUpload />
+                </div>
               ) : (
                 <MainRouter
                   currentPage={currentPage}
