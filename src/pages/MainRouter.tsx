@@ -1,5 +1,6 @@
+
 import { ChecklistModule } from '@/components/ChecklistModule';
-import { QAPage } from '@/components/QAPage';
+import QAPage from '@/components/QAPage';
 import { HubPage } from '@/components/HubPage';
 import { NewsPage } from '@/components/NewsPage';
 import { AffiliationPage } from '@/components/AffiliationPage';

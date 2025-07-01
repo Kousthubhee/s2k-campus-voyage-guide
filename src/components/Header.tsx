@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, LogOut, Menu, X } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { ProfileEditDialog } from './ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -26,17 +26,6 @@ export const Header = ({
   const { user, signOut } = useAuth();
   const [showProfileEdit, setShowProfileEdit] = useState(false);
 
-  const getPageTitle = () => {
-    switch (currentPage) {
-      case 'checklist': return 'Checklist';
-      case 'qa': return 'Ask AI';
-      case 'hub': return 'Hub';
-      case 'news': return 'News & Updates';
-      case 'documents': return 'Documents';
-      default: return 'pasS2Kampus';
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut();
     setCurrentPage('checklist');
@@ -47,16 +36,11 @@ export const Header = ({
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo and Title */}
-          <div className="flex items-center space-x-4">
-            <div 
-              className="text-2xl font-bold cursor-pointer"
-              onClick={() => setCurrentPage('checklist')}
-            >
-              pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
-            </div>
-            <div className="hidden md:block text-gray-600 font-medium">
-              {getPageTitle()}
-            </div>
+          <div 
+            className="text-2xl font-bold cursor-pointer"
+            onClick={() => setCurrentPage('checklist')}
+          >
+            pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
           </div>
 
           {/* Right Section - Keys, Login/Profile */}
@@ -111,7 +95,7 @@ export const Header = ({
         <ProfileEditDialog
           open={showProfileEdit}
           onOpenChange={setShowProfileEdit}
-          userProfile={userProfile}
+          profile={userProfile}
           onSave={setUserProfile}
         />
       )}
