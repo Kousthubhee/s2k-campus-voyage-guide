@@ -99,6 +99,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Ensure full viewport coverage */
+  html, body, #root {
+    height: 100%;
+    min-height: 100vh;
+  }
 }
 
 /* Add entrance animation for cards and sections */
@@ -136,7 +142,15 @@
   @apply text-xs text-gray-400 ml-1 mt-1;
 }
 
-/* Responsive paddings for main areas */
+/* Responsive paddings for main areas with consistent background */
 .main-area {
   @apply px-2 py-2 md:px-7 md:py-5;
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+}
+
+/* Ensure sidebar and main content area maintain full height */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
 }

@@ -1,63 +1,67 @@
 
-import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MessageSquare, Send, Bot, User, ImageUp, FileUp, Mic } from "lucide-react";
-import { faqCategories } from "@/data/faqCategories";
-import { QAMessageItem } from "./QAMessageItem";
-import styles from "./QAPage.module.css";
-import { TrendingQuestions } from "./qa/TrendingQuestions";
-import { QASharedToolbar } from "./qa/QASharedToolbar";
-import { useQAUserPrefs } from "./qa/useQAUserPrefs";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Send, 
+  Upload, 
+  Mic, 
+  MicOff, 
+  Bookmark, 
+  BookmarkCheck,
+  Volume2,
+  Languages,
+  MessageSquare,
+  Sparkles,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  Music
+} from 'lucide-react';
 
-interface MessageItem {
+interface Message {
   id: string;
-  type: "user" | "bot";
+  type: 'user' | 'bot';
   message: string;
-  file_url?: string;
-  file_name?: string;
-  is_bookmarked?: boolean;
+  timestamp: Date;
+  fileUrl?: string;
+  fileName?: string;
+  isBookmarked?: boolean;
 }
 
-export const QAPage = () => {
+const QAPage = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const [messages, setMessages] = useState<MessageItem[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [selectedTab, setSelectedTab] = useState(faqCategories[0].label);
-  const [isTyping, setIsTyping] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [language, setLanguage] = useState("en");
-  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
-  const [isListening, setIsListening] = useState(false);
-  const [noticeClosed, setNoticeClosed] = useState(false);
+  const { toast } = useToast();
 
-  const inputFileRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<any>(null);
-
-  const {
-    showBookmarks,
-    setShowBookmarks,
-  } = useQAUserPrefs();
-
-  const commonQuickQs = [
-    "How do I get a French student visa?",
-    "What is CAF and how do I apply?",
-    "Affordable housing tips for students?",
-    "Can I work part-time while studying in France?",
-    "Do I need private health insurance?",
-    "How to open a French bank account?",
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
   ];
 
   const trendingQuestions = [
-    "Is French language mandatory for all universities?",
-    "Tips on student housing and finding roommates?",
-    "Best way to save on public transport?",
+    "How do I apply for a student visa in France?",
+    "What documents do I need for university admission?",
+    "How much does it cost to study in France?",
+    "Can I work while studying in France?",
+    "What are the best cities for international students?"
   ];
 
   // Load messages from database
@@ -65,18 +69,22 @@ export const QAPage = () => {
     if (user) {
       loadMessages();
     } else {
-      // Load default message for non-authenticated users
-      setMessages([{
-        id: '1',
-        type: "bot",
-        message: "Hello! I'm here to help you with any questions about studying in France. What would you like to know?",
-      }]);
+      // Load from localStorage for guests
+      const savedMessages = localStorage.getItem('qa_messages');
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      }
     }
   }, [user]);
 
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const loadMessages = async () => {
     if (!user) return;
-
+    
     try {
       const { data, error } = await supabase
         .from('qa_messages')
@@ -85,487 +93,477 @@ export const QAPage = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      
-      if (data && data.length > 0) {
-        setMessages(data.map(msg => ({
-          id: msg.id,
-          type: msg.type as "user" | "bot",
-          message: msg.message,
-          file_url: msg.file_url,
-          file_name: msg.file_name,
-          is_bookmarked: msg.is_bookmarked
-        })));
-        setBookmarkedIds(data.filter(msg => msg.is_bookmarked).map(msg => msg.id));
-      } else {
-        // Add initial bot message if no messages exist
-        const botMessage = {
-          user_id: user.id,
-          type: "bot",
-          message: "Hello! I'm here to help you with any questions about studying in France. What would you like to know?",
-        };
-        
-        const { data: newMsg, error: insertError } = await supabase
-          .from('qa_messages')
-          .insert(botMessage)
-          .select()
-          .single();
 
-        if (!insertError && newMsg) {
-          setMessages([{
-            id: newMsg.id,
-            type: "bot",
-            message: newMsg.message,
-          }]);
-        }
+      if (data) {
+        const formattedMessages = data.map(msg => ({
+          id: msg.id,
+          type: msg.type as 'user' | 'bot',
+          message: msg.message,
+          timestamp: new Date(msg.created_at),
+          fileUrl: msg.file_url,
+          fileName: msg.file_name,
+          isBookmarked: msg.is_bookmarked
+        }));
+        setMessages(formattedMessages);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
     }
   };
 
-  const visibleMessages = showBookmarks
-    ? messages.filter((msg) => bookmarkedIds.includes(msg.id))
-    : messages;
-
-  const getMessageTags = (msg: MessageItem) => {
-    if (msg.type === "bot") {
-      return ["Bot"];
-    }
-    return [];
-  };
-
-  const toggleBookmarkMessage = async (id: string) => {
-    if (!user) return;
-
-    const isBookmarked = bookmarkedIds.includes(id);
-    const newBookmarkState = !isBookmarked;
-
-    try {
-      const { error } = await supabase
-        .from('qa_messages')
-        .update({ is_bookmarked: newBookmarkState })
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setBookmarkedIds((prev) =>
-        newBookmarkState ? [...prev, id] : prev.filter((x) => x !== id)
-      );
-      
-      setMessages(prev => prev.map(msg => 
-        msg.id === id ? { ...msg, is_bookmarked: newBookmarkState } : msg
-      ));
-    } catch (error) {
-      console.error('Error updating bookmark:', error);
-    }
-  };
-
-  const handleRateMessage = (id: string, val: number) => {
-    // Could implement rating functionality here
-  };
-
-  const sendBotReply = async (userMsg: string) => {
-    setIsTyping(true);
-    
-    // Simulate AI response
-    setTimeout(async () => {
-      const botResponse = `(${language === "fr" ? "FR" : "EN"}) Thanks for your question about "${userMsg || (file && file.name) || "your file"}". This is a simulated AI bot. If you would like help from a real person, click the button below!`;
-      
-      if (user) {
-        try {
-          const { data, error } = await supabase
-            .from('qa_messages')
-            .insert({
-              user_id: user.id,
-              type: "bot",
-              message: botResponse,
-            })
-            .select()
-            .single();
-
-          if (!error && data) {
-            setMessages((prev) => [...prev, {
-              id: data.id,
-              type: "bot",
-              message: data.message,
-            }]);
-          }
-        } catch (error) {
-          console.error('Error saving bot message:', error);
-        }
-      } else {
-        // For non-authenticated users, just add to local state
-        setMessages((prev) => [...prev, {
-          id: Date.now().toString(),
-          type: "bot",
-          message: botResponse,
-        }]);
-      }
-      
-      setIsTyping(false);
-    }, 1200);
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() && !file) return;
-    
-    const messageText = newMessage.trim();
-    const userMessage = {
-      type: "user" as const,
-      message: messageText + (file ? `\n[Attached: ${file.name}]` : ""),
-      file_url: filePreview || undefined,
-      file_name: file?.name,
-    };
-
+  const saveMessage = async (message: Omit<Message, 'id'>) => {
     if (user) {
       try {
         const { data, error } = await supabase
           .from('qa_messages')
           .insert({
             user_id: user.id,
-            ...userMessage,
+            type: message.type,
+            message: message.message,
+            file_url: message.fileUrl,
+            file_name: message.fileName,
+            is_bookmarked: message.isBookmarked || false
           })
           .select()
           .single();
 
-        if (!error && data) {
-          setMessages((prev) => [...prev, {
-            id: data.id,
-            type: data.type as "user" | "bot",
-            message: data.message,
-            file_url: data.file_url,
-            file_name: data.file_name,
-          }]);
-        }
+        if (error) throw error;
+        return data.id;
       } catch (error) {
         console.error('Error saving message:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save message",
+          variant: "destructive"
+        });
       }
     } else {
-      // For non-authenticated users, just add to local state
-      setMessages((prev) => [...prev, {
-        id: Date.now().toString(),
-        ...userMessage
-      }]);
-    }
-
-    setNewMessage("");
-    setFile(null);
-    setFilePreview(null);
-    sendBotReply(messageText);
-  };
-
-  const handleQuickQuestion = (q: string) => {
-    setNewMessage(q);
-    if (inputFileRef.current) inputFileRef.current.value = "";
-    setFile(null);
-    setFilePreview(null);
-  };
-
-  const handleAskRealPerson = () => {
-    toast({
-      title: "Redirecting to real support...",
-      description:
-        "This feature would connect you to a real person or alumni for direct help. (Demo placeholder)",
-    });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files && e.target.files[0];
-    if (!uploadedFile) return;
-    setFile(uploadedFile);
-    if (uploadedFile.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setFilePreview(ev.target?.result as string);
-      reader.readAsDataURL(uploadedFile);
-    } else {
-      setFilePreview(null);
+      // Save to localStorage for guests
+      const newMessage = { ...message, id: Date.now().toString() };
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
+      localStorage.setItem('qa_messages', JSON.stringify(updatedMessages));
+      return newMessage.id;
     }
   };
 
-  // Voice recognition setup
-  useEffect(() => {
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.onend = null;
-        recognitionRef.current.onerror = null;
-        recognitionRef.current.onresult = null;
-        recognitionRef.current.stop?.();
-      }
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() && !uploadedFile) return;
+
+    setIsLoading(true);
+
+    // Create user message
+    const userMessage: Omit<Message, 'id'> = {
+      type: 'user',
+      message: inputMessage,
+      timestamp: new Date(),
+      fileUrl: uploadedFile ? URL.createObjectURL(uploadedFile) : undefined,
+      fileName: uploadedFile?.name
     };
-  }, []);
+
+    const userMessageId = await saveMessage(userMessage);
+    if (userMessageId) {
+      setMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
+    }
+
+    // Simulate AI response
+    setTimeout(async () => {
+      const botResponse = generateBotResponse(inputMessage);
+      const botMessage: Omit<Message, 'id'> = {
+        type: 'bot',
+        message: botResponse,
+        timestamp: new Date()
+      };
+
+      const botMessageId = await saveMessage(botMessage);
+      if (botMessageId) {
+        setMessages(prev => [...prev, { ...botMessage, id: botMessageId }]);
+      }
+
+      setIsLoading(false);
+    }, 1000);
+
+    setInputMessage('');
+    setUploadedFile(null);
+  };
+
+  const generateBotResponse = (input: string) => {
+    const responses = [
+      "Based on current French education policies, I'd recommend checking the official Campus France website for the most up-to-date requirements.",
+      "For student visas, you'll typically need proof of admission, financial resources, and health insurance. The exact requirements may vary based on your nationality.",
+      "French universities offer excellent programs for international students. Would you like specific information about any particular field of study?",
+      "The cost of living varies significantly between cities. Paris is generally more expensive than cities like Lyon or Toulouse.",
+      "I'd be happy to help you with that! Could you provide more specific details about your situation?"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setUploadedFile(file);
+    }
+  };
+
+  const toggleBookmark = async (messageId: string) => {
+    const message = messages.find(m => m.id === messageId);
+    if (!message) return;
+
+    const updatedBookmark = !message.isBookmarked;
+
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('qa_messages')
+          .update({ is_bookmarked: updatedBookmark })
+          .eq('id', messageId);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating bookmark:', error);
+        return;
+      }
+    }
+
+    setMessages(prev => 
+      prev.map(m => 
+        m.id === messageId 
+          ? { ...m, isBookmarked: updatedBookmark }
+          : m
+      )
+    );
+
+    if (!user) {
+      localStorage.setItem('qa_messages', JSON.stringify(messages));
+    }
+  };
 
   const handleVoiceInput = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
+    if (!('webkitSpeechRecognition' in window)) {
       toast({
-        title: "Speech not supported",
-        description: "Your browser does not support voice input.",
+        title: "Not supported",
+        description: "Voice input is not supported in this browser",
+        variant: "destructive"
       });
       return;
     }
-    if (isListening) {
-      recognitionRef.current && recognitionRef.current.stop();
-      setIsListening(false);
-      return;
-    }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = language === "fr" ? "fr-FR" : "en-US";
-    recognition.interimResults = false;
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = selectedLanguage;
     recognition.continuous = false;
+    recognition.interimResults = false;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onend = () => setIsRecording(false);
     recognition.onresult = (event: any) => {
-      const text = event.results?.[0]?.[0]?.transcript;
-      if (text) setNewMessage((prev) => (prev ? prev + " " : "") + text);
-      setIsListening(false);
+      const transcript = event.results[0][0].transcript;
+      setInputMessage(transcript);
     };
-    recognitionRef.current = recognition;
+
     recognition.start();
   };
 
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = selectedLanguage;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+      case 'doc':
+      case 'docx':
+        return <FileText className="h-4 w-4" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return <ImageIcon className="h-4 w-4" />;
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+        return <Video className="h-4 w-4" />;
+      case 'mp3':
+      case 'wav':
+        return <Music className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const handleTrendingQuestionClick = (question: string) => {
+    setInputMessage(question);
+  };
+
   return (
-    <div>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3 flex items-center justify-center">
-            <MessageSquare className="h-8 w-8 mr-3 text-blue-600" />
-            Ask Me Anything
-          </h1>
-          <p className="text-lg text-gray-600">
-            Get instant answers to your questions about studying in France
-          </p>
-        </div>
-        
-        {!noticeClosed && (
-          <div className="bg-blue-50 border border-blue-200 px-5 py-4 mb-4 rounded relative text-sm text-blue-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 animate-fade-in">
-            <span>
-              <strong>AI Bot Notice:</strong> This is a simulated assistant for demo purposes. Your questions stay private and are <u>not</u> sent to any external servers or AI service.
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto px-2 py-1"
-              onClick={() => setNoticeClosed(true)}
-            >
-              Close
-            </Button>
-          </div>
-        )}
-
-        <div className="flex justify-end mb-2">
-          <label className="mr-2 text-sm text-gray-700">Language:</label>
-          <select
-            value={language}
-            onChange={e => setLanguage(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
-          >
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-5">
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-              <span className="inline-flex items-center px-3 py-1 rounded text-xs bg-blue-600 text-white font-semibold">
-                <Bot className="h-4 w-4 mr-2" />
-                Bot Assistant
-              </span>
-              <QASharedToolbar
-                showBookmarks={showBookmarks}
-                onShowBookmarks={() => setShowBookmarks(!showBookmarks)}
-              />
-            </div>
-            
-            <div className="mb-4 flex flex-wrap gap-2">
-              {commonQuickQs.map((q, idx) => (
-                <button
-                  key={q}
-                  onClick={() => setNewMessage(q)}
-                  className="bg-purple-100 text-purple-700 rounded px-3 py-1 text-xs hover:bg-purple-200"
-                  type="button"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-            
-            <Card className="h-96 mb-6">
-              <CardContent className="p-0 h-full flex flex-col">
-                <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                  {visibleMessages.map((msg) => (
-                    <QAMessageItem
-                      key={msg.id}
-                      id={msg.id}
-                      type={msg.type}
-                      message={msg.message}
-                      file={msg.file_url}
-                      fileName={msg.file_name}
-                      isBookmarked={bookmarkedIds.includes(msg.id)}
-                      toggleBookmark={() => toggleBookmarkMessage(msg.id)}
-                      tags={getMessageTags(msg)}
-                      showRating={msg.type === "bot"}
-                      onRate={(val) => handleRateMessage(msg.id, val)}
-                    />
-                  ))}
-                  {isTyping && (
-                    <div className="flex items-center gap-2 animate-fade-in">
-                      <div className="p-2 rounded-full bg-gray-200 text-gray-600 mr-2">
-                        <Bot className="h-4 w-4" />
-                      </div>
-                      <div className="p-3 rounded-lg bg-gray-100 text-gray-900 flex items-center gap-2">
-                        <span className={styles["dot-flash"]} />
-                        <span className={styles["dot-flash"]} />
-                        <span className={styles["dot-flash"]} />
-                        <span className="ml-2">typing...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4 border-t border-gray-200">
-                  <form
-                    className="flex flex-col sm:flex-row items-center gap-2"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*,.pdf,.doc,.docx"
-                      ref={inputFileRef}
-                      className="hidden"
-                      onChange={handleFileChange}
-                      aria-label="Attach file"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="shrink-0"
-                      aria-label="Attach an image or file"
-                      onClick={() => inputFileRef.current?.click()}
-                    >
-                      <ImageUp className="h-5 w-5" />
-                      File
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={isListening ? "secondary" : "outline"}
-                      onClick={handleVoiceInput}
-                      aria-label={isListening ? "Stop listening" : "Speak"}
-                      className={
-                        "shrink-0 px-2 py-2 " + (isListening ? "animate-pulse border-blue-500" : "")
-                      }
-                      disabled={isTyping}
-                    >
-                      <Mic className="h-5 w-5" />
-                      {isListening ? <span className="ml-1 text-xs">Listening…</span> : <span className="ml-1 text-xs">Speak</span>}
-                    </Button>
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your question here..."
-                      className="flex-1"
-                      onKeyDown={(e) => {
-                        if (
-                          e.key === "Enter" &&
-                          !e.shiftKey &&
-                          !e.ctrlKey &&
-                          !isTyping &&
-                          (newMessage.trim() || file)
-                        ) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="submit"
-                      className="flex-shrink-0"
-                      disabled={(!newMessage.trim() && !file) || isTyping}
-                    >
-                      <Send className="h-4 w-4" />
-                      Send
-                    </Button>
-                  </form>
-                  {file && (
-                    <div className="mt-2 flex items-center gap-2">
-                      {filePreview && file.type.startsWith("image/") ? (
-                        <img src={filePreview} alt={file.name} className="h-16 rounded border" />
-                      ) : (
-                        <FileUp className="text-blue-700" />
-                      )}
-                      <span className="text-xs">{file.name}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        type="button"
-                        onClick={() => {
-                          setFile(null);
-                          setFilePreview(null);
-                          if (inputFileRef.current) inputFileRef.current.value = "";
-                        }}
-                        className="px-1 py-0"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <div className="text-center mb-8">
-              <Button variant="secondary" className="px-5 py-2" onClick={handleAskRealPerson}>
-                Ask a real person
-              </Button>
-            </div>
-          </div>
-          
-          <div className="md:w-80">
-            <TrendingQuestions questions={trendingQuestions} onQuestionClick={handleQuickQuestion} />
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Common Questions</h3>
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList>
-              {faqCategories.map((cat) => (
-                <TabsTrigger
-                  key={cat.label}
-                  value={cat.label}
-                  className="capitalize"
-                >
-                  {cat.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {faqCategories.map((cat) => (
-              <TabsContent value={cat.label} key={cat.label}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                  {cat.questions.map((question, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="justify-start h-auto p-3 text-left"
-                      onClick={() => handleQuickQuestion(question)}
-                    >
-                      {question}
-                    </Button>
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
+          <MessageSquare className="h-8 w-8 text-blue-600" />
+          Ask Me Anything
+        </h1>
+        <p className="text-gray-600">
+          Get instant answers about studying in France, visa requirements, and more!
+        </p>
       </div>
+
+      <Tabs defaultValue="chat" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="chat" className="space-y-4">
+          {/* Language Selector */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Languages className="h-5 w-5 text-blue-600" />
+                <span className="font-medium">Language:</span>
+                <div className="flex gap-2">
+                  {languages.map((lang) => (
+                    <Button
+                      key={lang.code}
+                      variant={selectedLanguage === lang.code ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedLanguage(lang.code)}
+                      className="text-sm"
+                    >
+                      {lang.flag} {lang.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Trending Questions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-yellow-500" />
+                Trending Questions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2">
+                {trendingQuestions.map((question, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="justify-start h-auto p-3 text-left"
+                    onClick={() => handleTrendingQuestionClick(question)}
+                  >
+                    {question}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Chat Messages */}
+          <Card className="h-96">
+            <CardContent className="p-0">
+              <ScrollArea className="h-full p-4">
+                <div className="space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>No messages yet. Start a conversation!</p>
+                    </div>
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            message.type === 'user'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          <p className="text-sm">{message.message}</p>
+                          
+                          {message.fileName && (
+                            <div className="mt-2 p-2 bg-white/10 rounded flex items-center gap-2">
+                              {getFileIcon(message.fileName)}
+                              <span className="text-xs truncate">{message.fileName}</span>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs opacity-70">
+                              {message.timestamp.toLocaleTimeString()}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              {message.type === 'bot' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => speakText(message.message)}
+                                  className="h-6 w-6 p-0 hover:bg-white/20"
+                                >
+                                  <Volume2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleBookmark(message.id)}
+                                className="h-6 w-6 p-0 hover:bg-white/20"
+                              >
+                                {message.isBookmarked ? (
+                                  <BookmarkCheck className="h-3 w-3" />
+                                ) : (
+                                  <Bookmark className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 px-4 py-2 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Input Area */}
+          <Card>
+            <CardContent className="pt-6">
+              {uploadedFile && (
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {getFileIcon(uploadedFile.name)}
+                    <span className="text-sm">{uploadedFile.name}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {(uploadedFile.size / 1024 / 1024).toFixed(1)}MB
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setUploadedFile(null)}
+                  >
+                    ×
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="Ask me anything about studying in France..."
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="pr-12"
+                  />
+                </div>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept="*/*"
+                />
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleVoiceInput}
+                  className={isRecording ? "bg-red-50 border-red-200" : ""}
+                >
+                  {isRecording ? (
+                    <MicOff className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                </Button>
+                
+                <Button 
+                  onClick={handleSendMessage}
+                  disabled={!inputMessage.trim() && !uploadedFile}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bookmarks">
+          <Card>
+            <CardHeader>
+              <CardTitle>Bookmarked Messages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-64">
+                {messages.filter(m => m.isBookmarked).length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    <Bookmark className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No bookmarked messages yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {messages.filter(m => m.isBookmarked).map((message) => (
+                      <div key={message.id} className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm">{message.message}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge variant={message.type === 'user' ? 'default' : 'secondary'}>
+                            {message.type === 'user' ? 'You' : 'AI'}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {message.timestamp.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
 
-export {};
+export default QAPage;
