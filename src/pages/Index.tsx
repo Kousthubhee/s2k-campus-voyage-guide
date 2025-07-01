@@ -88,6 +88,7 @@ const Index = () => {
   const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const { toast } = useToast();
   const { user, loading } = useAuth();
 
@@ -150,6 +151,11 @@ const Index = () => {
   };
 
   const handlePageNavigation = (page: string) => {
+    if (page === 'login') {
+      setShowAuth(true);
+      return;
+    }
+    
     if (checkIfPageRequiresKey(page)) {
       alert('You need at least 1 key to access this page. Complete modules to earn keys!');
       return;
@@ -187,8 +193,8 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
+  if (showAuth) {
+    return <AuthPage onBack={() => setShowAuth(false)} />;
   }
 
   return (
@@ -197,7 +203,7 @@ const Index = () => {
         <AppSidebar
           currentPage={currentPage}
           setCurrentPage={handlePageNavigation}
-          userName={userProfile?.name || user.email || ''}
+          userName={userProfile?.name || user?.email || 'Guest'}
           userAvatarUrl=""
         />
         <div className="flex-1 flex flex-col">
@@ -207,6 +213,7 @@ const Index = () => {
             userProgress={userProgress}
             userProfile={userProfile}
             setUserProfile={setUserProfile}
+            showAuth={!user}
           />
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">

@@ -7,8 +7,13 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
-export function AuthPage() {
+interface AuthPageProps {
+  onBack?: () => void;
+}
+
+export function AuthPage({ onBack }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,6 +34,7 @@ export function AuthPage() {
         });
         if (error) throw error;
         toast({ title: "Welcome back!", description: "You've been signed in successfully." });
+        if (onBack) onBack();
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -45,6 +51,7 @@ export function AuthPage() {
           title: "Account created!", 
           description: "Welcome to pasS2Kampus! You can now start using the platform." 
         });
+        if (onBack) onBack();
       }
     } catch (error: any) {
       toast({
@@ -60,6 +67,7 @@ export function AuthPage() {
   const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle();
+      if (onBack) onBack();
     } catch (error: any) {
       toast({
         title: "Google Sign In Error",
@@ -73,6 +81,17 @@ export function AuthPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="absolute top-4 left-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          )}
           <div className="text-3xl font-bold mb-2">
             pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
           </div>

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,46 +11,40 @@ import styles from "./QAPage.module.css";
 import { TrendingQuestions } from "./qa/TrendingQuestions";
 import { QASharedToolbar } from "./qa/QASharedToolbar";
 import { useQAUserPrefs } from "./qa/useQAUserPrefs";
-import { toast } from "@/hooks/use-toast"; // for notification
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
-// ✅ Define type for messages allowing optional file/fileName
 interface MessageItem {
-  id: number;
+  id: string;
   type: "user" | "bot";
   message: string;
-  file?: string;
-  fileName?: string;
+  file_url?: string;
+  file_name?: string;
+  is_bookmarked?: boolean;
 }
 
 export const QAPage = () => {
-  // ✅ Add types to messages array
-  const [messages, setMessages] = useState<MessageItem[]>([
-    {
-      id: 1,
-      type: "bot",
-      message: "Hello! I'm here to help you with any questions about studying in France. What would you like to know?",
-    },
-  ]);
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<MessageItem[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedTab, setSelectedTab] = useState(faqCategories[0].label);
   const [isTyping, setIsTyping] = useState(false);
-  const [file, setFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [language, setLanguage] = useState("en");
-
-  // Preview image/file
-  const inputFileRef = useRef(null);
-
-  // Notice close state
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [isListening, setIsListening] = useState(false);
   const [noticeClosed, setNoticeClosed] = useState(false);
 
-  // Preferences for QA page (only bookmarks now)
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
   const {
     showBookmarks,
     setShowBookmarks,
   } = useQAUserPrefs();
 
-  // -- Quick suggestions (static for now) --
   const commonQuickQs = [
     "How do I get a French student visa?",
     "What is CAF and how do I apply?",
@@ -59,84 +54,214 @@ export const QAPage = () => {
     "How to open a French bank account?",
   ];
 
-  // -- Trending questions to show in the sidebar
   const trendingQuestions = [
     "Is French language mandatory for all universities?",
     "Tips on student housing and finding roommates?",
     "Best way to save on public transport?",
   ];
 
-  // For message bookmarks
-  const [bookmarkedIds, setBookmarkedIds] = useState([]);
+  // Load messages from database
+  useEffect(() => {
+    if (user) {
+      loadMessages();
+    } else {
+      // Load default message for non-authenticated users
+      setMessages([{
+        id: '1',
+        type: "bot",
+        message: "Hello! I'm here to help you with any questions about studying in France. What would you like to know?",
+      }]);
+    }
+  }, [user]);
 
-  // Show only bookmarked answers if toggled
+  const loadMessages = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('qa_messages')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setMessages(data.map(msg => ({
+          id: msg.id,
+          type: msg.type as "user" | "bot",
+          message: msg.message,
+          file_url: msg.file_url,
+          file_name: msg.file_name,
+          is_bookmarked: msg.is_bookmarked
+        })));
+        setBookmarkedIds(data.filter(msg => msg.is_bookmarked).map(msg => msg.id));
+      } else {
+        // Add initial bot message if no messages exist
+        const botMessage = {
+          user_id: user.id,
+          type: "bot",
+          message: "Hello! I'm here to help you with any questions about studying in France. What would you like to know?",
+        };
+        
+        const { data: newMsg, error: insertError } = await supabase
+          .from('qa_messages')
+          .insert(botMessage)
+          .select()
+          .single();
+
+        if (!insertError && newMsg) {
+          setMessages([{
+            id: newMsg.id,
+            type: "bot",
+            message: newMsg.message,
+          }]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
   const visibleMessages = showBookmarks
     ? messages.filter((msg) => bookmarkedIds.includes(msg.id))
     : messages;
 
-  // For demo, assign generic tag for the bot
-  function getMessageTags(msg) {
+  const getMessageTags = (msg: MessageItem) => {
     if (msg.type === "bot") {
       return ["Bot"];
     }
     return [];
-  }
+  };
 
-  // Handle bookmarking
-  function toggleBookmarkMessage(id) {
-    setBookmarkedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  }
+  const toggleBookmarkMessage = async (id: string) => {
+    if (!user) return;
 
-  // Handle rating
-  function handleRateMessage(id, val) {
-    // Could display a toast/toaster here
-  }
+    const isBookmarked = bookmarkedIds.includes(id);
+    const newBookmarkState = !isBookmarked;
 
-  // Simulate bot reply with typing animation
-  // Make sure userMsg is a string & type is correct
-  const sendBotReply = (userMsg: string) => {
+    try {
+      const { error } = await supabase
+        .from('qa_messages')
+        .update({ is_bookmarked: newBookmarkState })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setBookmarkedIds((prev) =>
+        newBookmarkState ? [...prev, id] : prev.filter((x) => x !== id)
+      );
+      
+      setMessages(prev => prev.map(msg => 
+        msg.id === id ? { ...msg, is_bookmarked: newBookmarkState } : msg
+      ));
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+    }
+  };
+
+  const handleRateMessage = (id: string, val: number) => {
+    // Could implement rating functionality here
+  };
+
+  const sendBotReply = async (userMsg: string) => {
     setIsTyping(true);
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          type: "bot", // <-- Ensure this is strictly typed
-          message: `(${language === "fr" ? "FR" : "EN"}) Thanks for your question about "${userMsg || (file && file.name) || "your file"}". This is a simulated AI bot. If you would like help from a real person, click the button below!`,
-        } as MessageItem, // Enforce type if needed
-      ]);
+    
+    // Simulate AI response
+    setTimeout(async () => {
+      const botResponse = `(${language === "fr" ? "FR" : "EN"}) Thanks for your question about "${userMsg || (file && file.name) || "your file"}". This is a simulated AI bot. If you would like help from a real person, click the button below!`;
+      
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('qa_messages')
+            .insert({
+              user_id: user.id,
+              type: "bot",
+              message: botResponse,
+            })
+            .select()
+            .single();
+
+          if (!error && data) {
+            setMessages((prev) => [...prev, {
+              id: data.id,
+              type: "bot",
+              message: data.message,
+            }]);
+          }
+        } catch (error) {
+          console.error('Error saving bot message:', error);
+        }
+      } else {
+        // For non-authenticated users, just add to local state
+        setMessages((prev) => [...prev, {
+          id: Date.now().toString(),
+          type: "bot",
+          message: botResponse,
+        }]);
+      }
+      
       setIsTyping(false);
     }, 1200);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() && !file) return;
+    
     const messageText = newMessage.trim();
-    const userMessage: MessageItem = {
-      id: messages.length + 1,
-      type: "user",
+    const userMessage = {
+      type: "user" as const,
       message: messageText + (file ? `\n[Attached: ${file.name}]` : ""),
-      file: filePreview || undefined,
-      fileName: file?.name,
+      file_url: filePreview || undefined,
+      file_name: file?.name,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('qa_messages')
+          .insert({
+            user_id: user.id,
+            ...userMessage,
+          })
+          .select()
+          .single();
+
+        if (!error && data) {
+          setMessages((prev) => [...prev, {
+            id: data.id,
+            type: data.type as "user" | "bot",
+            message: data.message,
+            file_url: data.file_url,
+            file_name: data.file_name,
+          }]);
+        }
+      } catch (error) {
+        console.error('Error saving message:', error);
+      }
+    } else {
+      // For non-authenticated users, just add to local state
+      setMessages((prev) => [...prev, {
+        id: Date.now().toString(),
+        ...userMessage
+      }]);
+    }
+
     setNewMessage("");
     setFile(null);
     setFilePreview(null);
     sendBotReply(messageText);
   };
 
-  const handleQuickQuestion = (q) => {
+  const handleQuickQuestion = (q: string) => {
     setNewMessage(q);
     if (inputFileRef.current) inputFileRef.current.value = "";
     setFile(null);
     setFilePreview(null);
   };
 
-  // Handler for "Ask a real person"
   const handleAskRealPerson = () => {
     toast({
       title: "Redirecting to real support...",
@@ -145,27 +270,21 @@ export const QAPage = () => {
     });
   };
 
-  // Handle file upload and preview for images
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files && e.target.files[0];
     if (!uploadedFile) return;
     setFile(uploadedFile);
     if (uploadedFile.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.onload = (ev) => setFilePreview(ev.target?.result);
+      reader.onload = (ev) => setFilePreview(ev.target?.result as string);
       reader.readAsDataURL(uploadedFile);
     } else {
       setFilePreview(null);
     }
   };
 
-  // --- Speech recognition state ---
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
-
-  // --- Voice typing handler functions ---
+  // Voice recognition setup
   useEffect(() => {
-    // Cleanup: stop recognition if unmount
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.onend = null;
@@ -176,7 +295,7 @@ export const QAPage = () => {
     };
   }, []);
 
-  function handleVoiceInput() {
+  const handleVoiceInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast({
@@ -206,7 +325,7 @@ export const QAPage = () => {
     };
     recognitionRef.current = recognition;
     recognition.start();
-  }
+  };
 
   return (
     <div>
@@ -220,6 +339,7 @@ export const QAPage = () => {
             Get instant answers to your questions about studying in France
           </p>
         </div>
+        
         {!noticeClosed && (
           <div className="bg-blue-50 border border-blue-200 px-5 py-4 mb-4 rounded relative text-sm text-blue-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 animate-fade-in">
             <span>
@@ -250,7 +370,6 @@ export const QAPage = () => {
 
         <div className="flex flex-col md:flex-row gap-5">
           <div className="flex-1">
-            {/* ---- REMOVED BotPersonaSelector, only 1 bot ---- */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
               <span className="inline-flex items-center px-3 py-1 rounded text-xs bg-blue-600 text-white font-semibold">
                 <Bot className="h-4 w-4 mr-2" />
@@ -261,7 +380,7 @@ export const QAPage = () => {
                 onShowBookmarks={() => setShowBookmarks(!showBookmarks)}
               />
             </div>
-            {/* Quick suggested Qs */}
+            
             <div className="mb-4 flex flex-wrap gap-2">
               {commonQuickQs.map((q, idx) => (
                 <button
@@ -274,7 +393,7 @@ export const QAPage = () => {
                 </button>
               ))}
             </div>
-            {/* Existing Card for chat */}
+            
             <Card className="h-96 mb-6">
               <CardContent className="p-0 h-full flex flex-col">
                 <div className="flex-1 p-4 overflow-y-auto space-y-4">
@@ -284,8 +403,8 @@ export const QAPage = () => {
                       id={msg.id}
                       type={msg.type}
                       message={msg.message}
-                      file={msg.file}
-                      fileName={msg.fileName}
+                      file={msg.file_url}
+                      fileName={msg.file_name}
                       isBookmarked={bookmarkedIds.includes(msg.id)}
                       toggleBookmark={() => toggleBookmarkMessage(msg.id)}
                       tags={getMessageTags(msg)}
@@ -315,7 +434,6 @@ export const QAPage = () => {
                       handleSendMessage();
                     }}
                   >
-                    {/* File/Image upload button */}
                     <input
                       type="file"
                       accept="image/*,.pdf,.doc,.docx"
@@ -334,7 +452,6 @@ export const QAPage = () => {
                       <ImageUp className="h-5 w-5" />
                       File
                     </Button>
-                    {/* Voice typing button */}
                     <Button
                       type="button"
                       variant={isListening ? "secondary" : "outline"}
@@ -375,7 +492,6 @@ export const QAPage = () => {
                       Send
                     </Button>
                   </form>
-                  {/* Show file preview if uploaded */}
                   {file && (
                     <div className="mt-2 flex items-center gap-2">
                       {filePreview && file.type.startsWith("image/") ? (
@@ -402,14 +518,17 @@ export const QAPage = () => {
                 </div>
               </CardContent>
             </Card>
-            {/* Ask a real person button */}
+            
             <div className="text-center mb-8">
               <Button variant="secondary" className="px-5 py-2" onClick={handleAskRealPerson}>
                 Ask a real person
               </Button>
             </div>
           </div>
-          {/* REMOVED: TrendingQuestions sidebar */}
+          
+          <div className="md:w-80">
+            <TrendingQuestions questions={trendingQuestions} onQuestionClick={handleQuickQuestion} />
+          </div>
         </div>
 
         <div>
@@ -448,4 +567,5 @@ export const QAPage = () => {
     </div>
   );
 };
+
 export {};

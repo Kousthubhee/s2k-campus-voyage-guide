@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,8 @@ import { DocumentAddDialog } from "./documents/DocumentAddDialog";
 import { DocumentSuggestions } from "./documents/DocumentSuggestions";
 import { ImportantDocCard } from "./documents/ImportantDocCard";
 import { ImportantDocAddDialog } from "./documents/ImportantDocAddDialog";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Document {
   id: string;
@@ -56,81 +58,8 @@ interface ImportantDoc {
 }
 
 export const DocumentsPage = () => {
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      name: 'Student Visa',
-      type: 'Immigration',
-      submissionDate: '2024-01-15',
-      expiryDate: '2025-01-14',
-      status: 'valid',
-      renewalProcess: [
-        'Start renewal process 2 months before expiry',
-        'Book appointment at prefecture',
-        'Prepare required documents (passport, proof of enrollment, etc.)',
-        'Pay renewal fees',
-        'Submit application at prefecture'
-      ],
-      notificationEnabled: true,
-      notes: 'Remember to bring original documents and copies',
-      file: null,
-      fileUrl: null,
-    },
-    {
-      id: '2',
-      name: 'Residence Permit',
-      type: 'Immigration',
-      submissionDate: '2024-01-20',
-      expiryDate: '2024-05-15',
-      status: 'expiring',
-      renewalProcess: [
-        'Begin renewal 2 months before expiry',
-        'Gather required documents',
-        'Schedule prefecture appointment',
-        'Submit renewal application'
-      ],
-      notificationEnabled: true,
-      notes: 'Keep proof of previous permits',
-      file: null,
-      fileUrl: null,
-    },
-    {
-      id: '3',
-      name: 'Housing Guarantee',
-      type: 'Housing',
-      submissionDate: '2024-02-10',
-      expiryDate: '2025-02-09',
-      status: 'valid',
-      renewalProcess: [
-        'Contact the guarantee service one month before expiry',
-        'Provide updated tenancy agreement',
-        'Submit renewal forms online',
-        'Receive and store new guarantee document'
-      ],
-      notificationEnabled: true,
-      notes: 'Vital for renting apartments; check with landlord for specific requirements.',
-      file: null,
-      fileUrl: null,
-    },
-    {
-      id: '4',
-      name: 'Housing Insurance',
-      type: 'Insurance',
-      submissionDate: '2024-02-12',
-      expiryDate: '2025-02-11',
-      status: 'valid',
-      renewalProcess: [
-        'Renew automatically with insurance provider unless cancelled',
-        'Update payment details if needed',
-        'Download new insurance certificate'
-      ],
-      notificationEnabled: true,
-      notes: 'Keep receipts and certificates for your landlord and personal records.',
-      file: null,
-      fileUrl: null,
-    }
-  ]);
-
+  const { user } = useAuth();
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDocument, setNewDocument] = useState({
     name: '',
@@ -158,6 +87,132 @@ export const DocumentsPage = () => {
     fileUrl: null,
   });
 
+  // Load documents from database
+  useEffect(() => {
+    if (user) {
+      loadDocuments();
+    } else {
+      // Load default documents for non-authenticated users
+      setDocuments([
+        {
+          id: '1',
+          name: 'Student Visa',
+          type: 'Immigration',
+          submissionDate: '2024-01-15',
+          expiryDate: '2025-01-14',
+          status: 'valid',
+          renewalProcess: [
+            'Start renewal process 2 months before expiry',
+            'Book appointment at prefecture',
+            'Prepare required documents (passport, proof of enrollment, etc.)',
+            'Pay renewal fees',
+            'Submit application at prefecture'
+          ],
+          notificationEnabled: true,
+          notes: 'Remember to bring original documents and copies',
+          file: null,
+          fileUrl: null,
+        },
+        {
+          id: '2',
+          name: 'Residence Permit',
+          type: 'Immigration',
+          submissionDate: '2024-01-20',
+          expiryDate: '2024-05-15',
+          status: 'expiring',
+          renewalProcess: [
+            'Begin renewal 2 months before expiry',
+            'Gather required documents',
+            'Schedule prefecture appointment',
+            'Submit renewal application'
+          ],
+          notificationEnabled: true,
+          notes: 'Keep proof of previous permits',
+          file: null,
+          fileUrl: null,
+        },
+        {
+          id: '3',
+          name: 'Housing Guarantee',
+          type: 'Housing',
+          submissionDate: '2024-02-10',
+          expiryDate: '2025-02-09',
+          status: 'valid',
+          renewalProcess: [
+            'Contact the guarantee service one month before expiry',
+            'Provide updated tenancy agreement',
+            'Submit renewal forms online',
+            'Receive and store new guarantee document'
+          ],
+          notificationEnabled: true,
+          notes: 'Vital for renting apartments; check with landlord for specific requirements.',
+          file: null,
+          fileUrl: null,
+        },
+        {
+          id: '4',
+          name: 'Housing Insurance',
+          type: 'Insurance',
+          submissionDate: '2024-02-12',
+          expiryDate: '2025-02-11',
+          status: 'valid',
+          renewalProcess: [
+            'Renew automatically with insurance provider unless cancelled',
+            'Update payment details if needed',
+            'Download new insurance certificate'
+          ],
+          notificationEnabled: true,
+          notes: 'Keep receipts and certificates for your landlord and personal records.',
+          file: null,
+          fileUrl: null,
+        }
+      ]);
+    }
+  }, [user]);
+
+  const loadDocuments = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      if (data) {
+        const renewalDocs = data.filter(doc => !doc.is_important).map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          type: doc.type,
+          submissionDate: doc.submission_date || '',
+          expiryDate: doc.expiry_date || '',
+          status: doc.status as 'valid' | 'expiring' | 'expired',
+          renewalProcess: doc.renewal_process || [],
+          notificationEnabled: doc.notification_enabled,
+          notes: doc.notes,
+          file: null,
+          fileUrl: doc.file_url,
+        }));
+
+        const importantDocs = data.filter(doc => doc.is_important).map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          description: doc.notes || '',
+          file: null,
+          fileUrl: doc.file_url,
+        }));
+
+        setDocuments(renewalDocs);
+        setImportantDocs(importantDocs);
+      }
+    } catch (error) {
+      console.error('Error loading documents:', error);
+    }
+  };
+
   const calculateStatus = (expiryDate: string): 'valid' | 'expiring' | 'expired' => {
     const today = new Date();
     const expiry = new Date(expiryDate);
@@ -168,38 +223,121 @@ export const DocumentsPage = () => {
     return 'valid';
   };
 
-  const handleAddDocument = () => {
+  const handleAddDocument = async () => {
     if (!newDocument.name || !newDocument.type || !newDocument.submissionDate || !newDocument.expiryDate) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     const status = calculateStatus(newDocument.expiryDate);
-    const newDoc: Document = {
-      id: Date.now().toString(),
-      ...newDocument,
+    const docData = {
+      name: newDocument.name,
+      type: newDocument.type,
+      submission_date: newDocument.submissionDate,
+      expiry_date: newDocument.expiryDate,
       status,
-      renewalProcess: newDocument.renewalProcess.split('\n').filter(step => step.trim()),
-      notificationEnabled: true,
-      file: newDocument.file || null,
-      fileUrl: newDocument.fileUrl || null,
+      renewal_process: newDocument.renewalProcess.split('\n').filter(step => step.trim()),
+      notification_enabled: true,
+      notes: newDocument.notes,
+      file_url: newDocument.fileUrl,
+      file_name: newDocument.file?.name,
+      is_important: false,
     };
 
-    setDocuments([...documents, newDoc]);
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('user_documents')
+          .insert({ ...docData, user_id: user.id })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          const newDoc: Document = {
+            id: data.id,
+            name: data.name,
+            type: data.type,
+            submissionDate: data.submission_date || '',
+            expiryDate: data.expiry_date || '',
+            status: data.status as 'valid' | 'expiring' | 'expired',
+            renewalProcess: data.renewal_process || [],
+            notificationEnabled: data.notification_enabled,
+            notes: data.notes,
+            file: newDocument.file,
+            fileUrl: data.file_url,
+          };
+          setDocuments([newDoc, ...documents]);
+        }
+      } catch (error) {
+        console.error('Error adding document:', error);
+        toast.error('Failed to add document');
+        return;
+      }
+    } else {
+      // For non-authenticated users, just add to local state
+      const newDoc: Document = {
+        id: Date.now().toString(),
+        ...newDocument,
+        status,
+        renewalProcess: newDocument.renewalProcess.split('\n').filter(step => step.trim()),
+        notificationEnabled: true,
+        file: newDocument.file || null,
+        fileUrl: newDocument.fileUrl || null,
+      };
+      setDocuments([newDoc, ...documents]);
+    }
+
     setIsAddDialogOpen(false);
     setNewDocument({ name: '', type: '', submissionDate: '', expiryDate: '', renewalProcess: '', notes: '', file: null, fileUrl: null });
     toast.success('Document added successfully');
   };
 
-  const deleteDocument = (docId: string) => {
+  const deleteDocument = async (docId: string) => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_documents')
+          .delete()
+          .eq('id', docId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        toast.error('Failed to delete document');
+        return;
+      }
+    }
+
     setDocuments(documents.filter(doc => doc.id !== docId));
     toast.success('Document deleted successfully');
   };
 
-  const toggleNotification = (docId: string) => {
+  const toggleNotification = async (docId: string) => {
+    const doc = documents.find(d => d.id === docId);
+    if (!doc) return;
+
+    const newState = !doc.notificationEnabled;
+
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_documents')
+          .update({ notification_enabled: newState })
+          .eq('id', docId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating notification:', error);
+        return;
+      }
+    }
+
     setDocuments(documents.map(doc => {
       if (doc.id === docId) {
-        const newState = !doc.notificationEnabled;
         toast(newState ? 'Notifications enabled' : 'Notifications disabled');
         return { ...doc, notificationEnabled: newState };
       }
@@ -275,15 +413,37 @@ export const DocumentsPage = () => {
     setEditValues({ ...editValues, [e.target.name]: e.target.value });
   };
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (!editValues.submissionDate || !editValues.expiryDate) {
       toast.error("Both dates are required");
       return;
     }
+    
+    const status = calculateStatus(editValues.expiryDate);
+
+    if (user && editDocId) {
+      try {
+        const { error } = await supabase
+          .from('user_documents')
+          .update({
+            submission_date: editValues.submissionDate,
+            expiry_date: editValues.expiryDate,
+            status,
+          })
+          .eq('id', editDocId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating document:', error);
+        toast.error("Failed to update dates");
+        return;
+      }
+    }
+
     setDocuments(docs =>
       docs.map(doc => {
         if (doc.id === editDocId) {
-          const status = calculateStatus(editValues.expiryDate);
           return {
             ...doc,
             submissionDate: editValues.submissionDate,
@@ -298,19 +458,58 @@ export const DocumentsPage = () => {
     closeEditDialog();
   };
 
-  const handleAddImportantDoc = () => {
+  const handleAddImportantDoc = async () => {
     if (!newImportantDoc.name || !newImportantDoc.file) {
       toast.error("Please provide at least a name and a file for the document.");
       return;
     }
-    const doc: ImportantDoc = {
-      id: Date.now().toString(),
+
+    const docData = {
       name: newImportantDoc.name,
-      description: newImportantDoc.description,
-      file: newImportantDoc.file,
-      fileUrl: newImportantDoc.fileUrl,
+      type: 'Important',
+      notes: newImportantDoc.description,
+      file_url: newImportantDoc.fileUrl,
+      file_name: newImportantDoc.file?.name,
+      is_important: true,
     };
-    setImportantDocs((prev) => [...prev, doc]);
+
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('user_documents')
+          .insert({ ...docData, user_id: user.id })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          const doc: ImportantDoc = {
+            id: data.id,
+            name: data.name,
+            description: data.notes || '',
+            file: newImportantDoc.file,
+            fileUrl: data.file_url,
+          };
+          setImportantDocs((prev) => [doc, ...prev]);
+        }
+      } catch (error) {
+        console.error('Error adding important document:', error);
+        toast.error('Failed to add document');
+        return;
+      }
+    } else {
+      // For non-authenticated users, just add to local state
+      const doc: ImportantDoc = {
+        id: Date.now().toString(),
+        name: newImportantDoc.name,
+        description: newImportantDoc.description,
+        file: newImportantDoc.file,
+        fileUrl: newImportantDoc.fileUrl,
+      };
+      setImportantDocs((prev) => [doc, ...prev]);
+    }
+
     toast.success("Important document uploaded!");
     setShowAddImportantDialog(false);
     setNewImportantDoc({ name: "", description: "", file: null, fileUrl: null });
@@ -327,7 +526,23 @@ export const DocumentsPage = () => {
     setNewImportantDoc(nd => ({ ...nd, file, fileUrl }));
   };
 
-  const handleDeleteImportantDoc = (id: string) => {
+  const handleDeleteImportantDoc = async (id: string) => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_documents')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error deleting important document:', error);
+        toast.error('Failed to delete document');
+        return;
+      }
+    }
+
     setImportantDocs(docs => docs.filter(doc => doc.id !== id));
     toast.success("Important document deleted!");
   };

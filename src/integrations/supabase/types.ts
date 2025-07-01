@@ -208,6 +208,42 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_messages: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_bookmarked: boolean | null
+          message: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_bookmarked?: boolean | null
+          message: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_bookmarked?: boolean | null
+          message?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       schools: {
         Row: {
           city: string
@@ -253,6 +289,60 @@ export type Database = {
           tuition_fees?: Json | null
           updated_at?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      user_documents: {
+        Row: {
+          created_at: string
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_important: boolean | null
+          name: string
+          notes: string | null
+          notification_enabled: boolean | null
+          renewal_process: string[] | null
+          status: string | null
+          submission_date: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_important?: boolean | null
+          name: string
+          notes?: string | null
+          notification_enabled?: boolean | null
+          renewal_process?: string[] | null
+          status?: string | null
+          submission_date?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_important?: boolean | null
+          name?: string
+          notes?: string | null
+          notification_enabled?: boolean | null
+          renewal_process?: string[] | null
+          status?: string | null
+          submission_date?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
