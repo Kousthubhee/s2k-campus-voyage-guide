@@ -45,7 +45,7 @@ import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
 import { FileUpload } from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { MainRouter } from './MainRouter';
@@ -206,15 +206,28 @@ const Index = () => {
           userName={userProfile?.name || user?.email || 'Guest'}
           userAvatarUrl=""
         />
-        <div className="flex-1 flex flex-col">
-          <Header 
-            currentPage={currentPage} 
-            setCurrentPage={handlePageNavigation}
-            userProgress={userProgress}
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-            showAuth={!user}
-          />
+        <SidebarInset>
+          <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
+            <div className="flex h-16 shrink-0 items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex flex-1 justify-between items-center">
+                <div 
+                  className="text-2xl font-bold cursor-pointer"
+                  onClick={() => setCurrentPage('checklist')}
+                >
+                  pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+                </div>
+                <Header 
+                  currentPage={currentPage} 
+                  setCurrentPage={handlePageNavigation}
+                  userProgress={userProgress}
+                  userProfile={userProfile}
+                  setUserProfile={setUserProfile}
+                  showAuth={!user}
+                />
+              </div>
+            </div>
+          </header>
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
@@ -283,7 +296,7 @@ const Index = () => {
               </div>
             )}
           </footer>
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

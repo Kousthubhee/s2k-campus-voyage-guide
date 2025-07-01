@@ -20,12 +20,6 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent
-} from "@/components/ui/tabs";
 import { DocumentCard } from "./documents/DocumentCard";
 import { DocumentEditDialog } from "./documents/DocumentEditDialog";
 import { DocumentAddDialog } from "./documents/DocumentAddDialog";
@@ -569,15 +563,6 @@ export const DocumentsPage = () => {
     setIsAddDialogOpen(true);
   };
 
-  const handleImportantSuggestionClick = (suggestion: { name: string; type: string }) => {
-    setNewImportantDoc({
-      ...newImportantDoc,
-      name: suggestion.name,
-      description: suggestion.type,
-    });
-    setShowAddImportantDialog(true);
-  };
-
   const [showSensitiveInfoAlert, setShowSensitiveInfoAlert] = useState(true);
 
   return (
@@ -591,111 +576,68 @@ export const DocumentsPage = () => {
           Track your important documents, keep digital copies, and stay on top of renewal deadlines.
         </p>
       </div>
-      <Tabs defaultValue="renewal" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="renewal">Documents to Renew</TabsTrigger>
-          <TabsTrigger value="all">All Important Documents</TabsTrigger>
-        </TabsList>
-        <TabsContent value="renewal">
-          {showSensitiveInfoAlert && (
-            <div className="mb-4">
-              <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-yellow-900 text-sm font-medium relative">
-                <AlertTriangle className="h-5 w-5 mr-2 text-yellow-500 flex-shrink-0" />
-                <span>
-                  Do not add anything that contains sensitive information (such as government numbers, personal ID numbers, or confidential details).
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowSensitiveInfoAlert(false)}
-                  aria-label="Close"
-                  className="absolute top-2 right-2 text-yellow-900 hover:text-red-500 transition"
-                >
-                  <span className="sr-only">Close warning</span>
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          )}
-          <DocumentSuggestions suggestions={docSuggestions} onClick={handleSuggestionClick} />
-          <div className="mb-6 flex justify-end">
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Document
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 gap-6">
-            {documents.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                doc={doc}
-                onEdit={openEditDialog}
-                onDelete={deleteDocument}
-                onToggleNotification={toggleNotification}
-                onFileChange={handleFileChange}
-                onRemoveFile={handleRemoveFile}
-              />
-            ))}
-          </div>
-          <DocumentEditDialog
-            open={!!editDocId}
-            submissionDate={editValues.submissionDate}
-            expiryDate={editValues.expiryDate}
-            onChange={handleEditChange}
-            onCancel={closeEditDialog}
-            onSubmit={handleEditSubmit}
-          />
-          <DocumentAddDialog
-            open={isAddDialogOpen}
-            newDocument={newDocument}
-            onChange={(field, value) => setNewDocument(nd => ({ ...nd, [field]: value }))}
-            onFileChange={handleNewDocFileChange}
-            onRemoveFile={handleRemoveNewDocFile}
-            onCancel={() => setIsAddDialogOpen(false)}
-            onSubmit={handleAddDocument}
-          />
-        </TabsContent>
-        <TabsContent value="all">
-          <div className="mb-4">
-            <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-yellow-900 text-sm font-medium">
-              <AlertTriangle className="h-5 w-5 mr-2 text-yellow-500" />
+
+      {showSensitiveInfoAlert && (
+        <div className="mb-4">
+          <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-yellow-900 text-sm font-medium relative">
+            <AlertTriangle className="h-5 w-5 mr-2 text-yellow-500 flex-shrink-0" />
+            <span>
               Do not add anything that contains sensitive information (such as government numbers, personal ID numbers, or confidential details).
-            </div>
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSensitiveInfoAlert(false)}
+              aria-label="Close"
+              className="absolute top-2 right-2 text-yellow-900 hover:text-red-500 transition"
+            >
+              <span className="sr-only">Close warning</span>
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <DocumentSuggestions suggestions={docSuggestions} onClick={handleImportantSuggestionClick} />
-          <div className="mb-6 flex justify-end">
-            <Button onClick={() => setShowAddImportantDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Upload Important Document
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {importantDocs.length === 0 ? (
-              <div className="text-gray-500 italic">No important documents uploaded yet.</div>
-            ) : (
-              importantDocs.map((doc) => (
-                <ImportantDocCard
-                  key={doc.id}
-                  doc={doc}
-                  onDelete={handleDeleteImportantDoc}
-                />
-              ))
-            )}
-          </div>
-          <ImportantDocAddDialog
-            open={showAddImportantDialog}
-            newDoc={newImportantDoc}
-            onChange={(field, value) =>
-              setNewImportantDoc(nd => ({ ...nd, [field]: value }))
-            }
-            onFileChange={handleImportantFileChange}
-            onCancel={() => setShowAddImportantDialog(false)}
-            onSubmit={handleAddImportantDoc}
-            onRemoveFile={() =>
-              setNewImportantDoc(nd => ({ ...nd, file: null, fileUrl: null }))
-            }
+        </div>
+      )}
+
+      <DocumentSuggestions suggestions={docSuggestions} onClick={handleSuggestionClick} />
+      
+      <div className="mb-6 flex justify-end">
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Document
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        {documents.map((doc) => (
+          <DocumentCard
+            key={doc.id}
+            doc={doc}
+            onEdit={openEditDialog}
+            onDelete={deleteDocument}
+            onToggleNotification={toggleNotification}
+            onFileChange={handleFileChange}
+            onRemoveFile={handleRemoveFile}
           />
-        </TabsContent>
-      </Tabs>
+        ))}
+      </div>
+
+      <DocumentEditDialog
+        open={!!editDocId}
+        submissionDate={editValues.submissionDate}
+        expiryDate={editValues.expiryDate}
+        onChange={handleEditChange}
+        onCancel={closeEditDialog}
+        onSubmit={handleEditSubmit}
+      />
+
+      <DocumentAddDialog
+        open={isAddDialogOpen}
+        newDocument={newDocument}
+        onChange={(field, value) => setNewDocument(nd => ({ ...nd, [field]: value }))}
+        onFileChange={handleNewDocFileChange}
+        onRemoveFile={handleRemoveNewDocFile}
+        onCancel={() => setIsAddDialogOpen(false)}
+        onSubmit={handleAddDocument}
+      />
     </div>
   );
 };
