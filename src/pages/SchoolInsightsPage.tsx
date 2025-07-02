@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CityCard } from "@/components/school-insights/CityCard";
 import { CityInsightsCard } from "@/components/school-insights/CityInsightsCard";
 import { InsightsDialog } from "@/components/school-insights/InsightsDialog";
@@ -14,10 +15,12 @@ import { SchoolsGrid } from "./school-insights/SchoolsGrid";
 import { useSchools, useSchoolsByCity, useSchoolSearch } from "@/hooks/useSchools";
 import { useCities, useCityByName } from "@/hooks/useCities";
 import { DatabaseCity, DatabaseSchool, LocalInsight } from "@/types/database";
+ import { useEffect } from "react"; // Ensure useEffect is imported
 
 interface SchoolInsightsPageProps {
   onBack: () => void;
 }
+
 
 export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -34,7 +37,15 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const { data: cityDetails } = useCityByName(selectedCity);
 
   const cityList = cities.map(city => city.name);
-  
+  const queryClient = useQueryClient();
+ 
+
+// ... inside SchoolInsightsPage component ...
+useEffect(() => {
+  // Invalidate all queries that start with 'schools'
+  queryClient.invalidateQueries({ queryKey: ['schools'] });
+}, [queryClient]); // Dependency array ensures it runs once on mount and if queryClient changes
+
   // Use appropriate data source based on search/selection
   const displaySchools = searchTerm.trim() ? searchResults : (selectedCity ? citySchools : allSchools);
     
