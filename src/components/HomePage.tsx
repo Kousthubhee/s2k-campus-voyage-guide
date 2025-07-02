@@ -240,22 +240,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="px-4 py-8 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="text-2xl font-bold mb-4">
-            pas<span className="text-cyan-400">S</span>2<span className="text-blue-400">K</span>ampus
-          </div>
-          <p className="text-gray-400 mb-4">
-            Empowering international students to succeed in French higher education
-          </p>
-          <div className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Created by{" "}
-            <span className="text-blue-400 font-semibold">Kousthubhee Krishna K</span> &{" "}
-            <span className="text-cyan-400 font-semibold">Srivatsava CK</span>
-          </div>
-        </div>
-      </footer>
+     
     </div>
   );
 };
