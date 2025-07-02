@@ -1,6 +1,5 @@
 
 import { ChecklistModule } from '@/components/ChecklistModule';
-import QAPage from '@/components/QAPage';
 import { HubPage } from '@/components/HubPage';
 import { NewsPage } from '@/components/NewsPage';
 import { AffiliationPage } from '@/components/AffiliationPage';
@@ -11,7 +10,6 @@ import { ProfilePage } from '@/components/ProfilePage';
 import { NotificationPage } from '@/components/NotificationPage';
 import { SchoolDetails } from '@/components/SchoolDetails';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
-import { DocumentsPage } from '@/components/DocumentsPage';
 import { HomePage } from '@/components/HomePage';
 import { SchoolInsightsPage } from './SchoolInsightsPage';
 import { PreArrival1Page } from './PreArrival1Page';
@@ -88,8 +86,6 @@ export function MainRouter({
           currentPage={currentPage}
         />
       );
-    case 'documents':
-      return <DocumentsPage />;
     case 'school-insights':
       return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
     case 'pre-arrival-1':
@@ -158,8 +154,6 @@ export function MainRouter({
           isCompleted={userProgress.completedModules.includes('finance-tracking')}
         />
       );
-    case 'qa':
-      return <QAPage />;
     case 'hub':
       return <HubPage />;
     case 'news':

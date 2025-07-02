@@ -1,13 +1,11 @@
 
 import { 
   CheckSquare, 
-  MessageSquare, 
   Users, 
   BookOpen, 
   Building2, 
   Languages, 
   Phone,
-  FileText,
   User,
   Home
 } from 'lucide-react';
@@ -54,8 +52,6 @@ export const AppSidebar = ({
   const menuItems = [
     { id: 'home', icon: Home, label: 'Home', tooltip: 'Return to homepage' },
     { id: 'checklist', icon: CheckSquare, label: 'Checklist', tooltip: 'Your onboarding checklist' },
-    { id: 'documents', icon: FileText, label: 'Documents & Renewals', tooltip: 'Manage paperwork and renewal timelines' },
-    { id: 'qa', icon: MessageSquare, label: 'Ask Me Anything', tooltip: 'Chat with our AI or browse FAQs' },
     { id: 'hub', icon: Users, label: 'Community Hub', tooltip: 'Connect with fellow students' },
     { id: 'news', icon: BookOpen, label: 'Stay Updated', tooltip: 'Latest campus and city news' },
     { id: 'affiliation', icon: Building2, label: 'Our Partners', tooltip: 'See our affiliations' },
