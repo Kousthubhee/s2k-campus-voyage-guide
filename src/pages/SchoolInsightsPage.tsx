@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CityCard } from "@/components/school-insights/CityCard";
 import { CityInsightsCard } from "@/components/school-insights/CityInsightsCard";
@@ -15,12 +15,11 @@ import { SchoolsGrid } from "./school-insights/SchoolsGrid";
 import { useSchools, useSchoolsByCity, useSchoolSearch } from "@/hooks/useSchools";
 import { useCities, useCityByName } from "@/hooks/useCities";
 import { DatabaseCity, DatabaseSchool, LocalInsight } from "@/types/database";
- import { useEffect } from "react"; // Ensure useEffect is imported
+import { useEffect } from "react";
 
 interface SchoolInsightsPageProps {
   onBack: () => void;
 }
-
 
 export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -28,23 +27,42 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showCityInsights, setShowCityInsights] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch data from database
-  const { data: cities = [], isLoading: citiesLoading } = useCities();
-  const { data: allSchools = [], isLoading: schoolsLoading } = useSchools();
-  const { data: citySchools = [] } = useSchoolsByCity(selectedCity);
-  const { data: searchResults = [] } = useSchoolSearch(searchTerm);
-  const { data: cityDetails } = useCityByName(selectedCity);
+  const { data: cities = [], isLoading: citiesLoading, refetch: refetchCities } = useCities();
+  const { data: allSchools = [], isLoading: schoolsLoading, refetch: refetchAllSchools } = useSchools();
+  const { data: citySchools = [], refetch: refetchCitySchools } = useSchoolsByCity(selectedCity);
+  const { data: searchResults = [], refetch: refetchSearchResults } = useSchoolSearch(searchTerm);
+  const { data: cityDetails, refetch: refetchCityDetails } = useCityByName(selectedCity);
 
   const cityList = cities.map(city => city.name);
   const queryClient = useQueryClient();
- 
 
-// ... inside SchoolInsightsPage component ...
-useEffect(() => {
-  // Invalidate all queries that start with 'schools'
-  queryClient.invalidateQueries({ queryKey: ['schools'] });
-}, [queryClient]); // Dependency array ensures it runs once on mount and if queryClient changes
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate all related queries
+      await queryClient.invalidateQueries({ queryKey: ['schools'] });
+      await queryClient.invalidateQueries({ queryKey: ['cities'] });
+      
+      // Refetch current data
+      await Promise.all([
+        refetchCities(),
+        refetchAllSchools(),
+        selectedCity && refetchCitySchools(),
+        selectedCity && refetchCityDetails(),
+        searchTerm && refetchSearchResults()
+      ].filter(Boolean));
+      
+      console.log('Data refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Use appropriate data source based on search/selection
   const displaySchools = searchTerm.trim() ? searchResults : (selectedCity ? citySchools : allSchools);
@@ -71,22 +89,35 @@ useEffect(() => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center mb-6">
-        {!selectedCity ? (
-          <>
-            <Button variant="ghost" onClick={onBack} className="mr-4">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Checklist
-            </Button>
-            <h1 className="text-2xl font-bold text-gray-900">School Insights</h1>
-          </>
-        ) : (
-          <>
-            <Button variant="ghost" onClick={() => setSelectedCity(null)} className="mr-4">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Cities
-            </Button>
-            <h1 className="text-2xl font-bold text-gray-900">{selectedCity} – Schools & Info</h1>
-          </>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          {!selectedCity ? (
+            <>
+              <Button variant="ghost" onClick={onBack} className="mr-4">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Checklist
+              </Button>
+              <h1 className="text-2xl font-bold text-gray-900">School Insights</h1>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => setSelectedCity(null)} className="mr-4">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Cities
+              </Button>
+              <h1 className="text-2xl font-bold text-gray-900">{selectedCity} – Schools & Info</h1>
+            </>
+          )}
+        </div>
+        
+        {/* Refresh button */}
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
       </div>
 
       {/* Global search functionality - always visible */}
