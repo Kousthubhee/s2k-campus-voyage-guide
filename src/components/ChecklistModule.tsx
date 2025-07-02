@@ -1,13 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { SchoolSelector } from './SchoolSelector';
 import { ModuleContent } from './ModuleContent';
 import { ChecklistHeader } from './ChecklistHeader';
 import { ModuleCard } from './ModuleCard';
 import { ProgressSection } from './ProgressSection';
-
 import { useToast } from '@/hooks/use-toast';
-import { CityGuidesTab } from "@/components/CityGuidesTab";
 
 interface Module {
   id: string;
@@ -138,27 +135,15 @@ export const ChecklistModule = ({
   };
 
   if (selectedModule) {
-    if (selectedModule.type === "school") {
-      return (
-        <div>
-          <SchoolSelector
-            onBack={() => setSelectedModule(null)}
-            onSchoolSelect={onSchoolSelect}
-          />
-          <CityGuidesTab />
-        </div>
-      );
-    } else {
-      return (
-        <ModuleContent
-          module={selectedModule}
-          onBack={() => setSelectedModule(null)}
-          onComplete={handleModuleComplete}
-          isCompleted={userProgress.completedModules.includes(selectedModule.id)}
-          onToast={handleToast}
-        />
-      );
-    }
+    return (
+      <ModuleContent
+        module={selectedModule}
+        onBack={() => setSelectedModule(null)}
+        onComplete={handleModuleComplete}
+        isCompleted={userProgress.completedModules.includes(selectedModule.id)}
+        onToast={handleToast}
+      />
+    );
   }
 
   return (

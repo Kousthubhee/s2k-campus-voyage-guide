@@ -8,7 +8,6 @@ import { TranslatePage } from '@/components/TranslatePage';
 import { ContactPage } from '@/components/ContactPage';
 import { ProfilePage } from '@/components/ProfilePage';
 import { NotificationPage } from '@/components/NotificationPage';
-import { SchoolDetails } from '@/components/SchoolDetails';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { HomePage } from '@/components/HomePage';
 import { DocumentsPage } from '@/components/DocumentsPage';
@@ -57,18 +56,10 @@ export function MainRouter({
     currentPage,
     userProfile,
     userProgress,
-    selectedSchool,
     profile,
   });
 
-  if (selectedSchool) {
-    return (
-      <SchoolDetails 
-        school={selectedSchool} 
-        onBack={() => setSelectedSchool(null)}
-      />
-    );
-  }
+  // Note: selectedSchool logic was removed as it's now handled by SchoolInsightsPage
   switch (currentPage) {
     case 'home':
       return (
