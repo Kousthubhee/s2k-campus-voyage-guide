@@ -80,6 +80,8 @@ export function MainRouter({
           currentPage={currentPage}
         />
       );
+    case 'documents':
+      return <DocumentsPage />;
     case 'school-insights':
       return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
     case 'pre-arrival-1':
@@ -166,8 +168,6 @@ export function MainRouter({
       return <NotificationPage />;
     case 'integration':
       return <FrenchIntegrationPage />;
-    case 'documents':
-      return <DocumentsPage />;
     case 'suggestions':
       return (
         <SuggestionsPage 
