@@ -49,6 +49,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { MainRouter } from './MainRouter';
+import { FloatingChatbot } from '@/components/FloatingChatbot';
 
 console.log("App.tsx is rendering");
 
@@ -297,6 +298,9 @@ const Index = () => {
             )}
           </footer>
         </SidebarInset>
+        
+        {/* Floating Chatbot - visible on all pages */}
+        <FloatingChatbot />
       </div>
     </SidebarProvider>
   );

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +22,9 @@ import {
   FileText,
   Image as ImageIcon,
   Video,
-  Music
+  Music,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface Message {
@@ -37,6 +37,75 @@ interface Message {
   isBookmarked?: boolean;
 }
 
+interface PredefinedCategory {
+  category: string;
+  emoji: string;
+  questions: string[];
+}
+
+const predefinedCategories: PredefinedCategory[] = [
+  {
+    category: "Checklist",
+    emoji: "📋",
+    questions: [
+      "What should I prepare before coming to France?",
+      "What documents do I need for university admission?",
+      "How do I apply for a student visa?",
+      "What are the pre-arrival requirements?",
+      "How do I find accommodation in France?",
+      "What financial preparations should I make?"
+    ]
+  },
+  {
+    category: "Documents & Renewals",
+    emoji: "📑",
+    questions: [
+      "What documents are needed for visa renewal?",
+      "How do I renew my residence permit?",
+      "What paperwork is required for CAF applications?",
+      "How do I get my documents translated?",
+      "What documents do I need to open a bank account?",
+      "How do I obtain a student card?"
+    ]
+  },
+  {
+    category: "Ask Me Anything",
+    emoji: "💬",
+    questions: [
+      "What can I ask the AI Assistant?",
+      "How does the AI help with French education?",
+      "Can you help with visa questions?",
+      "What topics can you assist with?",
+      "How accurate is the AI information?",
+      "Can you provide personalized advice?"
+    ]
+  },
+  {
+    category: "Community Hub",
+    emoji: "🏡",
+    questions: [
+      "How can I connect with other students?",
+      "Where can I find study groups?",
+      "How do I join student events?",
+      "Can I find roommates through the platform?",
+      "How do I participate in community discussions?",
+      "Are there networking opportunities?"
+    ]
+  },
+  {
+    category: "Learn French",
+    emoji: "📚",
+    questions: [
+      "Where can I find French language resources?",
+      "How can I improve my French skills?",
+      "Are there online French courses available?",
+      "What level of French do I need for university?",
+      "Can you recommend French learning apps?",
+      "How do I practice French conversation?"
+    ]
+  }
+];
+
 const QAPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -44,6 +113,7 @@ const QAPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -54,14 +124,6 @@ const QAPage = () => {
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
     { code: 'es', name: 'Español', flag: '🇪🇸' },
     { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
-  ];
-
-  const trendingQuestions = [
-    "How do I apply for a student visa in France?",
-    "What documents do I need for university admission?",
-    "How much does it cost to study in France?",
-    "Can I work while studying in France?",
-    "What are the best cities for international students?"
   ];
 
   // Load messages from database
@@ -147,6 +209,49 @@ const QAPage = () => {
     }
   };
 
+  const generateBotResponse = (input: string) => {
+    const lowerInput = input.toLowerCase();
+    
+    if (lowerInput.includes('prepare before coming') || lowerInput.includes('pre-arrival')) {
+      return "Before coming to France, you should: 1) Secure your student visa through Campus France, 2) Find accommodation (CROUS or private), 3) Arrange health insurance, 4) Open a French bank account, 5) Learn basic French, and 6) prepare financial proof (€615/month). Our checklist module guides you through each step!";
+    }
+    
+    if (lowerInput.includes('documents') && lowerInput.includes('admission')) {
+      return "For university admission, you typically need: Academic transcripts, diploma certificates, language proficiency tests (DELF/DALF or IELTS/TOEFL), motivation letter, CV, passport copy, and financial proof. Requirements vary by program and university.";
+    }
+    
+    if (lowerInput.includes('student visa')) {
+      return "To apply for a student visa: 1) Get accepted by a French institution, 2) Register on Campus France, 3) Gather required documents (passport, photos, financial proof, health insurance, acceptance letter), 4) Schedule visa appointment, 5) Pay fees. Processing takes 2-4 weeks.";
+    }
+    
+    if (lowerInput.includes('accommodation')) {
+      return "Accommodation options include: CROUS university housing (cheapest, €150-400/month), private apartments (€400-800/month), homestays, and student residences. Apply early as demand is high, especially in Paris!";
+    }
+    
+    if (lowerInput.includes('financial preparations')) {
+      return "Financial preparations: Prove €615/month for visa, open French bank account (BNP Paribas, Société Générale recommended), get international student insurance, budget for deposits, and consider part-time work options (20h/week allowed for non-EU students).";
+    }
+    
+    // Documents & Renewals answers
+    if (lowerInput.includes('visa renewal') || lowerInput.includes('residence permit')) {
+      return "For visa/residence permit renewal: Apply 2-3 months before expiry, provide updated enrollment certificate, financial proof, housing proof, health insurance, passport photos, and current residence permit. Visit your local prefecture.";
+    }
+    
+    if (lowerInput.includes('caf')) {
+      return "For CAF housing aid: Apply online at caf.fr after arrival, provide lease agreement, bank RIB, residence permit copy, and enrollment certificate. Aid ranges €100-200/month and takes 2-3 months to process.";
+    }
+    
+    if (lowerInput.includes('documents translated')) {
+      return "Document translation: Use certified translators (traducteur assermenté) for official documents. Costs €20-50 per page. Some universities accept official English documents. Check with your institution first.";
+    }
+    
+    if (lowerInput.includes('bank account')) {
+      return "To open a bank account: Bring passport, residence proof, student card, and initial deposit (€10-300). Popular banks: BNP Paribas, Société Générale, LCL. Many offer student packages with reduced fees.";
+    }
+    
+    return "I do not have information on this. Please talk with an expert.";
+  };
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && !uploadedFile) return;
 
@@ -166,7 +271,7 @@ const QAPage = () => {
       setMessages(prev => [...prev, { ...userMessage, id: userMessageId }]);
     }
 
-    // Simulate AI response
+    // Generate AI response
     setTimeout(async () => {
       const botResponse = generateBotResponse(inputMessage);
       const botMessage: Omit<Message, 'id'> = {
@@ -187,15 +292,12 @@ const QAPage = () => {
     setUploadedFile(null);
   };
 
-  const generateBotResponse = (input: string) => {
-    const responses = [
-      "Based on current French education policies, I'd recommend checking the official Campus France website for the most up-to-date requirements.",
-      "For student visas, you'll typically need proof of admission, financial resources, and health insurance. The exact requirements may vary based on your nationality.",
-      "French universities offer excellent programs for international students. Would you like specific information about any particular field of study?",
-      "The cost of living varies significantly between cities. Paris is generally more expensive than cities like Lyon or Toulouse.",
-      "I'd be happy to help you with that! Could you provide more specific details about your situation?"
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+  const handlePredefinedQuestion = async (question: string) => {
+    setInputMessage(question);
+    // Auto-send the predefined question
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -303,12 +405,8 @@ const QAPage = () => {
     }
   };
 
-  const handleTrendingQuestionClick = (question: string) => {
-    setInputMessage(question);
-  };
-
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-6">
+    <div className="max-w-5xl mx-auto p-4 space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
           <MessageSquare className="h-8 w-8 text-blue-600" />
@@ -320,10 +418,74 @@ const QAPage = () => {
       </div>
 
       <Tabs defaultValue="chat" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="categories" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-yellow-500" />
+                Quick Help Categories
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {predefinedCategories.map((category) => (
+                <div key={category.category} className="space-y-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setExpandedCategory(
+                      expandedCategory === category.category ? null : category.category
+                    )}
+                    className="w-full justify-between text-left h-auto p-4"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-xl">{category.emoji}</span>
+                      <span className="font-medium text-lg">{category.category}</span>
+                    </span>
+                    {expandedCategory === category.category ? 
+                      <ChevronUp className="h-5 w-5" /> : 
+                      <ChevronDown className="h-5 w-5" />
+                    }
+                  </Button>
+                  
+                  {expandedCategory === category.category && (
+                    <div className="space-y-2 ml-6">
+                      {category.questions.map((question, index) => (
+                        <Button
+                          key={index}
+                          variant="ghost"
+                          onClick={() => handlePredefinedQuestion(question)}
+                          className="w-full justify-start text-left h-auto p-3 hover:bg-blue-50 border border-gray-200"
+                        >
+                          <span className="text-sm">{question}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="pt-6 text-center">
+              <h3 className="font-semibold text-green-800 mb-2">Need Personal Help?</h3>
+              <p className="text-green-700 text-sm mb-4">
+                Get personalized assistance from our education experts
+              </p>
+              <Button
+                onClick={() => window.open('https://wa.me/33745736466', '_blank')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                📱 Chat with an expert on WhatsApp
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="chat" className="space-y-4">
           {/* Language Selector */}
@@ -349,30 +511,6 @@ const QAPage = () => {
             </CardContent>
           </Card>
 
-          {/* Trending Questions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-yellow-500" />
-                Trending Questions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2">
-                {trendingQuestions.map((question, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    className="justify-start h-auto p-3 text-left"
-                    onClick={() => handleTrendingQuestionClick(question)}
-                  >
-                    {question}
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Chat Messages */}
           <Card className="h-96">
             <CardContent className="p-0">
@@ -382,6 +520,7 @@ const QAPage = () => {
                     <div className="text-center text-gray-500 py-8">
                       <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                       <p>No messages yet. Start a conversation!</p>
+                      <p className="text-sm mt-2">Try the Categories tab for quick questions</p>
                     </div>
                   ) : (
                     messages.map((message) => (
@@ -400,7 +539,7 @@ const QAPage = () => {
                           
                           {message.fileName && (
                             <div className="mt-2 p-2 bg-white/10 rounded flex items-center gap-2">
-                              {getFileIcon(message.fileName)}
+                              <FileText className="h-4 w-4" />
                               <span className="text-xs truncate">{message.fileName}</span>
                             </div>
                           )}
@@ -409,30 +548,6 @@ const QAPage = () => {
                             <span className="text-xs opacity-70">
                               {message.timestamp.toLocaleTimeString()}
                             </span>
-                            <div className="flex items-center gap-1">
-                              {message.type === 'bot' && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => speakText(message.message)}
-                                  className="h-6 w-6 p-0 hover:bg-white/20"
-                                >
-                                  <Volume2 className="h-3 w-3" />
-                                </Button>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleBookmark(message.id)}
-                                className="h-6 w-6 p-0 hover:bg-white/20"
-                              >
-                                {message.isBookmarked ? (
-                                  <BookmarkCheck className="h-3 w-3" />
-                                ) : (
-                                  <Bookmark className="h-3 w-3" />
-                                )}
-                              </Button>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -457,26 +572,7 @@ const QAPage = () => {
 
           {/* Input Area */}
           <Card>
-            <CardContent className="pt-6">
-              {uploadedFile && (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {getFileIcon(uploadedFile.name)}
-                    <span className="text-sm">{uploadedFile.name}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {(uploadedFile.size / 1024 / 1024).toFixed(1)}MB
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setUploadedFile(null)}
-                  >
-                    ×
-                  </Button>
-                </div>
-              )}
-
+            <CardContent className="pt-6 space-y-3">
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <Input
@@ -488,42 +584,22 @@ const QAPage = () => {
                   />
                 </div>
                 
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  accept="*/*"
-                />
-                
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleVoiceInput}
-                  className={isRecording ? "bg-red-50 border-red-200" : ""}
-                >
-                  {isRecording ? (
-                    <MicOff className="h-4 w-4 text-red-600" />
-                  ) : (
-                    <Mic className="h-4 w-4" />
-                  )}
-                </Button>
-                
-                <Button 
                   onClick={handleSendMessage}
                   disabled={!inputMessage.trim() && !uploadedFile}
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
+              
+              <Button
+                onClick={() => window.open('https://wa.me/33745736466', '_blank')}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                📱 Chat with an expert on WhatsApp
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
