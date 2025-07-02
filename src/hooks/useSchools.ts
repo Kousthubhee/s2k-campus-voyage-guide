@@ -53,3 +53,22 @@ export function useSchoolSearch(searchTerm: string) {
     enabled: !!searchTerm.trim(),
   });
 }
+
+export function useSchoolDetail(schoolId: string | null) {
+  return useQuery({
+    queryKey: ['schools', 'detail', schoolId],
+    queryFn: async () => {
+      if (!schoolId) return null;
+      
+      const { data, error } = await supabase
+        .from('schools')
+        .select('*')
+        .eq('id', schoolId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!schoolId,
+  });
+}

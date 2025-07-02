@@ -291,45 +291,66 @@ export type Database = {
       }
       schools: {
         Row: {
+          accreditations: Json | null
           city: string
           contact_info: Json | null
           created_at: string | null
           description: string | null
+          detailed_programs: Json | null
+          emoji: string | null
           id: string
           image_url: string | null
+          long_description: string | null
           name: string
           programs: string[] | null
           ranking: number | null
+          rankings: Json | null
+          recognition: Json | null
+          specializations: Json | null
           subjects: string[] | null
           tuition_fees: Json | null
           updated_at: string | null
           website: string | null
         }
         Insert: {
+          accreditations?: Json | null
           city: string
           contact_info?: Json | null
           created_at?: string | null
           description?: string | null
+          detailed_programs?: Json | null
+          emoji?: string | null
           id?: string
           image_url?: string | null
+          long_description?: string | null
           name: string
           programs?: string[] | null
           ranking?: number | null
+          rankings?: Json | null
+          recognition?: Json | null
+          specializations?: Json | null
           subjects?: string[] | null
           tuition_fees?: Json | null
           updated_at?: string | null
           website?: string | null
         }
         Update: {
+          accreditations?: Json | null
           city?: string
           contact_info?: Json | null
           created_at?: string | null
           description?: string | null
+          detailed_programs?: Json | null
+          emoji?: string | null
           id?: string
           image_url?: string | null
+          long_description?: string | null
           name?: string
           programs?: string[] | null
           ranking?: number | null
+          rankings?: Json | null
+          recognition?: Json | null
+          specializations?: Json | null
           subjects?: string[] | null
           tuition_fees?: Json | null
           updated_at?: string | null

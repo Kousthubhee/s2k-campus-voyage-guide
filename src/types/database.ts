@@ -28,6 +28,13 @@ export interface DatabaseSchool {
   tuition_fees: any;
   created_at: string | null;
   updated_at: string | null;
+  emoji?: string | null;
+  long_description?: string | null;
+  detailed_programs?: any;
+  specializations?: any;
+  rankings?: any;
+  accreditations?: any;
+  recognition?: any;
 }
 
 export interface LocalInsight {
