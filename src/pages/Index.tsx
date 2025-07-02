@@ -42,11 +42,14 @@ import { useToast } from "@/hooks/use-toast";
 import { ProfilePage } from "@/components/ProfilePage";
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPage } from '@/components/AuthPage';
+import { ChatInterface } from '@/components/ChatInterface';
+import { FileUpload } from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { MainRouter } from './MainRouter';
+import { FloatingChatbot } from '@/components/FloatingChatbot';
 
 console.log("App.tsx is rendering");
 
@@ -142,7 +145,7 @@ const Index = () => {
     }
   };
 
-  const sidebarPages = ['hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration'];
+  const sidebarPages = ['qa', 'hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration', 'documents'];
   
   const checkIfPageRequiresKey = (page: string) => {
     return sidebarPages.includes(page) && userProgress.keys < 1;
@@ -230,6 +233,16 @@ const Index = () => {
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
                 <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
+              ) : currentPage === "qa" ? (
+                <div className="space-y-6">
+                  <h1 className="text-3xl font-bold">AI Assistant</h1>
+                  <ChatInterface />
+                </div>
+              ) : currentPage === "documents" ? (
+                <div className="space-y-6">
+                  <h1 className="text-3xl font-bold">Document Storage</h1>
+                  <FileUpload />
+                </div>
               ) : (
                 <MainRouter
                   currentPage={currentPage}
@@ -285,6 +298,9 @@ const Index = () => {
             )}
           </footer>
         </SidebarInset>
+        
+        {/* Floating Chatbot - visible on all pages */}
+        <FloatingChatbot />
       </div>
     </SidebarProvider>
   );
