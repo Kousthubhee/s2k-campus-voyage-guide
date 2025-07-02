@@ -71,19 +71,19 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
 
   const testimonials = [
     {
-      name: "Sarah Chen",
+      name: "Arjun Sharma",
       role: "Master's Student at Sorbonne",
       content: "pasS2Kampus made my transition to French university life so much smoother. The checklist helped me stay organized!",
       rating: 5
     },
     {
-      name: "Ahmed Hassan",
+      name: "Priya Patel",
       role: "Engineering Student at INSA Lyon",
-      content: "The AI assistant answered all my visa questions instantly. Couldn't have done it without this platform!",
+      content: "The expert guidance helped me with all my visa questions instantly. Couldn't have done it without this platform!",
       rating: 5
     },
     {
-      name: "Maria Rodriguez",
+      name: "Ravi Kumar",
       role: "Business Student at HEC Paris",
       content: "The community feature helped me connect with other students before I even arrived in France.",
       rating: 5
@@ -91,7 +91,13 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
+      {/* Dynamic background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
       {/* Hero Section */}
       <section className="px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto text-center">
@@ -123,10 +129,10 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="text-lg px-8 py-6 hover:bg-blue-50 transition-all"
-              onClick={() => onPageNavigation('qa')}
+              className="text-lg px-8 py-6 hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-all"
+              onClick={() => window.open('https://wa.me/33745736466', '_blank')}
             >
-              Ask AI Assistant
+              Talk to an Expert
               <MessageSquare className="ml-2 h-5 w-5" />
             </Button>
           </div>

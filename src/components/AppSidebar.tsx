@@ -7,7 +7,8 @@ import {
   Languages, 
   Phone,
   User,
-  Home
+  Home,
+  FileText
 } from 'lucide-react';
 import {
   Sidebar,
@@ -52,6 +53,7 @@ export const AppSidebar = ({
   const menuItems = [
     { id: 'home', icon: Home, label: 'Home', tooltip: 'Return to homepage' },
     { id: 'checklist', icon: CheckSquare, label: 'Checklist', tooltip: 'Your onboarding checklist' },
+    { id: 'documents', icon: FileText, label: 'Documents & Renewals', tooltip: 'Track your important documents' },
     { id: 'hub', icon: Users, label: 'Community Hub', tooltip: 'Connect with fellow students' },
     { id: 'news', icon: BookOpen, label: 'Stay Updated', tooltip: 'Latest campus and city news' },
     { id: 'affiliation', icon: Building2, label: 'Our Partners', tooltip: 'See our affiliations' },

@@ -11,6 +11,7 @@ import { NotificationPage } from '@/components/NotificationPage';
 import { SchoolDetails } from '@/components/SchoolDetails';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { HomePage } from '@/components/HomePage';
+import { DocumentsPage } from '@/components/DocumentsPage';
 import { SchoolInsightsPage } from './SchoolInsightsPage';
 import { PreArrival1Page } from './PreArrival1Page';
 import { PreArrival2Page } from './PreArrival2Page';
@@ -170,6 +171,8 @@ export function MainRouter({
       return <NotificationPage />;
     case 'integration':
       return <FrenchIntegrationPage />;
+    case 'documents':
+      return <DocumentsPage />;
     case 'suggestions':
       return (
         <SuggestionsPage 

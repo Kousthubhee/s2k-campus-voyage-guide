@@ -6,7 +6,7 @@ import { ReminderButton } from "@/components/ReminderButton";
 import { PageTitle } from "@/components/PageTitle";
 import { PostArrivalTaskCards } from '@/components/PostArrivalTaskCards';
 import { CheckboxItem } from "@/components/CheckboxItem";
-import { MiniChatbot } from "@/components/MiniChatbot";
+
 import confetti from "canvas-confetti";
 import { useToast } from "@/hooks/use-toast";
 
@@ -202,8 +202,6 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
 
   return (
     <div className="max-w-4xl mx-auto">
-      <MiniChatbot pageContext="Post-Arrival Checklist" />
-      
       <div className="mb-6">
         <Button 
           variant="outline" 

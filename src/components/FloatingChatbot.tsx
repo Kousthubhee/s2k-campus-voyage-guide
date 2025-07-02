@@ -19,70 +19,80 @@ interface PredefinedQuestion {
   questions: string[];
 }
 
-const predefinedQuestions: PredefinedQuestion[] = [
-  {
-    category: "Checklist",
-    emoji: "📋",
-    questions: [
-      "What should I prepare before coming to France?",
-      "What documents do I need for university admission?",
-      "How do I apply for a student visa?",
-      "What are the pre-arrival requirements?",
-      "How do I find accommodation in France?",
-      "What financial preparations should I make?"
-    ]
-  },
-  {
-    category: "Documents & Renewals",
-    emoji: "📑",
-    questions: [
-      "What documents are needed for visa renewal?",
-      "How do I renew my residence permit?",
-      "What paperwork is required for CAF applications?",
-      "How do I get my documents translated?",
-      "What documents do I need to open a bank account?",
-      "How do I obtain a student card?"
-    ]
-  },
-  {
-    category: "Ask Me Anything",
-    emoji: "💬",
-    questions: [
-      "What can I ask the AI Assistant?",
-      "How does the AI help with French education?",
-      "Can you help with visa questions?",
-      "What topics can you assist with?",
-      "How accurate is the AI information?",
-      "Can you provide personalized advice?"
-    ]
-  },
-  {
-    category: "Community Hub",
-    emoji: "🏡",
-    questions: [
-      "How can I connect with other students?",
-      "Where can I find study groups?",
-      "How do I join student events?",
-      "Can I find roommates through the platform?",
-      "How do I participate in community discussions?",
-      "Are there networking opportunities?"
-    ]
-  },
-  {
-    category: "Learn French",
-    emoji: "📚",
-    questions: [
-      "Where can I find French language resources?",
-      "How can I improve my French skills?",
-      "Are there online French courses available?",
-      "What level of French do I need for university?",
-      "Can you recommend French learning apps?",
-      "How do I practice French conversation?"
-    ]
-  }
-];
+const moduleQuestions: Record<string, PredefinedQuestion[]> = {
+  'pre-arrival-1': [
+    {
+      category: "Pre-Arrival Part 1",
+      emoji: "✈️",
+      questions: [
+        "What documents do I need for university admission?",
+        "How do I apply for a student visa?",
+        "What is Campus France process?",
+        "How do I book VFS appointment?",
+        "What financial proof do I need?",
+        "How long does visa processing take?"
+      ]
+    }
+  ],
+  'pre-arrival-2': [
+    {
+      category: "Packing Assistant",
+      emoji: "🎒",
+      questions: [
+        "What clothes should I pack for France?",
+        "What food items can I bring?",
+        "What electronics should I pack?",
+        "How to prepare culturally for France?",
+        "What medicines can I bring?",
+        "What books and study materials to pack?"
+      ]
+    }
+  ],
+  'post-arrival': [
+    {
+      category: "Post-Arrival",
+      emoji: "🏠",
+      questions: [
+        "How do I open a French bank account?",
+        "What is SSN and how to apply?",
+        "How do I get health insurance?",
+        "What is CAF and how to apply?",
+        "How do I get a French phone number?",
+        "How do I register for university?"
+      ]
+    }
+  ],
+  'documents': [
+    {
+      category: "Documents & Renewals",
+      emoji: "📑",
+      questions: [
+        "What documents are needed for visa renewal?",
+        "How do I renew my residence permit?",
+        "What paperwork is required for CAF applications?",
+        "How do I get my documents translated?",
+        "When should I start renewal process?",
+        "How to track document expiry dates?"
+      ]
+    }
+  ],
+  'general': [
+    {
+      category: "General Help",
+      emoji: "💬",
+      questions: [
+        "What should I prepare before coming to France?",
+        "How can I connect with other students?",
+        "Where can I find French language resources?",
+        "How do I find accommodation in France?",
+        "What are the visa requirements?",
+        "How do I adapt to French culture?"
+      ]
+    }
+  ]
+};
 
-const generateAnswer = (question: string): string => {
+const generateAnswer = (question: string, currentModule?: string): string => {
   const lowerQuestion = question.toLowerCase();
   
   // Checklist answers
@@ -202,10 +212,30 @@ const generateAnswer = (question: string): string => {
     return "Practice conversation through: Language exchange meetups, Tandem app partnerships, university conversation clubs, Alliance Française events, cafés polyglottes, and volunteering with French organizations.";
   }
   
-  return "I do not have information on this. Please talk with an expert.";
+  // Check if question is about different module
+  if (currentModule !== 'general') {
+    if ((lowerQuestion.includes('post-arrival') || lowerQuestion.includes('bank') || lowerQuestion.includes('ssn')) && currentModule !== 'post-arrival') {
+      return "You'll find this information in the Post-Arrival module. Navigate to Checklist > Post-Arrival Checklist to learn about bank accounts, SSN, CAF, and more!";
+    }
+    if ((lowerQuestion.includes('packing') || lowerQuestion.includes('clothes') || lowerQuestion.includes('food')) && currentModule !== 'pre-arrival-2') {
+      return "This information is available in the Packing Assistant module. Go to Checklist > Packing Assistant for detailed packing guides!";
+    }
+    if ((lowerQuestion.includes('visa') || lowerQuestion.includes('campus france')) && currentModule !== 'pre-arrival-1') {
+      return "Visa and Campus France information is in Pre-Arrival Part 1 module. Check Checklist > Pre-Arrival Checklist (Part 1) for complete visa guidance!";
+    }
+    if ((lowerQuestion.includes('renewal') || lowerQuestion.includes('document')) && currentModule !== 'documents') {
+      return "Document renewal information is in the Documents & Renewals section. Navigate to Documents & Renewals page for tracking and renewal processes!";
+    }
+  }
+
+  return "I don't have that information currently. Please check with our expert on WhatsApp for personalized assistance!";
 };
 
-export function FloatingChatbot() {
+interface FloatingChatbotProps {
+  currentModule?: string;
+}
+
+export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -218,6 +248,8 @@ export function FloatingChatbot() {
   const [inputValue, setInputValue] = useState('');
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const currentQuestions = moduleQuestions[currentModule] || moduleQuestions['general'];
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
@@ -233,7 +265,7 @@ export function FloatingChatbot() {
       setTimeout(() => {
         const botResponse: Message = {
           id: (Date.now() + 1).toString(),
-          text: generateAnswer(inputValue),
+          text: generateAnswer(inputValue, currentModule),
           isUser: false,
           timestamp: new Date()
         };
@@ -258,7 +290,7 @@ export function FloatingChatbot() {
     setTimeout(() => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateAnswer(question),
+        text: generateAnswer(question, currentModule),
         isUser: false,
         timestamp: new Date()
       };
@@ -342,8 +374,10 @@ export function FloatingChatbot() {
                 
                 {showCategories && (
                   <div className="space-y-2 mt-4">
-                    <div className="text-sm font-medium text-gray-600 mb-3">Choose a category:</div>
-                    {predefinedQuestions.map((category) => (
+                    <div className="text-sm font-medium text-gray-600 mb-3">
+                      {currentModule !== 'general' ? `${currentModule.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Questions:` : 'Choose a category:'}
+                    </div>
+                    {currentQuestions.map((category) => (
                       <div key={category.category} className="space-y-2">
                         <Button
                           variant="outline"

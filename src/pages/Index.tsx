@@ -300,7 +300,7 @@ const Index = () => {
         </SidebarInset>
         
         {/* Floating Chatbot - visible on all pages */}
-        <FloatingChatbot />
+        <FloatingChatbot currentModule={currentPage} />
       </div>
     </SidebarProvider>
   );

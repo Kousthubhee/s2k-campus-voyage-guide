@@ -7,7 +7,7 @@ import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
-import { MiniChatbot } from "@/components/MiniChatbot";
+
 
 interface ProfileType {
   name: string;
@@ -193,8 +193,6 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
 
   return (
     <div className="max-w-4xl mx-auto">
-      <MiniChatbot pageContext="Pre-Arrival Checklist (Part 1)" />
-      
       <div className="mb-6">
         <Button 
           variant="outline" 

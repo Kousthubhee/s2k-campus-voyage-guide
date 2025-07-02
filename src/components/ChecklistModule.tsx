@@ -5,7 +5,7 @@ import { ModuleContent } from './ModuleContent';
 import { ChecklistHeader } from './ChecklistHeader';
 import { ModuleCard } from './ModuleCard';
 import { ProgressSection } from './ProgressSection';
-import { MiniChatbot } from './MiniChatbot';
+
 import { useToast } from '@/hooks/use-toast';
 import { CityGuidesTab } from "@/components/CityGuidesTab";
 
@@ -163,8 +163,6 @@ export const ChecklistModule = ({
 
   return (
     <div className="max-w-6xl mx-auto">
-      <MiniChatbot pageContext="Checklist Modules" />
-      
       <ChecklistHeader />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
