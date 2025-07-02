@@ -238,11 +238,6 @@ const Index = () => {
                   <h1 className="text-3xl font-bold">AI Assistant</h1>
                   <ChatInterface />
                 </div>
-              ) : currentPage === "documents" ? (
-                <div className="space-y-6">
-                  <h1 className="text-3xl font-bold">Document Storage</h1>
-                  <FileUpload />
-                </div>
               ) : (
                 <MainRouter
                   currentPage={currentPage}
