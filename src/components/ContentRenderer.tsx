@@ -4,7 +4,6 @@ import { CityDetails } from '@/components/CityDetails';
 import { SchoolInfo } from '@/components/SchoolInfo';
 import { ChecklistDetail } from '@/components/ChecklistDetail';
 import { ChecklistMainView } from '@/components/ChecklistMainView';
-import { QAPage } from '@/pages/QAPage';
 import { HubPage } from '@/pages/HubPage';
 import { NewsPage } from '@/pages/NewsPage';
 import { AffiliationPage } from '@/pages/AffiliationPage';
@@ -63,8 +62,6 @@ export function ContentRenderer({
   }
 
   switch (state.currentPage) {
-    case 'qa':
-      return <QAPage />;
     case 'hub':
       return <HubPage />;
     case 'news':

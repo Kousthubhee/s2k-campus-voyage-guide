@@ -47,6 +47,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { MainRouter } from './MainRouter';
+import { FloatingChatbot } from '@/components/FloatingChatbot';
 
 console.log("App.tsx is rendering");
 
@@ -142,7 +143,7 @@ const Index = () => {
     }
   };
 
-  const sidebarPages = ['hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration'];
+  const sidebarPages = ['hub', 'news', 'affiliation', 'language', 'contact', 'notifications', 'integration'];
   
   const checkIfPageRequiresKey = (page: string) => {
     return sidebarPages.includes(page) && userProgress.keys < 1;
@@ -285,6 +286,7 @@ const Index = () => {
             )}
           </footer>
         </SidebarInset>
+        <FloatingChatbot />
       </div>
     </SidebarProvider>
   );

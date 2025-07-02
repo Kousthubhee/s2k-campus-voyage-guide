@@ -1,5 +1,5 @@
 
-import { Home, CheckSquare, Users, BookOpen, Phone, Building, Languages, Translate, Bell, User, Flag, User2 } from "lucide-react";
+import { Home, CheckSquare, Users, BookOpen, Phone, Building, Languages, Bell, User, Flag, User2 } from "lucide-react";
 
 import {
   Sidebar,
@@ -44,11 +44,6 @@ const items = [
     title: "Learn French",
     url: "language",
     icon: Languages,
-  },
-  {
-    title: "Translate",
-    url: "translate",
-    icon: Translate,
   },
   {
     title: "Contact Us",
