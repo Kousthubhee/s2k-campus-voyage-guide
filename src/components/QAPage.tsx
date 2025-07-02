@@ -478,7 +478,7 @@ const QAPage = () => {
                 Get personalized assistance from our education experts
               </p>
               <Button
-                onClick={() => window.open('https://wa.me/919441724256', '_blank')}
+                onClick={() => window.open('https://wa.me/33745736466', '_blank')}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 📱 Chat with an expert on WhatsApp
