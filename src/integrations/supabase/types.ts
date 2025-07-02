@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cities: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string | null
+          famous_places: string | null
+          id: string
+          local_insights: Json | null
+          name: string
+          schools_count: number | null
+          sports_facilities: string | null
+          student_life: string | null
+          transport: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          famous_places?: string | null
+          id?: string
+          local_insights?: Json | null
+          name: string
+          schools_count?: number | null
+          sports_facilities?: string | null
+          student_life?: string | null
+          transport?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          famous_places?: string | null
+          id?: string
+          local_insights?: Json | null
+          name?: string
+          schools_count?: number | null
+          sports_facilities?: string | null
+          student_life?: string | null
+          transport?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string | null

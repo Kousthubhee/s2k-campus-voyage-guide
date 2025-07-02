@@ -1,6 +1,4 @@
 
-import { CitiesList } from '@/components/CitiesList';
-import { CityDetails } from '@/components/CityDetails';
 import { SchoolInfo } from '@/components/SchoolInfo';
 import { ChecklistDetail } from '@/components/ChecklistDetail';
 import { ChecklistMainView } from '@/components/ChecklistMainView';
@@ -36,10 +34,6 @@ export function ContentRenderer({
 }: ContentRendererProps) {
   if (state.currentPage === 'checklist') {
     switch (state.currentView) {
-      case 'cities':
-        return <CitiesList onBack={onBack} onCitySelect={onCitySelect} />;
-      case 'city-details':
-        return <CityDetails cityId={state.selectedCity} onBack={onBack} onSchoolSelect={onSchoolSelect} />;
       case 'school-info':
         return <SchoolInfo schoolId={state.selectedSchool} onBack={onBack} />;
       case 'checklist-detail':

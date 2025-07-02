@@ -1,9 +1,9 @@
 
 import { useState } from "react";
 import { CityCard } from "@/components/school-insights/CityCard";
-import { getCityDetails } from "@/data/cityUtils";
-import { schools } from "@/data/schoolList";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCities } from "@/hooks/useCities";
+import { useSchools } from "@/hooks/useSchools";
 
 interface CitySelectionProps {
   cityList: string[];
@@ -12,6 +12,9 @@ interface CitySelectionProps {
 
 export function CitySelection({ cityList, onSelect }: CitySelectionProps) {
   const [programFilter, setProgramFilter] = useState<string>("All");
+  
+  const { data: cities = [] } = useCities();
+  const { data: schools = [] } = useSchools();
 
   // Get all unique programs from all schools
   const allPrograms = Array.from(
@@ -23,8 +26,8 @@ export function CitySelection({ cityList, onSelect }: CitySelectionProps) {
   // Filter cities based on selected program
   const filteredCities = programFilter === "All" 
     ? cityList 
-    : cityList.filter(city => {
-        const citySchools = schools.filter(school => school.city === city);
+    : cityList.filter(cityName => {
+        const citySchools = schools.filter(school => school.city === cityName);
         return citySchools.some(school => 
           (school.subjects || []).includes(programFilter)
         );
@@ -56,17 +59,18 @@ export function CitySelection({ cityList, onSelect }: CitySelectionProps) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-6">
-        {filteredCities.map((city) => {
-          const cityDef = getCityDetails(city);
+        {filteredCities.map((cityName) => {
+          const cityDef = cities.find(c => c.name === cityName);
+          if (!cityDef) return null;
           return (
             <CityCard
-              key={city}
+              key={cityName}
               name={cityDef.name}
-              emoji={cityDef.emoji}
-              description={cityDef.description}
-              schoolsCount={cityDef.schoolsCount}
-              onClick={() => onSelect(city)}
-              localInsights={cityDef.localInsights}
+              emoji={cityDef.emoji || ""}
+              description={cityDef.description || ""}
+              schoolsCount={cityDef.schools_count}
+              onClick={() => onSelect(cityName)}
+              localInsights={cityDef.local_insights as any}
             />
           );
         })}

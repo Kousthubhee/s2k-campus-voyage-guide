@@ -8,11 +8,12 @@ import { CityInsightsCard } from "@/components/school-insights/CityInsightsCard"
 import { InsightsDialog } from "@/components/school-insights/InsightsDialog";
 import { SchoolDetailRouter } from "@/components/school-insights/SchoolDetailRouter";
 import { SchoolSearch } from "@/components/school-insights/SchoolSearch";
-import { schools } from "@/data/schoolList";
-import { getCityDetails } from "@/data/cityUtils";
 import { CitySelection } from "./school-insights/CitySelection";
 import { SubjectFilter } from "./school-insights/SubjectFilter";
 import { SchoolsGrid } from "./school-insights/SchoolsGrid";
+import { useSchools, useSchoolsByCity, useSchoolSearch } from "@/hooks/useSchools";
+import { useCities, useCityByName } from "@/hooks/useCities";
+import { DatabaseCity, DatabaseSchool, LocalInsight } from "@/types/database";
 
 interface SchoolInsightsPageProps {
   onBack: () => void;
@@ -25,36 +26,28 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [showCityInsights, setShowCityInsights] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
 
-  const cityList = Array.from(new Set(schools.map((s) => s.city)));
-  
-  // Filter schools based on search term
-  const searchFilteredSchools = searchTerm.trim()
-    ? schools.filter((school) =>
-        school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        school.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        school.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (school.subjects || []).some(subject => 
-          subject.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      )
-    : schools;
+  // Fetch data from database
+  const { data: cities = [], isLoading: citiesLoading } = useCities();
+  const { data: allSchools = [], isLoading: schoolsLoading } = useSchools();
+  const { data: citySchools = [] } = useSchoolsByCity(selectedCity);
+  const { data: searchResults = [] } = useSchoolSearch(searchTerm);
+  const { data: cityDetails } = useCityByName(selectedCity);
 
-  const citySchools = selectedCity
-    ? searchFilteredSchools.filter((school) => school.city === selectedCity)
-    : searchFilteredSchools;
+  const cityList = cities.map(city => city.name);
+  
+  // Use appropriate data source based on search/selection
+  const displaySchools = searchTerm.trim() ? searchResults : (selectedCity ? citySchools : allSchools);
     
-  const availableSubjects = selectedCity
+  const availableSubjects = selectedCity && citySchools
     ? Array.from(new Set(citySchools.flatMap((s) => s.subjects || []))).sort()
     : [];
     
-  let displayedSchools = citySchools;
+  let filteredSchools = displaySchools;
   if (subjectFilter !== "All" && selectedCity) {
-    displayedSchools = citySchools.filter((school) =>
+    filteredSchools = displaySchools.filter((school) =>
       (school.subjects || []).includes(subjectFilter)
     );
   }
-  
-  const cityDetails = selectedCity ? getCityDetails(selectedCity) : null;
 
   if (selectedSchool) {
     return (
@@ -91,29 +84,29 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
         onSearchChange={setSearchTerm}
       />
 
-      {!selectedCity && !searchTerm && (
+      {!selectedCity && !searchTerm && !citiesLoading && (
         <CitySelection cityList={cityList} onSelect={setSelectedCity} />
       )}
       
-      {selectedCity && (
+      {selectedCity && cityDetails && (
         <div className="mb-4">
           <CityInsightsCard
             cityName={cityDetails.name}
-            transport={cityDetails.transport}
-            famousPlaces={cityDetails.famousPlaces}
-            sportsFacilities={cityDetails.sportsFacilities}
-            studentLife={cityDetails.studentLife}
+            transport={cityDetails.transport || ""}
+            famousPlaces={cityDetails.famous_places || ""}
+            sportsFacilities={cityDetails.sports_facilities || ""}
+            studentLife={cityDetails.student_life || ""}
             onShowAll={() => setShowCityInsights(true)}
           />
           <InsightsDialog
             open={showCityInsights}
             onOpenChange={setShowCityInsights}
             cityName={cityDetails.name}
-            localInsights={cityDetails.localInsights}
-            transport={cityDetails.transport}
-            famousPlaces={cityDetails.famousPlaces}
-            sportsFacilities={cityDetails.sportsFacilities}
-            studentLife={cityDetails.studentLife}
+            localInsights={(cityDetails.local_insights as unknown as LocalInsight[]) || []}
+            transport={cityDetails.transport || ""}
+            famousPlaces={cityDetails.famous_places || ""}
+            sportsFacilities={cityDetails.sports_facilities || ""}
+            studentLife={cityDetails.student_life || ""}
           />
         </div>
       )}
@@ -126,9 +119,19 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
         />
       )}
       
-      {(selectedCity || searchTerm) ? (
+      {citiesLoading || schoolsLoading ? (
+        <div className="text-center py-8">Loading...</div>
+      ) : (selectedCity || searchTerm) ? (
         <SchoolsGrid
-          displayedSchools={displayedSchools}
+          displayedSchools={filteredSchools.map(school => ({
+            id: school.id,
+            name: school.name,
+            city: school.city,
+            description: school.description || "",
+            levels: school.programs || [],
+            subjects: school.subjects || [],
+            website: school.website || "",
+          }))}
           onSelectSchool={(school) =>
             setSelectedSchool({
               ...school,
