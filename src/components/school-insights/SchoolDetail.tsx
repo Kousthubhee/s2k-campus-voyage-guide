@@ -1,6 +1,7 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, GraduationCap, Globe, Award, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, GraduationCap, Globe, Award, ExternalLink, Euro, Phone, Mail, Building } from "lucide-react";
 import { DatabaseSchool } from "@/types/database";
 
 interface SchoolDetailProps {
@@ -14,6 +15,26 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
   const accreditations = school.accreditations || [];
   const recognition = school.recognition || [];
   const specializations = school.specializations || [];
+  const tuitionFees = school.tuition_fees;
+  const contactInfo = school.contact_info;
+
+  const formatTuitionDetails = (fees: any) => {
+    if (!fees) return null;
+    if (typeof fees === 'object') {
+      return Object.entries(fees).map(([key, value]) => (
+        <div key={key} className="flex justify-between items-center">
+          <span className="capitalize text-gray-600">{key}:</span>
+          <span className="font-semibold">€{value}</span>
+        </div>
+      ));
+    }
+    return (
+      <div className="flex justify-between items-center">
+        <span className="text-gray-600">Tuition:</span>
+        <span className="font-semibold">{fees}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -73,13 +94,28 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
           </Card>
         )}
 
+        {/* Tuition Fees Card */}
+        {tuitionFees && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Euro className="h-5 w-5 mr-2 text-green-600" />
+                Tuition Fees
+              </h3>
+              <div className="space-y-2">
+                {formatTuitionDetails(tuitionFees)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Rankings/Accreditations/Recognition Card */}
         {(rankings.length > 0 || accreditations.length > 0 || recognition.length > 0 || specializations.length > 0) && (
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Award className="h-5 w-5 mr-2 text-yellow-600" />
-                {rankings.length > 0 ? 'Rankings' : 
+                {rankings.length > 0 ? 'Rankings & Recognition' : 
                  accreditations.length > 0 ? 'Accreditations' : 
                  specializations.length > 0 ? 'Specializations' : 'Recognition'}
               </h3>
@@ -94,30 +130,58 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
             </CardContent>
           </Card>
         )}
-      </div>
 
-      {/* Contact Information */}
-      {school.website && (
-        <Card className="mt-6">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Globe className="h-4 w-4 mr-2 text-gray-400" />
-                <a 
-                  href={school.website}
-                  target="_blank"
-                  rel="noopener noreferrer" 
-                  className="text-blue-600 hover:underline flex items-center"
-                >
-                  {school.website.replace('https://', '').replace('http://', '')}
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
+        {/* Contact Information Card */}
+        {(school.website || contactInfo) && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Building className="h-5 w-5 mr-2 text-gray-600" />
+                Contact Information
+              </h3>
+              <div className="space-y-3">
+                {school.website && (
+                  <div className="flex items-center">
+                    <Globe className="h-4 w-4 mr-2 text-gray-400" />
+                    <a 
+                      href={school.website}
+                      target="_blank"
+                      rel="noopener noreferrer" 
+                      className="text-blue-600 hover:underline flex items-center"
+                    >
+                      {school.website.replace('https://', '').replace('http://', '')}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </div>
+                )}
+                {contactInfo?.phone && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                    <span className="text-gray-700">{contactInfo.phone}</span>
+                  </div>
+                )}
+                {contactInfo?.email && (
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <a 
+                      href={`mailto:${contactInfo.email}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {contactInfo.email}
+                    </a>
+                  </div>
+                )}
+                {contactInfo?.address && (
+                  <div className="flex items-start">
+                    <Building className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                    <span className="text-gray-700">{contactInfo.address}</span>
+                  </div>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

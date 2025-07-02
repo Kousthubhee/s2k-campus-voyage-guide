@@ -16,12 +16,27 @@ export function CitySelection({ cityList, onSelect }: CitySelectionProps) {
   const { data: cities = [] } = useCities();
   const { data: schools = [] } = useSchools();
 
+  console.log('CitySelection - Total schools in database:', schools.length);
+  console.log('CitySelection - Schools by city breakdown:', 
+    cityList.reduce((acc, city) => {
+      acc[city] = schools.filter(s => s.city === city).length;
+      return acc;
+    }, {} as Record<string, number>)
+  );
+
   // Get all unique programs from all schools
   const allPrograms = Array.from(
     new Set(
       schools.flatMap(school => school.subjects || [])
     )
   ).sort();
+
+  // Calculate actual school counts per city from the schools data
+  const getSchoolCountForCity = (cityName: string) => {
+    const citySchools = schools.filter(school => school.city === cityName);
+    console.log(`Schools in ${cityName}:`, citySchools.length);
+    return citySchools.length;
+  };
 
   // Filter cities based on selected program
   const filteredCities = programFilter === "All" 
@@ -62,13 +77,17 @@ export function CitySelection({ cityList, onSelect }: CitySelectionProps) {
         {filteredCities.map((cityName) => {
           const cityDef = cities.find(c => c.name === cityName);
           if (!cityDef) return null;
+          
+          // Use dynamically calculated school count instead of cached value
+          const actualSchoolCount = getSchoolCountForCity(cityName);
+          
           return (
             <CityCard
               key={cityName}
               name={cityDef.name}
               emoji={cityDef.emoji || ""}
               description={cityDef.description || ""}
-              schoolsCount={cityDef.schools_count}
+              schoolsCount={actualSchoolCount}
               onClick={() => onSelect(cityName)}
               localInsights={cityDef.local_insights as any}
             />
