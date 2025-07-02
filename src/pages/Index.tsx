@@ -84,7 +84,7 @@ const queryClient = new QueryClient();
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentPage, setCurrentPage] = useState('checklist');
+  const [currentPage, setCurrentPage] = useState('home');
   const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -166,7 +166,7 @@ const Index = () => {
   const handleResetProgress = () => {
     resetProgress();
     setShowConfirm(false);
-    setCurrentPage('checklist');
+    setCurrentPage('home');
     toast({
       title: "Progress Reset",
       description: "Your checklist progress has been reset.",
@@ -213,7 +213,7 @@ const Index = () => {
               <div className="flex flex-1 justify-between items-center">
                 <div 
                   className="text-2xl font-bold cursor-pointer"
-                  onClick={() => setCurrentPage('checklist')}
+                  onClick={() => setCurrentPage('home')}
                 >
                   pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
                 </div>

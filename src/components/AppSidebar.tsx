@@ -1,3 +1,4 @@
+
 import { 
   CheckSquare, 
   MessageSquare, 
@@ -7,7 +8,8 @@ import {
   Languages, 
   Phone,
   FileText,
-  User
+  User,
+  Home
 } from 'lucide-react';
 import {
   Sidebar,
@@ -50,6 +52,7 @@ export const AppSidebar = ({
   const iconActiveTextClass = "text-cyan-600";   // deep cyan
 
   const menuItems = [
+    { id: 'home', icon: Home, label: 'Home', tooltip: 'Return to homepage' },
     { id: 'checklist', icon: CheckSquare, label: 'Checklist', tooltip: 'Your onboarding checklist' },
     { id: 'documents', icon: FileText, label: 'Documents & Renewals', tooltip: 'Manage paperwork and renewal timelines' },
     { id: 'qa', icon: MessageSquare, label: 'Ask Me Anything', tooltip: 'Chat with our AI or browse FAQs' },
@@ -67,7 +70,7 @@ export const AppSidebar = ({
         <div className="p-4 pb-2 border-b border-blue-100">
           <div
             className="text-xl cursor-pointer hover:scale-105 transition-transform font-bold"
-            onClick={() => setCurrentPage('checklist')}
+            onClick={() => setCurrentPage('home')}
           >
             pas<span className="text-cyan-600 font-bold">S</span>2<span className="text-blue-600 font-bold">K</span>ampus
           </div>

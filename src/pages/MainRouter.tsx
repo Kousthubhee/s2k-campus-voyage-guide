@@ -12,6 +12,7 @@ import { NotificationPage } from '@/components/NotificationPage';
 import { SchoolDetails } from '@/components/SchoolDetails';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { DocumentsPage } from '@/components/DocumentsPage';
+import { HomePage } from '@/components/HomePage';
 import { SchoolInsightsPage } from './SchoolInsightsPage';
 import { PreArrival1Page } from './PreArrival1Page';
 import { PreArrival2Page } from './PreArrival2Page';
@@ -70,6 +71,13 @@ export function MainRouter({
     );
   }
   switch (currentPage) {
+    case 'home':
+      return (
+        <HomePage 
+          onGetStarted={() => setCurrentPage('checklist')}
+          onPageNavigation={setCurrentPage}
+        />
+      );
     case 'checklist':
       return (
         <ChecklistModule 
@@ -176,12 +184,9 @@ export function MainRouter({
       );
     default:
       return (
-        <ChecklistModule 
-          modules={checklistModules}
-          userProgress={userProgress}
-          setUserProgress={handleProgressUpdate}
-          onSchoolSelect={setSelectedSchool}
-          currentPage={currentPage}
+        <HomePage 
+          onGetStarted={() => setCurrentPage('checklist')}
+          onPageNavigation={setCurrentPage}
         />
       );
   }
