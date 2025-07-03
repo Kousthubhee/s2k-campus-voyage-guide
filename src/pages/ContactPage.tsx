@@ -139,6 +139,60 @@ export const ContactPage = () => {
         </p>
       </div>
 
+      {/* Creators Section */}
+      <Card className="mb-8 bg-gradient-to-r from-blue-50 to-cyan-50">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-bold text-blue-900 mb-4">Creators: Kousthubhee Krishna & Srivatsava</h2>
+          <p className="text-blue-800 mb-6">
+            We're passionate about helping students navigate their journey to study in France. 
+            Our platform provides comprehensive guides, checklists, and support to make your 
+            French education dreams a reality.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                K
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-blue-900">Kousthubhee Krishna</h3>
+                <p className="text-blue-700 font-medium">Co-Founder & Developer</p>
+                <p className="text-blue-600 text-sm mt-1">Passionate about helping students navigate French education</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-cyan-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                S
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-blue-900">Srivatsava</h3>
+                <p className="text-blue-700 font-medium">Co-Founder & Content Creator</p>
+                <p className="text-blue-600 text-sm mt-1">Passionate about helping students navigate French education</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Mission Section */}
+      <Card className="mb-8">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Helping students navigate their journey to study in France</h2>
+          <p className="text-gray-700 mb-4">
+            Our mission is to provide comprehensive, reliable, and up-to-date information to 
+            help international students successfully pursue their education in France.
+          </p>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">Made for students</h3>
+            <p className="text-blue-800 text-sm">
+              We understand the challenges of studying abroad and have created 
+              this platform to make your journey smoother and more successful.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Contact Form */}
         <div className="lg:col-span-2">

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Image } from 'lucide-react';
-import { ProfileEditExtra } from './ProfileEditExtra';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileType {
@@ -28,6 +27,51 @@ interface ProfileEditDialogProps {
 }
 
 const defaultProfilePhoto = "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=facearea&w=256&h=256&facepad=3&q=80";
+
+const ProfileEditExtra = ({
+  age,
+  prevEducation,
+  workExperience,
+  onChange,
+}: {
+  age: string | number;
+  prevEducation: string;
+  workExperience: string;
+  onChange: (fields: { age?: string; prevEducation?: string; workExperience?: string }) => void;
+}) => (
+  <div className="space-y-4">
+    <div>
+      <Label htmlFor="edit-age">Age</Label>
+      <Input
+        id="edit-age"
+        type="number"
+        min="15"
+        max="80"
+        value={age}
+        placeholder="e.g. 23"
+        onChange={e => onChange({ age: e.target.value })}
+      />
+    </div>
+    <div>
+      <Label htmlFor="edit-prev-education">Previous Education</Label>
+      <Input
+        id="edit-prev-education"
+        value={prevEducation}
+        placeholder="e.g. Bachelor of Science"
+        onChange={e => onChange({ prevEducation: e.target.value })}
+      />
+    </div>
+    <div>
+      <Label htmlFor="edit-work-experience">Work Experience (if any)</Label>
+      <Input
+        id="edit-work-experience"
+        value={workExperience}
+        placeholder="e.g. 2 years at XYZ Company or N/A"
+        onChange={e => onChange({ workExperience: e.target.value })}
+      />
+    </div>
+  </div>
+);
 
 export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: ProfileEditDialogProps) {
   const [editingProfile, setEditingProfile] = useState(profile);
