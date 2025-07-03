@@ -1,192 +1,259 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Award, Users, MapPin, Globe, Building2, Star } from 'lucide-react';
+import { Building2, ExternalLink, Star, Users, Filter } from 'lucide-react';
+import { PartnerCard } from "./PartnerCard";
+import { BenefitsList } from "./BenefitsList";
+import { PageTitle } from "./PageTitle";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/select";
 
 export const AffiliationPage = () => {
   const partners = [
+    // BANKING PARTNERS
     {
-      name: 'Campus France',
-      category: 'Government Agency',
-      description: 'Official French government agency promoting French higher education internationally',
-      logo: '🇫🇷',
-      website: 'https://www.campusfrance.org',
-      services: ['Visa Assistance', 'University Applications', 'Scholarship Information'],
-      established: '2007',
-      locations: '120+ countries'
-    },
-    {
-      name: 'BNP Paribas',
-      category: 'Banking',
-      description: 'Leading French bank offering student banking services and financial solutions',
+      id: 1,
+      name: 'HDFC Bank (India)',
+      type: 'Banking Partner',
+      description: 'Preferred Indian bank offering international education loans and forex cards for students going abroad.',
+      services: ['Student loans', 'Forex card', 'Remittance'],
+      rating: 4.7,
+      users: '1M+',
       logo: '🏦',
-      website: 'https://group.bnpparibas',
-      services: ['Student Accounts', 'International Transfers', 'Student Loans'],
-      established: '1966',
-      locations: 'Worldwide'
+      website: 'https://www.hdfcbank.com/personal/borrow/education-loan',
+      affiliate: true
     },
     {
-      name: 'Studapart',
-      category: 'Housing',
-      description: 'Specialized platform for student accommodation across France',
-      logo: '🏠',
-      website: 'https://www.studapart.com',
-      services: ['Student Housing', 'Booking Assistance', 'Accommodation Verification'],
-      established: '2013',
-      locations: 'Major French Cities'
+      id: 2,
+      name: 'Niyo Global',
+      type: 'Neobank',
+      description: 'A global card for Indian students—easy international transactions, great forex rates, and student discounts.',
+      services: ['Prepaid forex card', 'Zero mark-up', 'Easy account opening'],
+      rating: 4.8,
+      users: '500K+',
+      logo: '💳',
+      website: 'https://www.goniyo.com/niyo-global/',
+      affiliate: true
     },
     {
-      name: 'CROUS',
-      category: 'Student Services',
-      description: 'Regional student welfare organization providing housing, dining, and financial aid',
-      logo: '🎓',
-      website: 'https://www.cnous.fr',
-      services: ['Student Housing', 'Dining Services', 'Financial Aid'],
-      established: '1955',
-      locations: 'All French Regions'
+      id: 3,
+      name: 'BNP Paribas',
+      type: 'French Bank',
+      description: 'Top French bank trusted by international students for easy account opening and affordable services.',
+      services: ['Bank account', 'Student offers', 'Nationwide branches'],
+      rating: 4.5,
+      users: '10M+',
+      logo: '🇫🇷',
+      website: 'https://mabanque.bnpparibas/en/opening-bank-account/france-student',
+      affiliate: true
     },
     {
-      name: 'French Consulates',
-      category: 'Government',
-      description: 'Official French diplomatic missions handling visa applications and student services',
+      id: 4,
+      name: 'Société Générale',
+      type: 'French Bank',
+      description: 'Popular among students, offers special packages and English-speaking support for internationals.',
+      services: ['Student bank account', 'International card', 'Mobile banking'],
+      rating: 4.4,
+      users: '5M+',
       logo: '🏛️',
-      website: 'https://www.diplomatie.gouv.fr',
-      services: ['Visa Processing', 'Document Authentication', 'Consular Services'],
-      established: 'Various',
-      locations: 'Global Network'
+      website: 'https://www.societegenerale.com/en/individuals/france/students',
+      affiliate: true
     },
     {
-      name: 'Educational Institutions',
-      category: 'Universities',
-      description: 'Partner universities and grandes écoles across France',
-      logo: '🎒',
-      website: '#',
-      services: ['Admissions Support', 'Program Information', 'Academic Guidance'],
-      established: 'Various',
-      locations: 'Throughout France'
-    }
+      id: 5,
+      name: 'Wise (ex-TransferWise)',
+      type: 'Money Transfer',
+      description: 'Send money abroad with real exchange rates and low fees, perfect for fees and living expenses.',
+      services: ['International transfer', 'Multi-currency account'],
+      rating: 4.9,
+      users: '16M+',
+      logo: '🌍',
+      website: 'https://wise.com/in/student/',
+      affiliate: true
+    },
+    {
+      id: 6,
+      name: 'Revolut',
+      type: 'Neobank',
+      description: 'Open a Euro account before arriving in France. Card works globally. App for students.',
+      services: ['Mobile account', 'Free card', 'Easy signup'],
+      rating: 4.8,
+      users: '30M+',
+      logo: '💸',
+      website: 'https://www.revolut.com',
+      affiliate: true
+    },
+    // SIM/MOBILE OPERATORS
+    {
+      id: 7,
+      name: 'Orange France',
+      type: 'SIM Card & Telecom',
+      description: 'France’s largest mobile network provider. Get a French SIM at airport or online.',
+      services: ['Prepaid SIM', 'Student offers', 'Nationwide coverage'],
+      rating: 4.3,
+      users: '20M+',
+      logo: '📱',
+      website: 'https://boutique.orange.fr/mobile/cartes-sim-prepayees',
+      affiliate: true
+    },
+    {
+      id: 8,
+      name: 'Free Mobile',
+      type: 'SIM Card & Telecom',
+      description: 'Student-friendly prepaid plans—get a SIM quickly at airport kiosks or partner stores.',
+      services: ['Prepaid SIM', 'Affordable plans', 'No contract'],
+      rating: 4.2,
+      users: '13M+',
+      logo: '📶',
+      website: 'https://mobile.free.fr/forfaits/forfait-free-2-euros.html',
+      affiliate: false
+    },
+    {
+      id: 9,
+      name: 'Bouygues Telecom',
+      type: 'SIM Card & Telecom',
+      description: 'Great coverage, affordable SIM plans, English-speaking support for internationals.',
+      services: ['Prepaid SIM', 'Student promotions'],
+      rating: 4.2,
+      users: '15M+',
+      logo: '📲',
+      website: 'https://www.bouyguestelecom.fr/forfaits-mobiles/cartes-prepayees',
+      affiliate: false
+    },
+    {
+      id: 10,
+      name: 'SFR',
+      type: 'SIM Card & Telecom',
+      description: 'Major French operator. Various prepaid and 4G/5G SIM offers for students.',
+      services: ['Prepaid SIM', '4G/5G data', 'Student discounts'],
+      rating: 4.0,
+      users: '17M+',
+      logo: '📡',
+      website: 'https://www.sfr.fr/offre-mobile-forfait-mobile.html',
+      affiliate: false
+    },
+    // ... keep some institutional partners (Campus France etc.) if space
+    {
+      id: 11,
+      name: 'Campus France',
+      type: 'Govt. Agency',
+      description: 'Official agency for French study—guides students with visas, university selection, and scholarships.',
+      services: ['Visa guidance', 'University advice', 'Scholarship info'],
+      rating: 4.8,
+      users: '100K+',
+      logo: '🎓',
+      website: 'https://www.campusfrance.org/en'
+    },
+    {
+      id: 12,
+      name: 'CAF',
+      type: 'Financial Support',
+      description: 'France family support agency—apply for student housing and monthly financial aid.',
+      services: ['CAF housing aid', 'Social benefits'],
+      rating: 4.2,
+      users: '2M+',
+      logo: '💰',
+      website: 'https://www.caf.fr'
+    },
   ];
 
-  const stats = [
-    { icon: Building2, label: 'Partner Organizations', value: '50+' },
-    { icon: Users, label: 'Students Helped', value: '10,000+' },
-    { icon: MapPin, label: 'Cities Covered', value: '25+' },
-    { icon: Star, label: 'Success Rate', value: '95%' }
+  const partnershipBenefits = [
+    'Get the best deals for students via our affiliate links',
+    'Direct access to official and private providers',
+    'Streamlined banking and telecom onboarding',
+    'Trusted services and supports',
+    'Priority consultancy support if you use our links'
   ];
+
+  // derive categories dynamically
+  const categories = Array.from(
+    new Set(partners.map((p) => p.type))
+  );
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  // Filter logic
+  const filteredPartners =
+    selectedCategory === "All"
+      ? partners
+      : partners.filter((p) => p.type === selectedCategory);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Our Trusted Partners</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          We collaborate with leading organizations to provide you with comprehensive support 
-          throughout your French education journey.
-        </p>
+    <div className="max-w-6xl mx-auto">
+      {/* PAGE TITLE */}
+      <PageTitle>Our Partners</PageTitle>
+
+      {/* BANNER for affiliate benefits */}
+      <Card className="mb-8 border-blue-300">
+        <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-4 justify-between bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-200 rounded-lg">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl text-green-600"><Building2 /></span>
+            <span className="font-semibold text-blue-900 text-lg">Special Student Perks:</span>
+          </div>
+          <div className="text-sm sm:text-base text-blue-900">
+            Unlock exclusive deals and priority support with our trusted partner network by using affiliate links!
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* FILTER by category */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <Filter className="text-blue-600 h-5 w-5" />
+          <span className="font-medium text-blue-900">Filter by category:</span>
+        </div>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="max-w-xs">
+            <span>{selectedCategory}</span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Statistics Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {stats.map((stat, index) => (
-          <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <CardContent className="p-8">
-              <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <stat.icon className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-              <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
-            </CardContent>
-          </Card>
+      {/* Benefits List */}
+      <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">Partnership Benefits</h3>
+          <BenefitsList benefits={partnershipBenefits} />
+        </CardContent>
+      </Card>
+
+      {/* Partner Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredPartners.map((partner) => (
+          <PartnerCard key={partner.id} partner={partner} />
         ))}
       </div>
 
-      {/* Partners Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-        {partners.map((partner, index) => (
-          <Card key={index} className="h-full hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
-            <CardHeader className="pb-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="text-4xl bg-gray-50 w-16 h-16 rounded-lg flex items-center justify-center">
-                  {partner.logo}
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-xl mb-2 leading-tight">{partner.name}</CardTitle>
-                  <Badge variant="secondary" className="text-xs font-medium">
-                    {partner.category}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-6 pt-0">
-              <p className="text-gray-600 leading-relaxed">
-                {partner.description}
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Key Services</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {partner.services.map((service, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs py-1">
-                        {service}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <span className="font-medium text-gray-900 block">Founded</span>
-                    <span className="text-gray-600">{partner.established}</span>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <span className="font-medium text-gray-900 block">Coverage</span>
-                    <span className="text-gray-600">{partner.locations}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {partner.website !== '#' && (
-                <Button variant="outline" size="sm" className="w-full mt-4" asChild>
-                  <a href={partner.website} target="_blank" rel="noopener noreferrer">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Visit Website
-                    <ExternalLink className="h-3 w-3 ml-2" />
-                  </a>
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Call to Action */}
-      <Card className="bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 border-0 shadow-xl">
-        <CardContent className="p-12 text-center">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Award className="h-10 w-10 text-blue-600" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Ready to Start Your French Education Journey?
-            </h2>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Our network of trusted partners is here to support you every step of the way. 
-              From university applications to visa processing, we've got you covered.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-3">
-                <Award className="h-5 w-5 mr-2" />
-                Get Started Today
-              </Button>
-              <Button variant="outline" size="lg" className="px-8 py-3">
-                <Users className="h-5 w-5 mr-2" />
-                Contact Our Team
-              </Button>
-            </div>
+      {/* Affiliate why use block */}
+      <Card className="mt-8 bg-green-50 border-green-200">
+        <CardContent className="p-6 text-center">
+          <h3 className="text-lg font-semibold text-green-900 mb-4">
+            Why Use Our Affiliate/Referral Links?
+          </h3>
+          <p className="text-green-700 mb-4 max-w-2xl mx-auto">
+            By opening your account, applying for a loan, or getting a SIM card with our listed partners using the above links, 
+            you support our consultancy at zero extra cost and often unlock exclusive rates or student bonuses. This helps us keep offering free guidance and services for students like you!
+            <br />
+            <span className="text-green-900 font-semibold">Thank you for supporting our student community!</span>
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button className="bg-green-600 hover:bg-green-700">
+              Partnership Inquiry
+            </Button>
+            <Button variant="outline" className="border-green-600 text-green-600">
+              Learn More
+            </Button>
           </div>
         </CardContent>
       </Card>

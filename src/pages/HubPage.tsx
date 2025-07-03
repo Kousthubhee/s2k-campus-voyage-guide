@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, MessageSquare, Share2, Heart, Calendar, Video, Edit, Search, Award, Pin, Trash2 } from 'lucide-react';
+import { Users, MessageSquare, Share2, Heart, Calendar, Video, Edit, Search, Award, Pin } from 'lucide-react';
 import { QATab } from '../components/hub/QATab';
 import { BlogsTab } from '../components/hub/BlogsTab';
 import { ReelsTab } from '../components/hub/ReelsTab';
@@ -14,7 +14,7 @@ import { StatsCard } from '../components/hub/StatsCard';
 import { QuickHelpCard } from '../components/hub/QuickHelpCard';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { HubNoticeAlert } from '../components/hub/HubNoticeAlert';
 import { HubTripPlanCard } from '../components/hub/HubTripPlanCard';
 import { HubSearchFilterBar } from '../components/hub/HubSearchFilterBar';
@@ -122,9 +122,7 @@ export const HubPage = () => {
   // Show alert and block if content has phone number
   function blockIfPhone(content: string): boolean {
     if (containsPhoneNumber(content)) {
-      toast("Sharing personal contact info is not allowed.", {
-        position: "top-center",
-      });
+      toast("Sharing personal contact info is not allowed.");
       return true;
     }
     return false;
@@ -134,13 +132,11 @@ export const HubPage = () => {
   const handleLike = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
     const likeKey = `${type}-${itemId}`;
     if (isLiked(itemId, type)) {
-      toast("You may only like this once.", {
-        position: "top-center",
-      });
+      toast("You may only like this once.");
       return;
     }
     setLikedItems([...likedItems, likeKey]);
-    
+    // ... Keep previous liking logic ...
     if (type === 'post' || type === 'reel' || type === 'poll') {
       setPosts(posts.map(item =>
         item.id === itemId && item.type === type
@@ -151,210 +147,6 @@ export const HubPage = () => {
       setBlogs(blogs.map(blog =>
         blog.id === itemId ? { ...blog, likes: blog.likes + 1 } : blog
       ));
-    }
-  };
-
-  // Handle edit functionality with proper implementation
-  const handleEdit = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
-    if (type === 'post' || type === 'reel' || type === 'poll') {
-      const item = posts.find(p => p.id === itemId && p.type === type);
-      if (item && item.author === 'You') {
-        let currentContent = '';
-        if (item.type === 'post') currentContent = item.content;
-        else if (item.type === 'reel') currentContent = item.caption;
-        else if (item.type === 'poll') currentContent = item.question;
-        
-        const newContent = prompt('Edit your content:', currentContent);
-        
-        if (newContent && newContent.trim() && newContent !== currentContent) {
-          if (blockIfPhone(newContent)) return;
-          
-          setPosts(posts.map(p => 
-            p.id === itemId && p.type === type
-              ? { 
-                  ...p, 
-                  ...(p.type === 'post' && { content: newContent }),
-                  ...(p.type === 'reel' && { caption: newContent }),
-                  ...(p.type === 'poll' && { question: newContent })
-                }
-              : p
-          ));
-          toast("Content updated successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only edit your own posts.", {
-          position: "top-center",
-        });
-      }
-    } else if (type === 'blog') {
-      const blog = blogs.find(b => b.id === itemId);
-      if (blog && blog.author === 'You') {
-        const newTitle = prompt('Edit blog title:', blog.title);
-        if (newTitle && newTitle.trim()) {
-          const newContent = prompt('Edit blog content:', blog.content);
-          if (newContent && newContent.trim()) {
-            if (blockIfPhone(newContent)) return;
-            
-            setBlogs(blogs.map(b =>
-              b.id === itemId ? { ...b, title: newTitle, content: newContent } : b
-            ));
-            toast("Blog updated successfully!", {
-              position: "top-center",
-            });
-          }
-        }
-      } else {
-        toast("You can only edit your own blogs.", {
-          position: "top-center",
-        });
-      }
-    }
-  };
-
-  // Handle delete functionality with proper implementation
-  const handleDelete = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
-    if (type === 'post' || type === 'reel' || type === 'poll') {
-      const item = posts.find(p => p.id === itemId && p.type === type);
-      if (item && item.author === 'You') {
-        if (confirm('Are you sure you want to delete this ' + type + '?')) {
-          setPosts(posts.filter(p => !(p.id === itemId && p.type === type)));
-          toast("Content deleted successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only delete your own posts.", {
-          position: "top-center",
-        });
-      }
-    } else if (type === 'blog') {
-      const blog = blogs.find(b => b.id === itemId);
-      if (blog && blog.author === 'You') {
-        if (confirm('Are you sure you want to delete this blog?')) {
-          setBlogs(blogs.filter(b => b.id !== itemId));
-          toast("Blog deleted successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only delete your own blogs.", {
-          position: "top-center",
-        });
-      }
-    }
-  };
-
-  // Handle edit comment functionality
-  const handleEditComment = (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => {
-    if (type === 'post' || type === 'reel' || type === 'poll') {
-      const post = posts.find(p => p.id === postId && p.type === type);
-      const comment = post?.comments.find(c => c.id === commentId);
-      
-      if (comment && comment.author === 'You') {
-        const newContent = prompt('Edit your comment:', comment.content);
-        if (newContent && newContent.trim() && newContent !== comment.content) {
-          if (blockIfPhone(newContent)) return;
-          
-          setPosts(posts.map(p =>
-            p.id === postId && p.type === type
-              ? {
-                  ...p,
-                  comments: p.comments.map(c =>
-                    c.id === commentId ? { ...c, content: newContent } : c
-                  )
-                }
-              : p
-          ));
-          toast("Comment updated successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only edit your own comments.", {
-          position: "top-center",
-        });
-      }
-    } else if (type === 'blog') {
-      const blog = blogs.find(b => b.id === postId);
-      const comment = blog?.comments.find(c => c.id === commentId);
-      
-      if (comment && comment.author === 'You') {
-        const newContent = prompt('Edit your comment:', comment.content);
-        if (newContent && newContent.trim() && newContent !== comment.content) {
-          if (blockIfPhone(newContent)) return;
-          
-          setBlogs(blogs.map(b =>
-            b.id === postId
-              ? {
-                  ...b,
-                  comments: b.comments.map(c =>
-                    c.id === commentId ? { ...c, content: newContent } : c
-                  )
-                }
-              : b
-          ));
-          toast("Comment updated successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only edit your own comments.", {
-          position: "top-center",
-        });
-      }
-    }
-  };
-
-  // Handle delete comment functionality
-  const handleDeleteComment = (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => {
-    if (type === 'post' || type === 'reel' || type === 'poll') {
-      const post = posts.find(p => p.id === postId && p.type === type);
-      const comment = post?.comments.find(c => c.id === commentId);
-      
-      if (comment && comment.author === 'You') {
-        if (confirm('Are you sure you want to delete this comment?')) {
-          setPosts(posts.map(p =>
-            p.id === postId && p.type === type
-              ? {
-                  ...p,
-                  comments: p.comments.filter(c => c.id !== commentId)
-                }
-              : p
-          ));
-          toast("Comment deleted successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only delete your own comments.", {
-          position: "top-center",
-        });
-      }
-    } else if (type === 'blog') {
-      const blog = blogs.find(b => b.id === postId);
-      const comment = blog?.comments.find(c => c.id === commentId);
-      
-      if (comment && comment.author === 'You') {
-        if (confirm('Are you sure you want to delete this comment?')) {
-          setBlogs(blogs.map(b =>
-            b.id === postId
-              ? {
-                  ...b,
-                  comments: b.comments.filter(c => c.id !== commentId)
-                }
-              : b
-          ));
-          toast("Comment deleted successfully!", {
-            position: "top-center",
-          });
-        }
-      } else {
-        toast("You can only delete your own comments.", {
-          position: "top-center",
-        });
-      }
     }
   };
 
@@ -632,14 +424,10 @@ export const HubPage = () => {
               onNewPostChange={setNewPost}
               onPublishPost={handlePublishPost}
               onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'blogs' && (
@@ -651,8 +439,6 @@ export const HubPage = () => {
               onPublish={handlePublishBlog}
               blogs={filteredBlogs}
               onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
@@ -668,8 +454,6 @@ export const HubPage = () => {
               onChangeCaption={setNewReelCaption}
               onPublish={handlePublishReel}
               onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
@@ -687,8 +471,6 @@ export const HubPage = () => {
               onPublish={handlePublishPoll}
               onVote={handleVotePoll}
               onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}

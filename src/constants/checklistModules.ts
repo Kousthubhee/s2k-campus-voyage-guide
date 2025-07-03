@@ -1,55 +1,67 @@
-
+/**
+ * Checklist modules array for main checklist navigation.
+ * Each object represents a module to display.
+ */
 const checklistModules = [
   {
     id: 'school',
-    title: 'School Insights',
-    description: 'Explore universities and schools across France with detailed information and city insights.',
-    icon: '🎓',
-    color: 'bg-blue-500',
-    type: 'navigation'
+    title: 'School & Local Insights',
+    description: 'Explore French schools and get local insights for each city',
+    icon: '🏫',
+    color: 'from-blue-500 to-cyan-500',
+    type: 'school'
   },
   {
     id: 'pre-arrival-1',
-    title: 'Pre-Arrival Setup 1',
-    description: 'Essential documents, visa applications, and initial preparations for your journey.',
-    icon: '📋',
-    color: 'bg-green-500',
-    type: 'module'
+    title: 'Pre-Arrival Checklist (Part 1)',
+    description: 'Campus France, VFS, and essential preparations',
+    icon: '✈️',
+    color: 'from-green-500 to-emerald-500',
+    type: 'checklist'
   },
   {
     id: 'pre-arrival-2',
-    title: 'Pre-Arrival Setup 2',
-    description: 'Accommodation, banking, and final preparations before departure.',
-    icon: '🏠',
-    color: 'bg-purple-500',
-    type: 'module'
+    title: 'Packing Assistant',
+    description: 'Food, clothes, and cultural preparation',
+    icon: '🎒',
+    color: 'from-orange-500 to-red-500',
+    type: 'checklist'
   },
   {
     id: 'post-arrival',
-    title: 'Post-Arrival Tasks',
-    description: 'Essential tasks to complete after arriving in France.',
-    icon: '✅',
-    color: 'bg-orange-500',
-    type: 'module',
+    title: 'Post-Arrival Checklist',
+    description: 'Bank account, SSN, insurance, CAF, and more',
+    icon: '🏠',
+    color: 'from-indigo-500 to-purple-500',
+    type: 'checklist',
     keysRequired: 2
   },
   {
     id: 'integration',
     title: 'French Integration',
-    description: 'Learn French culture, language basics, and integration tips.',
-    icon: '🇫🇷',
-    color: 'bg-red-500',
-    type: 'navigation',
-    keysRequired: 1
+    description: 'Cultural adaptation and social integration',
+    icon: '🤝',
+    color: 'from-rose-500 to-pink-500',
+    type: 'integration',
+    keysRequired: 3
   },
   {
     id: 'finance',
-    title: 'Finance Tracking',
-    description: 'Manage your expenses and budget while studying in France.',
-    icon: '💰',
-    color: 'bg-yellow-500',
-    type: 'module',
-    keysRequired: 3
+    title: 'Tracking your Finances',
+    description: 'Important paperwork and renewal processes',
+    icon: '📄',
+    color: 'from-teal-500 to-blue-500',
+    type: 'documents',
+    keysRequired: 1
+  },
+  {
+    id: 'suggestions',
+    title: 'Suggestions for You',
+    description: 'Explore new features and ideas to enhance your journey',
+    icon: '💡',
+    color: 'from-yellow-400 to-amber-500',
+    type: 'suggestions',
+    keysRequired: 1
   }
 ];
 

@@ -1,28 +1,31 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Heart, MessageSquare, Video, Edit, Trash2 } from 'lucide-react';
-import { Reel, QAComment } from './hubTypes';
+import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Video, Heart, MessageSquare, Edit2, Trash2 } from 'lucide-react';
+import { Reel, QAComment, QAReply } from './hubTypes';
+import { useState } from 'react';
 
 interface ReelsTabProps {
   reels: Reel[];
   newReel: string | null;
   newReelCaption: string;
   onReelUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeCaption: (value: string) => void;
+  onChangeCaption: (val: string) => void;
   onPublish: () => void;
-  onLike: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
-  onEdit: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
-  onDelete: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onLike: (id: number, type: "post" | "reel" | "poll" | "blog") => void;
   newComment: any;
-  setNewComment: (comments: any) => void;
-  onComment: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
-  onReply: (itemId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  setNewComment: (a: any) => void;
+  onComment: (id: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onReply: (
+    itemId: number,
+    commentId: number,
+    type: "post" | "reel" | "poll" | "blog"
+  ) => void;
 }
 
-export const ReelsTab: React.FC<ReelsTabProps> = ({
+export function ReelsTab({
   reels,
   newReel,
   newReelCaption,
@@ -30,162 +33,210 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   onChangeCaption,
   onPublish,
   onLike,
-  onEdit,
-  onDelete,
   newComment,
   setNewComment,
   onComment,
-  onReply
-}) => {
+  onReply,
+}: ReelsTabProps) {
+  const [editingComment, setEditingComment] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState('');
+
+  const handleEditComment = (commentId: number, currentContent: string) => {
+    setEditingComment(commentId);
+    setEditContent(currentContent);
+  };
+
+  const handleSaveEdit = (reelId: number, commentId: number) => {
+    console.log('Saving edit for comment:', commentId, 'with content:', editContent);
+    setEditingComment(null);
+    setEditContent('');
+  };
+
+  const handleDeleteComment = (reelId: number, commentId: number) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      console.log('Deleting comment:', commentId);
+    }
+  };
+
+  const handleDeleteReply = (reelId: number, commentId: number, replyId: number) => {
+    if (window.confirm('Are you sure you want to delete this reply?')) {
+      console.log('Deleting reply:', replyId);
+    }
+  };
+
   return (
     <>
-      {/* Create New Reel */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            Share a Video Reel
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={onReelUpload}
-            className="mb-4"
-          />
-          {newReel && (
-            <video
-              src={newReel}
-              controls
-              className="w-full max-w-md mb-4 rounded-lg"
-            />
-          )}
-          <Input
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <Video className="h-5 w-5 mr-2 text-red-600" />
+            Upload a Reel
+          </h3>
+          <Input type="file" accept="video/*" onChange={onReelUpload} className="mb-4" />
+          {newReel && <video src={newReel} controls className="w-full rounded-lg mb-4" />}
+          <Textarea
             placeholder="Add a caption..."
+            className="mb-4"
             value={newReelCaption}
             onChange={(e) => onChangeCaption(e.target.value)}
-            className="mb-4"
           />
-          <Button onClick={onPublish} disabled={!newReel || !newReelCaption.trim()}>
-            Share Reel
+          <Button size="sm" onClick={onPublish}>
+            Post
           </Button>
         </CardContent>
       </Card>
-
-      {/* Reels Feed */}
-      {reels.map((reel) => (
-        <Card key={reel.id}>
+      {reels.map((item) => (
+        <Card key={item.id} className="hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">{reel.avatar}</div>
+              <div className="flex items-center">
+                <div className="text-2xl mr-3">{item.avatar}</div>
                 <div>
-                  <div className="font-semibold">{reel.author}</div>
-                  <div className="text-sm text-gray-500">{reel.time}</div>
+                  <div className="font-semibold text-gray-900">{item.author}</div>
+                  <div className="text-sm text-gray-500">{item.time}</div>
                 </div>
               </div>
-              {reel.author === 'You' && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(reel.id, 'reel')}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(reel.id, 'reel')}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">{item.category}</span>
             </div>
-            
-            <div className="mb-4">
-              <video
-                src={reel.videoUrl}
-                controls
-                className="w-full max-w-md rounded-lg"
-              />
-            </div>
-            
-            <p className="mb-4">{reel.caption}</p>
-            
-            <div className="flex items-center gap-4 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onLike(reel.id, 'reel')}
-                className="flex items-center gap-2"
+            <video src={item.videoUrl} controls className="w-full rounded-lg mb-4" />
+            <p className="text-gray-700 mt-2">{item.caption}</p>
+            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+              <button
+                className="flex items-center hover:text-red-500"
+                onClick={() => onLike(item.id, item.type)}
               >
-                <Heart className="h-4 w-4" />
-                {reel.likes}
-              </Button>
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                {reel.comments.length}
-              </Button>
+                <Heart className="h-4 w-4 mr-1" />
+                {item.likes}
+              </button>
+              <span className="flex items-center">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                {item.comments.length}
+              </span>
             </div>
-
-            {/* Comments Section */}
-            <div className="space-y-3">
-              {reel.comments.map((comment: QAComment) => (
-                <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
-                  <div className="font-semibold text-sm mb-1">{comment.author}</div>
-                  <p className="text-sm mb-2">{comment.content}</p>
-                  
-                  {/* Reply Input */}
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      placeholder="Reply..."
-                      value={newComment[`reply-reel-${reel.id}-${comment.id}`] || ''}
-                      onChange={(e) => setNewComment({
-                        ...newComment,
-                        [`reply-reel-${reel.id}-${comment.id}`]: e.target.value
-                      })}
-                      className="text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={() => onReply(reel.id, comment.id, 'reel')}
-                    >
-                      Reply
-                    </Button>
-                  </div>
-
-                  {/* Replies */}
-                  {comment.replies?.map((reply) => (
-                    <div key={reply.id} className="ml-4 mt-2 p-2 bg-white rounded">
-                      <div className="font-semibold text-xs">{reply.author}</div>
-                      <p className="text-xs">{reply.content}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-              
-              {/* Add Comment */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a comment..."
-                  value={newComment[`reel-${reel.id}`] || ''}
-                  onChange={(e) => setNewComment({
+            <div className="mt-4">
+              <Textarea
+                placeholder="Write a comment..."
+                className="mb-2 h-16"
+                value={newComment[`${item.type}-${item.id}`] || ''}
+                onChange={(e) =>
+                  setNewComment({
                     ...newComment,
-                    [`reel-${reel.id}`]: e.target.value
-                  })}
-                />
-                <Button onClick={() => onComment(reel.id, 'reel')}>
-                  Comment
-                </Button>
-              </div>
+                    [`${item.type}-${item.id}`]: e.target.value
+                  })
+                }
+              />
+              <Button
+                size="sm"
+                onClick={() => onComment(item.id, item.type)}
+                disabled={!newComment[`${item.type}-${item.id}`]}
+              >
+                Comment
+              </Button>
             </div>
+            {item.comments.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {item.comments.map((comment) => (
+                  <div key={comment.id} className="border-l-2 border-gray-200 pl-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="font-semibold text-gray-900 mr-2">{comment.author}</span>
+                        <span className="text-sm text-gray-500">{comment.time || 'Just now'}</span>
+                      </div>
+                      {comment.author === 'You' && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditComment(comment.id, comment.content)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteComment(item.id, comment.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {editingComment === comment.id ? (
+                      <div className="mb-2">
+                        <Textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="mb-2"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleSaveEdit(item.id, comment.id)}>
+                            Save
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setEditingComment(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 mb-2">{comment.content}</p>
+                    )}
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Write a reply..."
+                        className="mb-2"
+                        value={newComment[`reply-${item.type}-${item.id}-${comment.id}`] || ''}
+                        onChange={(e) =>
+                          setNewComment({
+                            ...newComment,
+                            [`reply-${item.type}-${item.id}-${comment.id}`]: e.target.value
+                          })
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => onReply(item.id, comment.id, item.type)}
+                        disabled={!newComment[`reply-${item.type}-${item.id}-${comment.id}`]}
+                      >
+                        Reply
+                      </Button>
+                    </div>
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="mt-2 space-y-2 pl-4">
+                        {comment.replies.map((reply) => (
+                          <div key={reply.id} className="border-l-2 border-gray-300 pl-4">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center">
+                                <span className="font-semibold text-gray-900 mr-2">{reply.author}</span>
+                                <span className="text-sm text-gray-500">{reply.time || 'Just now'}</span>
+                              </div>
+                              {reply.author === 'You' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteReply(item.id, comment.id, reply.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <p className="text-gray-700">{reply.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}
     </>
-  );
-};
+  )
+}
