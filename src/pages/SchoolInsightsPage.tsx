@@ -12,7 +12,6 @@ import { SubjectFilter } from "./school-insights/SubjectFilter";
 import { SchoolsGrid } from "./school-insights/SchoolsGrid";
 import { useSchools, useSchoolsByCity, useSchoolSearch } from "@/hooks/useSchools";
 import { useCities, useCityByName } from "@/hooks/useCities";
-import { DatabaseCity, DatabaseSchool, LocalInsight } from "@/types/database";
 
 interface SchoolInsightsPageProps {
   onBack: () => void;
@@ -133,49 +132,54 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             <p className="text-gray-600">Choose a city to discover schools and local insights</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {cities.map((city) => (
-              <Card 
-                key={city.id} 
-                className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1"
-                onClick={() => setSelectedCity(city.name)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{city.emoji || '🌆'}</span>
-                      <h3 className="font-bold text-gray-900">{city.name}</h3>
-                    </div>
-                    <ArrowLeft className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors rotate-180" />
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {city.description || 'Discover what this city has to offer for international students.'}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                        <School className="h-3 w-3" />
-                        {city.schools_count || 0} Schools
+            {cities.map((city) => {
+              // Calculate actual school count for this city
+              const actualSchoolCount = allSchools.filter(school => school.city === city.name).length;
+              
+              return (
+                <Card 
+                  key={city.id} 
+                  className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1"
+                  onClick={() => setSelectedCity(city.name)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{city.emoji || '🌆'}</span>
+                        <h3 className="font-bold text-gray-900">{city.name}</h3>
                       </div>
+                      <ArrowLeft className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors rotate-180" />
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedCity(city.name);
-                        setShowCityInsights(true);
-                      }}
-                    >
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      Local Tips
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {city.description || 'Discover what this city has to offer for international students.'}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                          <School className="h-3 w-3" />
+                          {actualSchoolCount} Schools
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCity(city.name);
+                          setShowCityInsights(true);
+                        }}
+                      >
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Local Tips
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
@@ -195,7 +199,11 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             open={showCityInsights}
             onOpenChange={setShowCityInsights}
             cityName={cityDetails.name}
-            localInsights={(cityDetails.local_insights as unknown as LocalInsight[]) || []}
+            localInsights={Array.isArray(cityDetails.local_insights) ? cityDetails.local_insights.map(insight => ({
+              title: insight.title || '',
+              description: insight.description || '',
+              tips: insight.tips || []
+            })) : []}
             transport={cityDetails.transport || ""}
             famousPlaces={cityDetails.famous_places || ""}
             sportsFacilities={cityDetails.sports_facilities || ""}
@@ -229,7 +237,7 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
           {filteredSchools.length > 0 ? (
             <SchoolsGrid
               displayedSchools={filteredSchools.map(school => ({
-                id: school.id,
+                id: parseInt(school.id) || 0,
                 name: school.name,
                 city: school.city,
                 description: school.description || "",
