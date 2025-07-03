@@ -19,6 +19,8 @@ interface QATabProps {
   setNewComment: (comments: any) => void;
   onComment: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
   onReply: (itemId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onEditComment: (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onDeleteComment: (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
 }
 
 export const QATab: React.FC<QATabProps> = ({
@@ -32,7 +34,9 @@ export const QATab: React.FC<QATabProps> = ({
   newComment,
   setNewComment,
   onComment,
-  onReply
+  onReply,
+  onEditComment,
+  onDeleteComment
 }) => {
   return (
     <>
@@ -116,13 +120,7 @@ export const QATab: React.FC<QATabProps> = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            const newContent = prompt('Edit your comment:', comment.content);
-                            if (newContent && newContent.trim()) {
-                              // Handle comment edit - you'd need to implement this
-                              console.log('Edit comment:', comment.id, newContent);
-                            }
-                          }}
+                          onClick={() => onEditComment(post.id, comment.id, 'post')}
                           className="h-6 w-6 p-0"
                         >
                           <Edit className="h-3 w-3" />
@@ -130,12 +128,7 @@ export const QATab: React.FC<QATabProps> = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
-                            if (confirm('Delete this comment?')) {
-                              // Handle comment delete - you'd need to implement this
-                              console.log('Delete comment:', comment.id);
-                            }
-                          }}
+                          onClick={() => onDeleteComment(post.id, comment.id, 'post')}
                           className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-3 w-3" />

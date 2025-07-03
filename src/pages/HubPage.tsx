@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import { StatsCard } from '../components/hub/StatsCard';
 import { QuickHelpCard } from '../components/hub/QuickHelpCard';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { HubNoticeAlert } from '../components/hub/HubNoticeAlert';
 import { HubTripPlanCard } from '../components/hub/HubTripPlanCard';
 import { HubSearchFilterBar } from '../components/hub/HubSearchFilterBar';
@@ -123,7 +122,9 @@ export const HubPage = () => {
   // Show alert and block if content has phone number
   function blockIfPhone(content: string): boolean {
     if (containsPhoneNumber(content)) {
-      toast("Sharing personal contact info is not allowed.");
+      toast("Sharing personal contact info is not allowed.", {
+        position: "top-center",
+      });
       return true;
     }
     return false;
@@ -133,7 +134,9 @@ export const HubPage = () => {
   const handleLike = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
     const likeKey = `${type}-${itemId}`;
     if (isLiked(itemId, type)) {
-      toast("You may only like this once.");
+      toast("You may only like this once.", {
+        position: "top-center",
+      });
       return;
     }
     setLikedItems([...likedItems, likeKey]);
@@ -151,13 +154,11 @@ export const HubPage = () => {
     }
   };
 
-  // Handle edit functionality
+  // Handle edit functionality with proper implementation
   const handleEdit = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
-    // Check if the item belongs to the current user (for now, assume "You" is the current user)
     if (type === 'post' || type === 'reel' || type === 'poll') {
       const item = posts.find(p => p.id === itemId && p.type === type);
       if (item && item.author === 'You') {
-        // Enable edit mode for the item
         let currentContent = '';
         if (item.type === 'post') currentContent = item.content;
         else if (item.type === 'reel') currentContent = item.caption;
@@ -165,7 +166,7 @@ export const HubPage = () => {
         
         const newContent = prompt('Edit your content:', currentContent);
         
-        if (newContent && newContent.trim()) {
+        if (newContent && newContent.trim() && newContent !== currentContent) {
           if (blockIfPhone(newContent)) return;
           
           setPosts(posts.map(p => 
@@ -178,10 +179,14 @@ export const HubPage = () => {
                 }
               : p
           ));
-          toast("Content updated successfully!");
+          toast("Content updated successfully!", {
+            position: "top-center",
+          });
         }
       } else {
-        toast("You can only edit your own posts.");
+        toast("You can only edit your own posts.", {
+          position: "top-center",
+        });
       }
     } else if (type === 'blog') {
       const blog = blogs.find(b => b.id === itemId);
@@ -195,36 +200,160 @@ export const HubPage = () => {
             setBlogs(blogs.map(b =>
               b.id === itemId ? { ...b, title: newTitle, content: newContent } : b
             ));
-            toast("Blog updated successfully!");
+            toast("Blog updated successfully!", {
+              position: "top-center",
+            });
           }
         }
       } else {
-        toast("You can only edit your own blogs.");
+        toast("You can only edit your own blogs.", {
+          position: "top-center",
+        });
       }
     }
   };
 
-  // Handle delete functionality
+  // Handle delete functionality with proper implementation
   const handleDelete = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
     if (type === 'post' || type === 'reel' || type === 'poll') {
       const item = posts.find(p => p.id === itemId && p.type === type);
       if (item && item.author === 'You') {
         if (confirm('Are you sure you want to delete this ' + type + '?')) {
           setPosts(posts.filter(p => !(p.id === itemId && p.type === type)));
-          toast("Content deleted successfully!");
+          toast("Content deleted successfully!", {
+            position: "top-center",
+          });
         }
       } else {
-        toast("You can only delete your own posts.");
+        toast("You can only delete your own posts.", {
+          position: "top-center",
+        });
       }
     } else if (type === 'blog') {
       const blog = blogs.find(b => b.id === itemId);
       if (blog && blog.author === 'You') {
         if (confirm('Are you sure you want to delete this blog?')) {
           setBlogs(blogs.filter(b => b.id !== itemId));
-          toast("Blog deleted successfully!");
+          toast("Blog deleted successfully!", {
+            position: "top-center",
+          });
         }
       } else {
-        toast("You can only delete your own blogs.");
+        toast("You can only delete your own blogs.", {
+          position: "top-center",
+        });
+      }
+    }
+  };
+
+  // Handle edit comment functionality
+  const handleEditComment = (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => {
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      const post = posts.find(p => p.id === postId && p.type === type);
+      const comment = post?.comments.find(c => c.id === commentId);
+      
+      if (comment && comment.author === 'You') {
+        const newContent = prompt('Edit your comment:', comment.content);
+        if (newContent && newContent.trim() && newContent !== comment.content) {
+          if (blockIfPhone(newContent)) return;
+          
+          setPosts(posts.map(p =>
+            p.id === postId && p.type === type
+              ? {
+                  ...p,
+                  comments: p.comments.map(c =>
+                    c.id === commentId ? { ...c, content: newContent } : c
+                  )
+                }
+              : p
+          ));
+          toast("Comment updated successfully!", {
+            position: "top-center",
+          });
+        }
+      } else {
+        toast("You can only edit your own comments.", {
+          position: "top-center",
+        });
+      }
+    } else if (type === 'blog') {
+      const blog = blogs.find(b => b.id === postId);
+      const comment = blog?.comments.find(c => c.id === commentId);
+      
+      if (comment && comment.author === 'You') {
+        const newContent = prompt('Edit your comment:', comment.content);
+        if (newContent && newContent.trim() && newContent !== comment.content) {
+          if (blockIfPhone(newContent)) return;
+          
+          setBlogs(blogs.map(b =>
+            b.id === postId
+              ? {
+                  ...b,
+                  comments: b.comments.map(c =>
+                    c.id === commentId ? { ...c, content: newContent } : c
+                  )
+                }
+              : b
+          ));
+          toast("Comment updated successfully!", {
+            position: "top-center",
+          });
+        }
+      } else {
+        toast("You can only edit your own comments.", {
+          position: "top-center",
+        });
+      }
+    }
+  };
+
+  // Handle delete comment functionality
+  const handleDeleteComment = (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => {
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      const post = posts.find(p => p.id === postId && p.type === type);
+      const comment = post?.comments.find(c => c.id === commentId);
+      
+      if (comment && comment.author === 'You') {
+        if (confirm('Are you sure you want to delete this comment?')) {
+          setPosts(posts.map(p =>
+            p.id === postId && p.type === type
+              ? {
+                  ...p,
+                  comments: p.comments.filter(c => c.id !== commentId)
+                }
+              : p
+          ));
+          toast("Comment deleted successfully!", {
+            position: "top-center",
+          });
+        }
+      } else {
+        toast("You can only delete your own comments.", {
+          position: "top-center",
+        });
+      }
+    } else if (type === 'blog') {
+      const blog = blogs.find(b => b.id === postId);
+      const comment = blog?.comments.find(c => c.id === commentId);
+      
+      if (comment && comment.author === 'You') {
+        if (confirm('Are you sure you want to delete this comment?')) {
+          setBlogs(blogs.map(b =>
+            b.id === postId
+              ? {
+                  ...b,
+                  comments: b.comments.filter(c => c.id !== commentId)
+                }
+              : b
+          ));
+          toast("Comment deleted successfully!", {
+            position: "top-center",
+          });
+        }
+      } else {
+        toast("You can only delete your own comments.", {
+          position: "top-center",
+        });
       }
     }
   };
@@ -509,6 +638,8 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
+              onEditComment={handleEditComment}
+              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'blogs' && (
@@ -526,6 +657,8 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
+              onEditComment={handleEditComment}
+              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'reels' && (
@@ -543,6 +676,8 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
+              onEditComment={handleEditComment}
+              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'polls' && (
@@ -562,6 +697,8 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
+              onEditComment={handleEditComment}
+              onDeleteComment={handleDeleteComment}
             />
           )}
         </div>

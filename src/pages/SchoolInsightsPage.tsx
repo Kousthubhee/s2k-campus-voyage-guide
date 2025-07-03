@@ -10,6 +10,7 @@ import { useSchools, useSchoolsByCity, useSchoolSearch } from "@/hooks/useSchool
 import { useCities, useCityByName } from "@/hooks/useCities";
 import { DatabaseCity, DatabaseSchool, LocalInsight } from "@/types/database";
 import { useEffect } from "react";
+import { CitiesGridPage } from "@/components/CitiesGridPage";
 
 interface SchoolInsightsPageProps {
   onBack: () => void;
@@ -20,7 +21,7 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
   const [subjectFilter, setSubjectFilter] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showCityInsights, setShowCityInsights] = useState(false);
-  const [selectedSchool, setSelectedSchool] = useState<any | null>(null);
+  const [selectedSchool, setSelectedSchool] = useState<DatabaseSchool | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch data from database
@@ -69,6 +70,11 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
       (school.subjects || []).includes(subjectFilter)
     );
   }
+
+  // Handle city selection from the grid
+  const handleCitySelect = (cityName: string) => {
+    setSelectedCity(cityName);
+  };
 
   if (selectedSchool) {
     return (
@@ -227,94 +233,6 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             )}
           </div>
 
-          {/* Rankings & Recognition */}
-          {((selectedSchool.rankings && selectedSchool.rankings.length > 0) || 
-            (selectedSchool.accreditations && selectedSchool.accreditations.length > 0) || 
-            (selectedSchool.recognition && selectedSchool.recognition.length > 0) || 
-            (selectedSchool.specializations && selectedSchool.specializations.length > 0)) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-yellow-600" />
-                  Rankings & Recognition
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {selectedSchool.rankings && selectedSchool.rankings.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3 text-gray-900">Rankings</h4>
-                      <div className="space-y-3">
-                        {selectedSchool.rankings.map((ranking: any, index: number) => (
-                          <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div className="font-semibold text-yellow-800">
-                              {ranking.organization || ranking.title}
-                            </div>
-                            <div className="text-sm text-yellow-700">
-                              {ranking.rank || ranking.description}
-                            </div>
-                            {ranking.year && (
-                              <div className="text-xs text-yellow-600 mt-1">{ranking.year}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedSchool.accreditations && selectedSchool.accreditations.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3 text-gray-900">Accreditations</h4>
-                      <div className="space-y-2">
-                        {selectedSchool.accreditations.map((accreditation: any, index: number) => (
-                          <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <span className="text-green-800 font-medium">
-                              {typeof accreditation === 'string' ? accreditation : accreditation.title}
-                            </span>
-                            {typeof accreditation === 'object' && accreditation.description && (
-                              <div className="text-sm text-green-700 mt-1">{accreditation.description}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedSchool.recognition && selectedSchool.recognition.length > 0 && (
-                    <div className="md:col-span-2">
-                      <h4 className="font-semibold mb-3 text-gray-900">Recognition & Awards</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {selectedSchool.recognition.map((item: any, index: number) => (
-                          <div key={index} className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                            <div className="font-semibold text-purple-800">
-                              {item.title || item}
-                            </div>
-                            {item.description && (
-                              <div className="text-sm text-purple-700">{item.description}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedSchool.specializations && selectedSchool.specializations.length > 0 && (
-                    <div className="md:col-span-2">
-                      <h4 className="font-semibold mb-3 text-gray-900">Specializations</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedSchool.specializations.map((spec: any, index: number) => (
-                          <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
-                            {typeof spec === 'string' ? spec : spec.title}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Contact Information */}
           <Card>
             <CardHeader>
@@ -370,44 +288,6 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
                     </div>
                   )}
                 </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-gray-900">Follow Us</h4>
-                  <div className="flex flex-wrap gap-3">
-                    {selectedSchool.contact_info?.linkedin && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={selectedSchool.contact_info.linkedin} target="_blank" rel="noopener noreferrer">
-                          <Linkedin className="h-4 w-4 mr-2" />
-                          LinkedIn
-                        </a>
-                      </Button>
-                    )}
-                    {selectedSchool.contact_info?.instagram && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={selectedSchool.contact_info.instagram} target="_blank" rel="noopener noreferrer">
-                          <Instagram className="h-4 w-4 mr-2" />
-                          Instagram
-                        </a>
-                      </Button>
-                    )}
-                    {selectedSchool.contact_info?.facebook && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={selectedSchool.contact_info.facebook} target="_blank" rel="noopener noreferrer">
-                          <Facebook className="h-4 w-4 mr-2" />
-                          Facebook
-                        </a>
-                      </Button>
-                    )}
-                    {selectedSchool.contact_info?.twitter && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={selectedSchool.contact_info.twitter} target="_blank" rel="noopener noreferrer">
-                          <Twitter className="h-4 w-4 mr-2" />
-                          Twitter
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -462,22 +342,7 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
       </div>
 
       {!selectedCity && !searchTerm && !citiesLoading && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Select a City</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {cityList.map((city) => (
-              <Button
-                key={city}
-                variant="outline"
-                onClick={() => setSelectedCity(city)}
-                className="h-auto p-4 flex flex-col items-center justify-center text-center"
-              >
-                <MapPin className="h-5 w-5 mb-2 text-blue-600" />
-                <span className="font-medium">{city}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+        <CitiesGridPage onCitySelect={handleCitySelect} />
       )}
       
       {selectedCity && cityDetails && (
@@ -625,11 +490,7 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             </Card>
           ))}
         </div>
-      ) : (
-        <div className="text-gray-500 text-center">
-          Select a city to explore school insights or search for specific schools.
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

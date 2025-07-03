@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfileEditDialog } from './ProfileEditDialog';
-import { Key, Bell, User, LogIn } from 'lucide-react';
+import { Key, Bell, User, LogIn, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   currentPage: string;
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   showAuth
 }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const { signOut } = useAuth();
 
   const handleNotificationClick = () => {
     setCurrentPage('notifications');
@@ -30,6 +32,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleAuthClick = () => {
     setCurrentPage('login');
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -80,11 +91,11 @@ export const Header: React.FC<HeaderProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCurrentPage('profile')}
-            className="flex items-center gap-2"
+            onClick={handleSignOut}
+            className="flex items-center gap-2 text-red-600 hover:text-red-700"
           >
-            <User className="h-4 w-4" />
-            Profile
+            <LogOut className="h-4 w-4" />
+            Sign Out
           </Button>
         </div>
       )}
