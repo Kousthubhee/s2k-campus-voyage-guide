@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
-
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProfileType {
   name: string;
@@ -24,7 +25,7 @@ interface PreArrival1PageProps {
   onBack: () => void;
   onComplete: () => void;
   isCompleted: boolean;
-  profile: ProfileType | null; // Made profile nullable
+  profile: ProfileType | null;
 }
 
 export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: PreArrival1PageProps) => {
@@ -33,6 +34,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   const [reminders, setReminders] = useState<{ [id: string]: string }>({});
   const [appointments, setAppointments] = useState<{ [id: string]: { date: string; location: string } }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
+  const { user } = useAuth();
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => 
@@ -42,7 +44,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     );
   };
 
-  // Personalized guidance detection with null checks:
+  // Personalized guidance detection with null checks for both logged in and non-logged in users
   const personalizedDocs = (userProfile: ProfileType | null) => {
     const alerts: string[] = [];
     if (userProfile) {
@@ -52,128 +54,177 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
       if (userProfile.workExperience && userProfile.workExperience.trim() && userProfile.workExperience.trim().toLowerCase() !== 'n/a' && userProfile.workExperience.trim().toLowerCase() !== 'no') {
         alerts.push("You reported work experience, so supporting documents are required for some steps.");
       }
+    } else {
+      // For non-logged in users, show general guidance
+      alerts.push("Sign in to get personalized guidance based on your profile.");
     }
     return alerts;
   };
   const personalizationAlerts = personalizedDocs(profile);
 
-  // IMPORTANT LOGIC: Based on profile, adjust document lists.
+  // Checklist items with comprehensive processes
   const checklistItems = [
     {
       id: 'campus-france',
       title: "Campus France Registration",
-      description: "Complete your Campus France application and interview",
+      description: "Complete your Campus France application and interview - MANDATORY first step",
       urgency: "high",
       timeline: "3-4 months before departure",
       documents: (() => {
-        // Always required
         const docs = [
           "Degree/diploma certificates (original + copy)",
-          "Resume (CV)",
-          "Cover letter",
-          "Admission letter",
-          "Passport copy",
-          "Photograph",
-          "Campus France fee payment receipt"
+          "Academic transcripts (all years)",
+          "Resume (CV) in French or English",
+          "Cover letter explaining study motivation",
+          "Admission letter from French institution",
+          "Passport copy (all pages)",
+          "Recent passport-size photographs (35mm x 45mm)",
+          "Campus France fee payment receipt",
+          "Language proficiency certificate (if required)"
         ];
-        // Only require Experience Letter & Gap justification if age > 23 or gap-year/experience data
+        // Add conditional documents based on profile
         if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim() && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
-          docs.splice(3,0,"Experience letter (if applicable)");
-        }
-        if (profile && profile.age && Number(profile.age) >= 23) {
-          docs.push("Gap year justification (if any)");
+          docs.splice(4, 0, "Experience letters from employers");
+          docs.push("Gap year explanation letter (if applicable)");
         }
         return docs;
       })(),
       process: [
-        "Create account on Etudes en France portal",
-        "Upload documents and submit application",
-        "Attend Campus France interview",
-        "Receive registration number and NOC"
+        "Create account on Etudes en France portal (www.campusfrance.org)",
+        "Fill out personal information and academic history",
+        "Upload all required documents in PDF format",
+        "Pay Campus France processing fee (varies by country)",
+        "Submit complete application online",
+        "Wait for appointment scheduling email",
+        "Attend Campus France interview at nearest center",
+        "Receive Campus France registration number and NOC (No Objection Certificate)"
       ]
     },
     {
       id: 'vfs',
       title: "VFS Visa Application",
-      description: "Submit visa documents and attend biometric appointment",
+      description: "Submit visa documents and attend biometric appointment at VFS Global center",
       urgency: "high",
-      timeline: "2-3 months before departure",
+      timeline: "2-3 months before departure (after Campus France approval)",
       documents: (() => {
         const docs = [
-          "Visa application form (signed)",
-          "Passport + copy",
-          "2 passport-size photos",
-          "Campus France registration number + NOC",
-          "Admission letter",
-          "Tuition fee payment proof",
-          "Proof of accommodation",
-          "Proof of financial means",
-          "Cover letter",
-          "Travel insurance (3 months)",
-          "Flight booking (dummy or real)",
-          "SOP, expense sheet, CA statement (optional)"
+          "Long-stay visa application form (filled and signed)",
+          "Passport (valid for 3+ months beyond stay) + all pages copy",
+          "2 recent passport-size photos (35mm x 45mm, white background)",
+          "Campus France registration number + NOC certificate",
+          "Original admission letter from French institution",
+          "Tuition fee payment proof or fee exemption certificate",
+          "Proof of accommodation in France",
+          "Proof of financial means (bank statements, scholarship letters)",
+          "Detailed cover letter explaining study plans",
+          "Travel insurance (minimum 3 months, 30,000€ coverage)",
+          "Flight booking confirmation (can be dummy ticket)",
+          "Birth certificate (original + copy)",
+          "SOP (Statement of Purpose), expense calculation sheet, CA statement (recommended)"
         ];
-        // Require extra docs for older or gap/experience applicants
+        // Add conditional documents
         if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim() && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
-          docs.splice(3, 0, "Experience letter (if applicable)");
-        }
-        if (profile && profile.age && Number(profile.age) >= 23) {
-          docs.push("Gap year justification (if any)");
+          docs.splice(5, 0, "Work experience certificates and letters");
+          docs.push("Explanation letter for career gap (if applicable)");
         }
         return docs;
       })(),
       process: [
-        "Gather all documents",
-        "Book VFS appointment",
-        "Submit documents + attend biometrics",
-        "Await visa decision"
+        "Gather all required documents (check VFS website for latest requirements)",
+        "Book VFS appointment online at vfsglobal.com",
+        "Pay visa application fee online",
+        "Visit VFS center on appointment date with original documents",
+        "Submit documents and provide biometric data (fingerprints + photo)",
+        "Receive tracking number for application status",
+        "Wait for visa processing (typically 15-20 working days)",
+        "Collect passport with visa or opt for courier delivery"
       ]
     },
     {
       id: 'documents',
-      title: "Document Translation",
-      description: "Get official translations of academic documents",
+      title: "Document Translation & Legalization",
+      description: "Get official translations and apostille/attestation of academic documents",
       urgency: "medium",
-      timeline: "2 months before departure",
+      timeline: "2-3 months before departure",
       documents: [
-        "Academic certificates",
-        "Transcripts",
-        "Experience letters",
-        "Any non-English/French documents"
+        "Academic certificates and transcripts",
+        "Birth certificate",
+        "Experience letters and employment certificates",
+        "Medical certificates (if required)",
+        "Police clearance certificate (if required)",
+        "Any non-English/French official documents"
       ],
       process: [
-        "Identify documents needing translation",
-        "Use certified translator",
-        "Receive signed and stamped translations"
+        "Identify all documents needing translation",
+        "Get apostille/attestation from respective authorities",
+        "Use certified translator recognized by French authorities",
+        "Ensure translations are signed and stamped",
+        "Keep both originals and translated copies",
+        "Get additional copies as backup"
       ]
     },
     {
       id: 'insurance',
-      title: "Travel Insurance",
-      description: "Purchase comprehensive travel and health insurance",
+      title: "Travel & Health Insurance",
+      description: "Purchase comprehensive travel and health insurance as per Schengen requirements",
       urgency: "medium",
-      timeline: "1 month before departure",
+      timeline: "1-2 months before departure",
       documents: [
-        "Passport copy",
-        "Insurance certificate with name, dates, and coverage"
+        "Passport copy for insurance application",
+        "Insurance certificate with full name and dates",
+        "Coverage details showing minimum 30,000€ medical coverage",
+        "Policy document in English or French"
       ],
       process: [
-        "Purchase 3-month comprehensive travel insurance",
-        "Attach policy document to visa file"
+        "Research Schengen-compliant insurance providers",
+        "Purchase policy with minimum 30,000€ medical coverage",
+        "Ensure coverage includes repatriation and emergency evacuation",
+        "Get policy certificate with your exact name as in passport",
+        "Keep digital and physical copies of insurance documents",
+        "Consider extending coverage beyond initial 3 months"
       ]
     },
     {
       id: 'flight',
-      title: "Flight Booking",
-      description: "Book your flight to France",
+      title: "Flight Booking & Travel Arrangements",
+      description: "Book flights and arrange travel logistics for departure",
       urgency: "low",
       timeline: "1 month before departure",
       documents: [
-        "Dummy or confirmed flight ticket"
+        "Flight booking confirmation",
+        "Travel itinerary",
+        "Airport transfer arrangements"
       ],
       process: [
-        "For visa: get refundable or dummy ticket",
-        "After visa approval: book actual ticket"
+        "For visa application: book refundable ticket or get dummy ticket",
+        "After visa approval: book confirmed flight tickets",
+        "Arrange airport pickup or public transport to accommodation",
+        "Plan arrival during weekdays for easier administrative tasks",
+        "Inform institution about arrival date and time",
+        "Keep all travel documents easily accessible during journey"
+      ]
+    },
+    {
+      id: 'preparation',
+      title: "Pre-Departure Preparation",
+      description: "Final preparations before traveling to France",
+      urgency: "medium",
+      timeline: "2-4 weeks before departure",
+      documents: [
+        "All original documents in organized folder",
+        "Digital copies on cloud storage",
+        "Emergency contact list",
+        "Institution contact details",
+        "Accommodation confirmation"
+      ],
+      process: [
+        "Inform bank about international travel to avoid card blocks",
+        "Get international roaming plan or French SIM card info",
+        "Research about your destination city and nearest services",
+        "Pack essential items and documents in carry-on luggage",
+        "Exchange some currency to Euros for initial expenses",
+        "Download offline maps and translation apps",
+        "Prepare for cultural orientation and language basics"
       ]
     }
   ];
@@ -207,13 +258,13 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
             ✈️ Pre-Arrival Checklist (Part 1)
           </PageTitle>
           <p className="text-base text-gray-600 font-calibri">
-            Campus France, VFS, and essential preparations
+            Campus France, VFS, and essential preparations for studying in France
           </p>
           {personalizationAlerts.length > 0 && (
             <div className="mx-auto max-w-xl mt-4 mb-2 bg-blue-50 border border-blue-300 text-blue-900 text-sm rounded-lg p-3">
               <div className="font-semibold mb-1 flex items-center">
                 <Info className="inline h-4 w-4 mr-2 text-blue-500" />
-                Personalized Guidance
+                {user ? 'Personalized Guidance' : 'General Guidance'}
               </div>
               <ul className="list-disc ml-5">
                 {personalizationAlerts.map((alert, i) => (
@@ -239,22 +290,6 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
           const isOpen = openSections.includes(item.id);
           const isVisaStep = item.id === "vfs";
 
-          // Identify if extra documents were shown due to age/experience
-          let extraDocs: string[] = [];
-          if (profile && item.documents.some((d: string) => d.toLowerCase().includes("experience letter"))) {
-            if (
-              (profile.age && Number(profile.age) >= 23) ||
-              (profile.workExperience && profile.workExperience.trim() && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no')
-            ) {
-              extraDocs.push("Experience Letter");
-            }
-          }
-          if (profile && item.documents.some((d: string) => d.toLowerCase().includes("gap year justification"))) {
-            if (profile.age && Number(profile.age) >= 23) {
-              extraDocs.push("Gap year justification");
-            }
-          }
-
           return (
             <Card key={index} className={`border-l-4 border-l-blue-500 ${isStepCompleted ? 'ring-2 ring-green-500' : ''}`}>
               <CardHeader className="pb-3">
@@ -270,14 +305,6 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                     <div className="flex-1">
                       <CardTitle className="text-lg">{item.title}</CardTitle>
                       <p className="text-gray-600 mt-1">{item.description}</p>
-                      {extraDocs.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <span className="inline-flex items-center px-3 py-0.5 bg-yellow-50 border border-yellow-300 rounded-full text-xs text-yellow-800 font-medium">
-                            Personalized: Requires {extraDocs.join(", ")}
-                          </span>
-                          <span className="text-xs text-blue-500">(Based on your profile)</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -306,7 +333,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                       <Button variant="outline" size="sm" className="w-full justify-between">
                         <span className="flex items-center">
                           <FileText className="h-4 w-4 mr-2" />
-                          View Details
+                          View Detailed Process & Documents
                         </span>
                         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                       </Button>
@@ -314,7 +341,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                     
                     <CollapsibleContent className="mt-4 space-y-4">
                       <div className="bg-blue-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-blue-900 mb-2">📋 Documents Required:</h4>
+                        <h4 className="font-semibold text-blue-900 mb-3">📋 Required Documents:</h4>
                         <div className="space-y-2">
                           {item.documents.map((doc, docIndex) => (
                             <CheckboxItem
@@ -325,20 +352,19 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                               className="text-blue-800"
                             >
                               {doc}
-                              {extraDocs.includes(doc.split(" (")[0]) && (
-                                <span className="ml-2 px-2 inline rounded bg-yellow-100 text-yellow-700 text-xs font-medium">Personalized</span>
-                              )}
                             </CheckboxItem>
                           ))}
                         </div>
                       </div>
                       <div className="bg-green-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-green-900 mb-2">🔄 Process:</h4>
-                        <ol className="space-y-1">
+                        <h4 className="font-semibold text-green-900 mb-3">🔄 Step-by-Step Process:</h4>
+                        <ol className="space-y-2">
                           {item.process.map((step, stepIndex) => (
                             <li key={stepIndex} className="text-sm text-green-800 flex items-start">
-                              <span className="mr-2 font-medium">{stepIndex + 1}.</span>
-                              {step}
+                              <span className="mr-3 font-bold text-green-600 bg-green-200 rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                                {stepIndex + 1}
+                              </span>
+                              <span>{step}</span>
                             </li>
                           ))}
                         </ol>
@@ -384,7 +410,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
               All Steps Completed!
             </h3>
             <p className="text-green-700 mb-4">
-              Great job! You've finished all steps in this module.
+              Congratulations! You've completed all the essential pre-arrival steps for studying in France.
             </p>
             <Button 
               onClick={onComplete}

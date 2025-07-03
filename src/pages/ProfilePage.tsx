@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2, LogIn } from 'lucide-react';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProfilePageProps {
   userProfile: {
@@ -22,79 +22,64 @@ interface ProfilePageProps {
 
 export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuth();
   
-  // Use the passed userProfile or fall back to default
+  // If user is not signed in, show sign-in prompt
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <Card className="text-center py-12">
+          <CardContent>
+            <LogIn className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Hello, Stranger! 👋
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Please sign in to view and manage your profile, track your progress, and unlock all features.
+            </p>
+            <Button onClick={() => window.location.href = '/auth'}>
+              Sign In to Continue
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // Use the passed userProfile or fall back to placeholder data for signed-in users
   const profile = userProfile || {
-    name: 'Sarah Mitchell',
-    email: 'sarah.mitchell@email.com',
-    about: 'International student from Canada studying Business Administration at HEC Paris. Passionate about sustainable business practices and French culture.',
-    memberSince: 'September 2024',
-    photo: 'https://images.unsplash.com/photo-1494790108755-2616b88f04b1?w=150&h=150&fit=crop&crop=face',
-    age: '22',
-    prevEducation: 'Bachelor of Commerce, University of Toronto',
-    workExperience: 'Marketing Intern at Tech Startup (2023)'
+    name: user.email || 'New User',
+    email: user.email || 'user@example.com',
+    about: 'Complete your profile to personalize your experience and get better recommendations.',
+    memberSince: 'Recently joined',
+    photo: '',
+    age: 'Not specified',
+    prevEducation: 'Add your education background',
+    workExperience: 'Add your work experience'
   };
 
   const achievements = [
     {
       id: '1',
-      title: 'First Steps',
-      description: 'Completed your first pre-arrival module',
+      title: 'Getting Started',
+      description: 'Welcome to pasS2Kampus! Complete your profile to unlock more features.',
       icon: '🎯',
-      earnedAt: '2024-09-15',
-      points: 50,
+      earnedAt: new Date().toISOString().split('T')[0],
+      points: 25,
       category: 'milestone'
-    },
-    {
-      id: '2',
-      title: 'Document Master',
-      description: 'Successfully organized all required documents',
-      icon: '📋',
-      earnedAt: '2024-09-20',
-      points: 100,
-      category: 'organization'
-    },
-    {
-      id: '3',
-      title: 'Banking Pro',
-      description: 'Opened your first French bank account',
-      icon: '🏦',
-      earnedAt: '2024-10-01',
-      points: 75,
-      category: 'financial'
-    },
-    {
-      id: '4',
-      title: 'Community Helper',
-      description: 'Helped 5 other students in the hub',
-      icon: '🤝',
-      earnedAt: '2024-10-10',
-      points: 125,
-      category: 'community'
-    },
-    {
-      id: '5',
-      title: 'Language Enthusiast',
-      description: 'Completed 10 French lessons',
-      icon: '🗣️',
-      earnedAt: '2024-10-15',
-      points: 150,
-      category: 'language'
     }
   ];
 
   const stats = [
-    { label: 'Modules Completed', value: '8/12', color: 'bg-blue-500' },
-    { label: 'Documents Organized', value: '15', color: 'bg-green-500' },
-    { label: 'Hub Contributions', value: '23', color: 'bg-purple-500' },
-    { label: 'French Lessons', value: '45', color: 'bg-orange-500' }
+    { label: 'Modules Completed', value: '0/12', color: 'bg-blue-500' },
+    { label: 'Documents Organized', value: '0', color: 'bg-green-500' },
+    { label: 'Hub Contributions', value: '0', color: 'bg-purple-500' },
+    { label: 'French Lessons', value: '0', color: 'bg-orange-500' }
   ];
 
   const recentActivity = [
-    { action: 'Completed Post-Arrival Module', time: '2 hours ago', icon: CheckCircle2 },
-    { action: 'Uploaded Residence Permit', time: '1 day ago', icon: User },
-    { action: 'Helped student with CAF application', time: '2 days ago', icon: Trophy },
-    { action: 'Completed French Lesson: Greetings', time: '3 days ago', icon: Award }
+    { action: 'Joined pasS2Kampus', time: 'Recently', icon: CheckCircle2 },
+    { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
 
   const handleSaveProfile = (updatedProfile: typeof profile) => {
@@ -103,7 +88,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   };
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
-  const completedModules = 8;
+  const completedModules = 0;
   const totalModules = 12;
   const progressPercentage = (completedModules / totalModules) * 100;
 
@@ -114,11 +99,17 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="flex-shrink-0">
-              <img
-                src={profile.photo}
-                alt={profile.name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-              />
+              {profile.photo ? (
+                <img
+                  src={profile.photo}
+                  alt={profile.name}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <User className="h-12 w-12 text-gray-500" />
+                </div>
+              )}
             </div>
             
             <div className="flex-1 space-y-2">
@@ -146,7 +137,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span className="text-sm">Paris, France</span>
+                  <span className="text-sm">France</span>
                 </div>
               </div>
               
@@ -265,24 +256,15 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
                 ))}
               </div>
 
-              {/* Achievement Categories */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4 text-center">Achievement Categories</h3>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {[
-                    { name: 'Milestone', icon: '🎯', count: 1 },
-                    { name: 'Organization', icon: '📋', count: 1 },
-                    { name: 'Financial', icon: '🏦', count: 1 },
-                    { name: 'Community', icon: '🤝', count: 1 },
-                    { name: 'Language', icon: '🗣️', count: 1 }
-                  ].map((category, index) => (
-                    <div key={index} className="text-center">
-                      <div className="text-2xl mb-1">{category.icon}</div>
-                      <div className="text-sm font-medium text-gray-900">{category.name}</div>
-                      <div className="text-xs text-gray-600">{category.count} earned</div>
-                    </div>
-                  ))}
-                </div>
+              {/* Welcome message for new users */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg text-center">
+                <h3 className="text-lg font-semibold mb-4">Welcome to pasS2Kampus! 🎓</h3>
+                <p className="text-gray-600 mb-4">
+                  Complete modules, organize documents, and engage with the community to earn more achievements and unlock features.
+                </p>
+                <Button onClick={() => window.location.href = '/checklist'}>
+                  Start Your Journey
+                </Button>
               </div>
             </CardContent>
           </Card>

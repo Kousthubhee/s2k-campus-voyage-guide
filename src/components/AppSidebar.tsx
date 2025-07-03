@@ -24,7 +24,7 @@ import {
   SidebarHeader,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface AppSidebarProps {
   currentPage: string;
@@ -39,17 +39,12 @@ export const AppSidebar = ({
   userName,
   userAvatarUrl,
 }: AppSidebarProps) => {
+  const { state } = useSidebar();
+  const isCollapsed = state === 'collapsed';
+  
   // Cleaned logic: "Hello, Stranger!" if no name, else Hello, [Name]!
   const cleanedName = typeof userName === "string" && userName.trim() !== "" ? userName : null;
   const avatarUrl = userAvatarUrl ?? "";
-
-  // Subtle color classes for inactive icons (pale accents)
-  const iconInactiveBgClass = "bg-blue-50"; // very light blue background
-  const iconInactiveTextClass = "text-blue-400"; // soft, not gray
-
-  // Set active to cyan for clearer feedback
-  const iconActiveBgClass = "bg-cyan-100";       // cyan background
-  const iconActiveTextClass = "text-cyan-600";   // deep cyan
 
   const menuItems = [
     { id: 'home', icon: Home, label: 'Home', tooltip: 'Return to homepage' },
@@ -68,23 +63,27 @@ export const AppSidebar = ({
     <Sidebar collapsible="icon" className="border-r border-gray-200">
       <SidebarHeader className="border-b border-gray-100 pb-4">
         <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">pS</span>
           </div>
-          <div className="flex-1 group-data-[collapsible=icon]:hidden">
-            <h2 className="font-semibold text-gray-900">
-              pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
-            </h2>
-            <p className="text-xs text-gray-500">Your guide to French education</p>
-          </div>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <h2 className="font-semibold text-gray-900 truncate">
+                pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+              </h2>
+              <p className="text-xs text-gray-500 truncate">Your guide to French education</p>
+            </div>
+          )}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide group-data-[collapsible=icon]:hidden">
-            Navigation
-          </SidebarGroupLabel>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Navigation
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {menuItems.map((item) => {
@@ -103,17 +102,19 @@ export const AppSidebar = ({
                       title={item.tooltip}
                     >
                       <div className={`
-                        p-2 rounded-md transition-colors
+                        p-2 rounded-md transition-colors flex-shrink-0
                         ${isActive 
-                          ? `${iconActiveBgClass} ${iconActiveTextClass}` 
-                          : `${iconInactiveBgClass} ${iconInactiveTextClass}`
+                          ? 'bg-cyan-100 text-cyan-600' 
+                          : 'bg-blue-50 text-blue-400'
                         }
                       `}>
                         <Icon className="h-4 w-4" />
                       </div>
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        {item.label}
-                      </span>
+                      {!isCollapsed && (
+                        <span className="truncate">
+                          {item.label}
+                        </span>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -124,20 +125,22 @@ export const AppSidebar = ({
       </SidebarContent>
 
       <SidebarFooter className="border-t border-gray-100 p-4">
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+        <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full" />
             ) : (
               <User className="h-4 w-4 text-gray-500" />
             )}
           </div>
-          <div className="flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium text-gray-900">
-              {cleanedName ? `Hello, ${cleanedName}!` : "Hello, Stranger!"}
-            </p>
-            <p className="text-xs text-gray-500">Student</p>
-          </div>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {cleanedName ? `Hello, ${cleanedName}!` : "Hello, Stranger!"}
+              </p>
+              <p className="text-xs text-gray-500">Student</p>
+            </div>
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>
