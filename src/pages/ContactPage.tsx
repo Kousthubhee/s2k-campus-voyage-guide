@@ -211,6 +211,41 @@ export const ContactPage = () => {
         </div>
       </div>
 
+      {/* FAQ Section */}
+      <Card className="mb-12">
+        <CardHeader>
+          <CardTitle>Frequently Asked Questions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">How long does visa processing take?</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Student visa processing typically takes 2-4 weeks, but we recommend applying at least 8 weeks before your intended travel date.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Do you help with accommodation?</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Yes! We have partnerships with student housing providers and can help you find suitable accommodation near your university.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">What documents do I need?</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Required documents vary by program, but typically include passport, academic transcripts, language certificates, and financial proof.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Is there application assistance?</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Absolutely! Our team provides step-by-step guidance throughout your entire application process, from university selection to visa approval.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Creator Information */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardContent className="p-8 text-center">
@@ -226,7 +261,7 @@ export const ContactPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">👩‍💻</div>
+                  <div className="text-4xl mr-4">👨‍💻</div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Kousthubhee Krishna</h3>
                     <p className="text-blue-600">Co-Founder & Developer</p>
