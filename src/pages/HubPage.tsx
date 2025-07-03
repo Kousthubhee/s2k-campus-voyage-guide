@@ -657,8 +657,6 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'reels' && (
@@ -676,8 +674,6 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
             />
           )}
           {activeTab === 'polls' && (
@@ -697,8 +693,6 @@ export const HubPage = () => {
               setNewComment={setNewComment}
               onComment={handleComment}
               onReply={handleReply}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
             />
           )}
         </div>
