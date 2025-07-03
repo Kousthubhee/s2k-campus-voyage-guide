@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export function HubTripPlanCard() {
   return (

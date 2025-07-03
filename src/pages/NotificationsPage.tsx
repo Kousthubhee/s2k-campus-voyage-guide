@@ -5,7 +5,7 @@ import { Bell, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import { PageTitle } from '../components/PageTitle';
 import { useNotifications, getTimeAgo } from "@/hooks/useNotifications";
 import { ReminderNotificationActions } from "../components/notifications/ReminderNotificationActions";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { useEffect } from "react";
 import { NotificationErrorBoundary } from "../components/NotificationErrorBoundary";
 
