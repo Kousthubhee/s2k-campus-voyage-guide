@@ -17,6 +17,7 @@ import { PreArrival2Page } from './PreArrival2Page';
 import { PostArrivalPage } from './PostArrivalPage';
 import { FinanceTrackingPage } from './FinanceTrackingPage';
 import { SuggestionsPage } from './SuggestionsPage';
+import { QAPage } from './QAPage';
 import checklistModules from '@/constants/checklistModules';
 
 interface MainRouterProps {
@@ -170,6 +171,8 @@ export function MainRouter({
           onBack={() => setCurrentPage('checklist')}
         />
       );
+    case 'qa':
+      return <QAPage />;
     default:
       return (
         <HomePage 

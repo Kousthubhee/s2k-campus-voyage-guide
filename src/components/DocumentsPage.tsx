@@ -1,374 +1,342 @@
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { FileText, Plus, Bell, Calendar, AlertTriangle, CheckCircle, Clock, Trash2, Edit2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { toast } from '@/components/ui/sonner';
-import { DocumentEditDialog } from './documents/DocumentEditDialog';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, Calendar, AlertTriangle, Edit, Trash2, Plus } from "lucide-react";
 
 interface Document {
   id: string;
   name: string;
-  type: string;
+  category: string;
   submissionDate: string;
   expiryDate: string;
-  status: 'valid' | 'expiring' | 'expired';
-  renewalProcess: string[];
-  notificationEnabled: boolean;
-  notes?: string;
+  status: "pending" | "submitted" | "approved" | "expired";
 }
 
-export const DocumentsPage = () => {
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      name: 'Student Visa',
-      type: 'Immigration',
-      submissionDate: '2024-01-15',
-      expiryDate: '2025-01-14',
-      status: 'valid',
-      renewalProcess: [
-        'Start renewal process 2 months before expiry',
-        'Book appointment at prefecture',
-        'Prepare required documents (passport, proof of enrollment, etc.)',
-        'Pay renewal fees',
-        'Submit application at prefecture'
-      ],
-      notificationEnabled: true,
-      notes: 'Remember to bring original documents and copies'
-    },
-    {
-      id: '2',
-      name: 'Residence Permit',
-      type: 'Immigration',
-      submissionDate: '2024-01-20',
-      expiryDate: '2024-05-15',
-      status: 'expiring',
-      renewalProcess: [
-        'Begin renewal 2 months before expiry',
-        'Gather required documents',
-        'Schedule prefecture appointment',
-        'Submit renewal application'
-      ],
-      notificationEnabled: true,
-      notes: 'Keep proof of previous permits'
-    }
-  ]);
+interface DocumentEditDialogProps {
+  open: boolean;
+  submissionDate: string;
+  expiryDate: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+}
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
-  const [editFormData, setEditFormData] = useState<{ submissionDate: string; expiryDate: string }>({
+const DocumentEditDialog: React.FC<DocumentEditDialogProps> = ({
+  open,
+  submissionDate,
+  expiryDate,
+  onChange,
+  onCancel,
+  onSubmit
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={o => !o && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Document Dates</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="edit-submission-date">Submission Date</Label>
+            <Input
+              id="edit-submission-date"
+              name="submissionDate"
+              type="date"
+              value={submissionDate}
+              onChange={onChange}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-expiry-date">Expiry Date</Label>
+            <Input
+              id="edit-expiry-date"
+              name="expiryDate"
+              type="date"
+              value={expiryDate}
+              onChange={onChange}
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSubmit}>
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const sampleDocuments: Document[] = [
+  {
+    id: "1",
+    name: "Passport",
+    category: "Identity",
+    submissionDate: "2024-01-15",
+    expiryDate: "2029-01-15",
+    status: "approved"
+  },
+  {
+    id: "2",
+    name: "Student Visa",
+    category: "Visa",
+    submissionDate: "2024-02-20",
+    expiryDate: "2025-02-20",
+    status: "approved"
+  },
+  {
+    id: "3",
+    name: "Health Insurance",
+    category: "Insurance",
+    submissionDate: "2024-03-01",
+    expiryDate: "2024-12-31",
+    status: "pending"
+  },
+  {
+    id: "4",
+    name: "Academic Transcripts",
+    category: "Education",
+    submissionDate: "2024-01-10",
+    expiryDate: "2026-01-10",
+    status: "submitted"
+  }
+];
+
+export const DocumentsPage = () => {
+  const [documents, setDocuments] = useState<Document[]>(sampleDocuments);
+  const [editingDoc, setEditingDoc] = useState<Document | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
     submissionDate: '',
     expiryDate: ''
   });
-  const [newDocument, setNewDocument] = useState({
-    name: '',
-    type: '',
-    submissionDate: '',
-    expiryDate: '',
-    renewalProcess: '',
-    notes: ''
-  });
-
-  const calculateStatus = (expiryDate: string): 'valid' | 'expiring' | 'expired' => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    const monthsUntilExpiry = (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30);
-    
-    if (monthsUntilExpiry < 0) return 'expired';
-    if (monthsUntilExpiry < 2) return 'expiring';
-    return 'valid';
-  };
-
-  const handleAddDocument = () => {
-    if (!newDocument.name || !newDocument.type || !newDocument.submissionDate || !newDocument.expiryDate) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    const status = calculateStatus(newDocument.expiryDate);
-    const newDoc: Document = {
-      id: Date.now().toString(),
-      ...newDocument,
-      status,
-      renewalProcess: newDocument.renewalProcess.split('\n').filter(step => step.trim()),
-      notificationEnabled: true
-    };
-
-    setDocuments([...documents, newDoc]);
-    setIsAddDialogOpen(false);
-    setNewDocument({ name: '', type: '', submissionDate: '', expiryDate: '', renewalProcess: '', notes: '' });
-    toast.success('Document added successfully');
-  };
-
-  const handleEditDocument = (doc: Document) => {
-    setEditingDocument(doc);
-    setEditFormData({
-      submissionDate: doc.submissionDate,
-      expiryDate: doc.expiryDate
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingDocument) return;
-
-    const updatedStatus = calculateStatus(editFormData.expiryDate);
-    const updatedDocuments = documents.map(doc =>
-      doc.id === editingDocument.id
-        ? {
-            ...doc,
-            submissionDate: editFormData.submissionDate,
-            expiryDate: editFormData.expiryDate,
-            status: updatedStatus
-          }
-        : doc
-    );
-
-    setDocuments(updatedDocuments);
-    setIsEditDialogOpen(false);
-    setEditingDocument(null);
-    toast.success('Document updated successfully');
-  };
-
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const deleteDocument = (docId: string) => {
-    setDocuments(documents.filter(doc => doc.id !== docId));
-    toast.success('Document deleted successfully');
-  };
-
-  const toggleNotification = (docId: string) => {
-    setDocuments(documents.map(doc => {
-      if (doc.id === docId) {
-        const newState = !doc.notificationEnabled;
-        toast(newState ? 'Notifications enabled' : 'Notifications disabled');
-        return { ...doc, notificationEnabled: newState };
-      }
-      return doc;
-    }));
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'valid':
-        return 'text-green-600';
-      case 'expiring':
-        return 'text-orange-600';
-      case 'expired':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
+      case "approved": return "text-green-600 bg-green-50";
+      case "submitted": return "text-blue-600 bg-blue-50";
+      case "pending": return "text-yellow-600 bg-yellow-50";
+      case "expired": return "text-red-600 bg-red-50";
+      default: return "text-gray-600 bg-gray-50";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'valid':
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'expiring':
-        return <Clock className="h-5 w-5 text-orange-600" />;
-      case 'expired':
-        return <AlertTriangle className="h-5 w-5 text-red-600" />;
-      default:
-        return null;
+      case "approved": return "✓";
+      case "submitted": return "📤";
+      case "pending": return "⏳";
+      case "expired": return "⚠️";
+      default: return "📄";
     }
   };
 
+  const isDueSoon = (expiryDate: string) => {
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const diffTime = expiry.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 30 && diffDays > 0;
+  };
+
+  const isExpired = (expiryDate: string) => {
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    return expiry < now;
+  };
+
+  const handleEditDocument = (doc: Document) => {
+    setEditingDoc(doc);
+    setEditFormData({
+      submissionDate: doc.submissionDate,
+      expiryDate: doc.expiryDate
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingDoc) return;
+    
+    setDocuments(prev => prev.map(doc => 
+      doc.id === editingDoc.id 
+        ? { ...doc, ...editFormData }
+        : doc
+    ));
+    
+    setEditDialogOpen(false);
+    setEditingDoc(null);
+    console.log('Document updated:', { id: editingDoc.id, ...editFormData });
+  };
+
+  const handleCancelEdit = () => {
+    setEditDialogOpen(false);
+    setEditingDoc(null);
+    setEditFormData({ submissionDate: '', expiryDate: '' });
+  };
+
+  const upcomingRenewals = documents.filter(doc => 
+    isDueSoon(doc.expiryDate) || isExpired(doc.expiryDate)
+  );
+
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-          <FileText className="h-8 w-8 mr-3 text-blue-600" />
-          Documents & Renewals
-        </h1>
-        <p className="text-lg text-gray-600">
-          Track your important documents and stay updated on renewal deadlines
-        </p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Documents & Renewals</h1>
+        <p className="text-gray-600">Keep track of your important documents and renewal dates</p>
       </div>
 
-      <div className="mb-6 flex justify-end">
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Document
-        </Button>
-      </div>
+      {/* Alerts for upcoming renewals */}
+      {upcomingRenewals.length > 0 && (
+        <Card className="mb-6 border-yellow-200 bg-yellow-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              <h3 className="font-semibold text-yellow-800">Renewal Alerts</h3>
+            </div>
+            <div className="space-y-1">
+              {upcomingRenewals.map(doc => (
+                <p key={doc.id} className="text-sm text-yellow-700">
+                  <strong>{doc.name}</strong> {isExpired(doc.expiryDate) ? 'has expired' : 'expires soon'} 
+                  ({new Date(doc.expiryDate).toLocaleDateString()})
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      <div className="grid grid-cols-1 gap-6">
+      {/* Documents Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {documents.map((doc) => (
-          <Card key={doc.id} className={`border-l-4 ${
-            doc.status === 'valid' ? 'border-l-green-500' :
-            doc.status === 'expiring' ? 'border-l-orange-500' :
-            'border-l-red-500'
-          }`}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900 mr-3">{doc.name}</h3>
-                    {getStatusIcon(doc.status)}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">Type: {doc.type}</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Submitted: {new Date(doc.submissionDate).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Expires: {new Date(doc.expiryDate).toLocaleDateString()}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Renewal Process:</h4>
-                    <ul className="list-disc list-inside space-y-1">
-                      {doc.renewalProcess.map((step, index) => (
-                        <li key={index} className="text-sm text-gray-600">{step}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {doc.notes && (
-                    <div className="mt-4 bg-gray-50 p-3 rounded-md">
-                      <h4 className="font-medium text-gray-900 mb-1">Notes:</h4>
-                      <p className="text-sm text-gray-600">{doc.notes}</p>
-                    </div>
-                  )}
+          <Card key={doc.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-lg">{doc.name}</CardTitle>
                 </div>
-
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEditDocument(doc)}
+                    className="h-8 w-8 p-0"
                   >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={doc.notificationEnabled ? 'text-blue-600' : 'text-gray-400'}
-                    onClick={() => toggleNotification(doc.id)}
-                  >
-                    <Bell className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600"
-                    onClick={() => deleteDocument(doc.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
+                    <Edit className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Category</span>
+                <span className="text-sm font-medium">{doc.category}</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Status</span>
+                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(doc.status)}`}>
+                  {getStatusIcon(doc.status)} {doc.status}
+                </span>
+              </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className={`text-sm font-medium ${getStatusColor(doc.status)}`}>
-                  Status: {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Submitted</span>
+                <span className="text-sm">{new Date(doc.submissionDate).toLocaleDateString()}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Expires</span>
+                <span className={`text-sm ${isDueSoon(doc.expiryDate) || isExpired(doc.expiryDate) ? 'text-red-600 font-semibold' : ''}`}>
+                  {new Date(doc.expiryDate).toLocaleDateString()}
+                </span>
               </div>
             </CardContent>
           </Card>
         ))}
+
+        {/* Add New Document Card */}
+        <Card className="border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer">
+          <CardContent className="flex flex-col items-center justify-center h-full py-12">
+            <Plus className="h-8 w-8 text-gray-400 mb-2" />
+            <p className="text-gray-600 text-center">Add New Document</p>
+            <p className="text-sm text-gray-500 text-center mt-1">Upload and track important documents</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Document</DialogTitle>
-          </DialogHeader>
+      {/* Renewal Calendar Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Upcoming Renewals
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Document Name</Label>
-              <Input
-                id="name"
-                value={newDocument.name}
-                onChange={(e) => setNewDocument({ ...newDocument, name: e.target.value })}
-                placeholder="e.g., Student Visa"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="type">Document Type</Label>
-              <Input
-                id="type"
-                value={newDocument.type}
-                onChange={(e) => setNewDocument({ ...newDocument, type: e.target.value })}
-                placeholder="e.g., Immigration"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="submissionDate">Submission Date</Label>
-              <Input
-                id="submissionDate"
-                type="date"
-                value={newDocument.submissionDate}
-                onChange={(e) => setNewDocument({ ...newDocument, submissionDate: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="expiryDate">Expiry Date</Label>
-              <Input
-                id="expiryDate"
-                type="date"
-                value={newDocument.expiryDate}
-                onChange={(e) => setNewDocument({ ...newDocument, expiryDate: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="renewalProcess">Renewal Process (one step per line)</Label>
-              <Textarea
-                id="renewalProcess"
-                value={newDocument.renewalProcess}
-                onChange={(e) => setNewDocument({ ...newDocument, renewalProcess: e.target.value })}
-                placeholder="Step 1&#10;Step 2&#10;Step 3"
-                className="h-32"
-              />
-            </div>
-            <div>
-              <Label htmlFor="notes">Additional Notes</Label>
-              <Textarea
-                id="notes"
-                value={newDocument.notes}
-                onChange={(e) => setNewDocument({ ...newDocument, notes: e.target.value })}
-                placeholder="Add any important notes or reminders..."
-                className="h-20"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddDocument}>
-                Add Document
-              </Button>
-            </div>
+            {documents
+              .filter(doc => {
+                const expiry = new Date(doc.expiryDate);
+                const now = new Date();
+                const diffTime = expiry.getTime() - now.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 90; // Show renewals due in next 90 days
+              })
+              .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+              .map(doc => (
+                <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">{doc.name}</p>
+                    <p className="text-sm text-gray-600">{doc.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-medium ${isExpired(doc.expiryDate) ? 'text-red-600' : isDueSoon(doc.expiryDate) ? 'text-yellow-600' : 'text-green-600'}`}>
+                      {new Date(doc.expiryDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {isExpired(doc.expiryDate) ? 'Expired' : 
+                       Math.ceil((new Date(doc.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) + ' days left'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            {documents.filter(doc => {
+              const expiry = new Date(doc.expiryDate);
+              const now = new Date();
+              const diffTime = expiry.getTime() - now.getTime();
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              return diffDays <= 90;
+            }).length === 0 && (
+              <p className="text-gray-500 text-center py-4">No upcoming renewals in the next 90 days</p>
+            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
 
+      {/* Edit Dialog */}
       <DocumentEditDialog
-        open={isEditDialogOpen}
+        open={editDialogOpen}
         submissionDate={editFormData.submissionDate}
         expiryDate={editFormData.expiryDate}
         onChange={handleEditFormChange}
-        onCancel={() => setIsEditDialogOpen(false)}
+        onCancel={handleCancelEdit}
         onSubmit={handleSaveEdit}
       />
     </div>
