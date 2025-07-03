@@ -1,10 +1,9 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, LogOut } from 'lucide-react';
 import { ProfileEditDialog } from './ProfileEditDialog';
-import { useAuth } from '@/hooks/useAuth';
+import { Key, Bell, User, LogIn } from 'lucide-react';
 
 interface HeaderProps {
   currentPage: string;
@@ -12,80 +11,76 @@ interface HeaderProps {
   userProgress: any;
   userProfile: any;
   setUserProfile: (profile: any) => void;
-  showAuth?: boolean;
+  showAuth: boolean;
 }
 
-export const Header = ({ 
-  currentPage, 
-  setCurrentPage, 
-  userProgress, 
-  userProfile, 
+export const Header: React.FC<HeaderProps> = ({
+  currentPage,
+  setCurrentPage,
+  userProgress,
+  userProfile,
   setUserProfile,
-  showAuth = false
-}: HeaderProps) => {
-  const { user, signOut } = useAuth();
-  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  showAuth
+}) => {
+  const handleNotificationClick = () => {
+    setCurrentPage('notifications');
+  };
 
-  const handleSignOut = async () => {
-    await signOut();
-    setCurrentPage('checklist');
+  const handleAuthClick = () => {
+    setCurrentPage('login');
   };
 
   return (
-    <>
-      <div className="flex items-center space-x-4">
-        {/* Keys Badge */}
-        {userProgress?.keys > 0 && (
-          <Badge variant="secondary" className="flex items-center">
-            🗝️ {userProgress.keys} keys
-          </Badge>
-        )}
+    <div className="flex items-center gap-4">
+      {/* Notification Icon */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleNotificationClick}
+        className="relative"
+      >
+        <Bell className="h-5 w-5" />
+        <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs p-0">
+          3
+        </Badge>
+      </Button>
 
-        {/* Auth Section */}
-        {user ? (
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowProfileEdit(true)}
-              className="flex items-center space-x-2"
-            >
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {userProfile?.name || user.email?.split('@')[0] || 'User'}
-              </span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="text-red-600 hover:text-red-700"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline ml-2">Sign Out</span>
-            </Button>
-          </div>
-        ) : (
-          <Button
-            onClick={() => setCurrentPage('login')}
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Sign In
-          </Button>
-        )}
+      {/* Keys Counter */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
+        <Key className="h-4 w-4 text-yellow-600" />
+        <span className="text-sm font-semibold text-yellow-800">
+          {userProgress?.keys || 0} Keys
+        </span>
       </div>
 
-      {/* Profile Edit Dialog */}
-      {showProfileEdit && userProfile && (
-        <ProfileEditDialog
-          open={showProfileEdit}
-          onOpenChange={setShowProfileEdit}
-          profile={userProfile}
-          onSave={setUserProfile}
-        />
+      {/* Auth/Profile Section */}
+      {showAuth ? (
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleAuthClick}
+          className="flex items-center gap-2"
+        >
+          <LogIn className="h-4 w-4" />
+          Sign In
+        </Button>
+      ) : (
+        <div className="flex items-center gap-2">
+          <ProfileEditDialog 
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentPage('profile')}
+            className="flex items-center gap-2"
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </Button>
+        </div>
       )}
-    </>
+    </div>
   );
 };

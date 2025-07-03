@@ -69,10 +69,10 @@ export const AppSidebar = ({
       <SidebarHeader className="border-b border-gray-100 pb-4">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">CV</span>
+            <span className="text-white font-bold text-sm">pS</span>
           </div>
           <div className="flex-1 group-data-[collapsible=icon]:hidden">
-            <h2 className="font-semibold text-gray-900">Campus Voyage</h2>
+            <h2 className="font-semibold text-gray-900">pasS2Kampus</h2>
             <p className="text-xs text-gray-500">Study Guide</p>
           </div>
         </div>
@@ -112,13 +112,6 @@ export const AppSidebar = ({
                       <span className="group-data-[collapsible=icon]:hidden">
                         {item.label}
                       </span>
-                      
-                      {/* Add notification badge for notifications */}
-                      {item.id === 'notifications' && (
-                        <div className="ml-auto">
-                          <Bell className="h-4 w-4" />
-                        </div>
-                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

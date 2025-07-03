@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, Clock, Send, MessageSquare, Globe, Heart } from 'lucide-react';
+import { Mail, Phone, Clock, Send, MessageSquare, Globe, Heart } from 'lucide-react';
 
 export const ContactPage = () => {
   const [formData, setFormData] = React.useState({
@@ -34,8 +34,8 @@ export const ContactPage = () => {
       icon: Mail,
       title: 'Email Support',
       description: 'Get help via email',
-      value: 'support@campusvoyage.com',
-      action: 'mailto:support@campusvoyage.com'
+      value: 'pass2kampus@gmail.com',
+      action: 'mailto:pass2kampus@gmail.com'
     },
     {
       icon: MessageSquare,
@@ -48,8 +48,8 @@ export const ContactPage = () => {
       icon: Phone,
       title: 'Phone Support',
       description: 'Speak with our team',
-      value: '+33 1 23 45 67 89',
-      action: 'tel:+33123456789'
+      value: '+33 745736466',
+      action: 'tel:+33745736466'
     },
     {
       icon: Globe,
@@ -76,87 +76,85 @@ export const ContactPage = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Contact Form */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
-                Send us a Message
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Your full name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-                </div>
-                
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5" />
+              Send us a Message
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject *
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name *
                   </label>
                   <Input
-                    id="subject"
-                    name="subject"
+                    id="name"
+                    name="name"
                     type="text"
                     required
-                    value={formData.subject}
+                    value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="What's this about?"
+                    placeholder="Your full name"
                   />
                 </div>
-                
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Message *
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
                   </label>
-                  <Textarea
-                    id="message"
-                    name="message"
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
                     required
-                    rows={6}
-                    value={formData.message}
+                    value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Tell us how we can help you..."
+                    placeholder="your.email@example.com"
                   />
                 </div>
-                
-                <Button type="submit" className="w-full" size="lg">
-                  <Send className="h-4 w-4 mr-2" />
-                  Send Message
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+              
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                  Subject *
+                </label>
+                <Input
+                  id="subject"
+                  name="subject"
+                  type="text"
+                  required
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  placeholder="What's this about?"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  Message *
+                </label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={6}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder="Tell us how we can help you..."
+                />
+              </div>
+              
+              <Button type="submit" className="w-full" size="lg">
+                <Send className="h-4 w-4 mr-2" />
+                Send Message
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
         {/* Contact Methods & Support Hours */}
         <div className="space-y-6">
@@ -251,26 +249,49 @@ export const ContactPage = () => {
       {/* Creator Information */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardContent className="p-8 text-center">
-          <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center justify-center mb-6">
             <Heart className="h-6 w-6 text-red-500 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">About the Creator</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Creators: Kousthubhee Krishna & Srivatsava</h2>
           </div>
-          <div className="max-w-3xl mx-auto">
-            <p className="text-lg text-gray-700 mb-4">
-              <strong>Sriyatava Ganguly</strong> - Founder & Creator of Campus Voyage
+          <div className="max-w-4xl mx-auto">
+            <p className="text-lg text-blue-600 mb-6">
+              We're passionate about helping students navigate their journey to study in France. Our platform provides comprehensive guides, checklists, and support to make your French education dreams a reality.
             </p>
-            <p className="text-gray-600 leading-relaxed mb-6">
-              Campus Voyage was born from a personal mission to simplify the study abroad journey for international students. 
-              As someone who understands the challenges and complexities of studying in a foreign country, I created this platform 
-              to provide comprehensive guidance, connect students with trusted partners, and build a supportive community.
-            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">👨‍💻</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Kousthubhee Krishna</h3>
+                    <p className="text-blue-600">Co-Founder & Developer</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">Passionate about helping students navigate French education</p>
+              </div>
+              
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">👨‍🎨</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Srivatsava</h3>
+                    <p className="text-blue-600">Co-Founder & Content Creator</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">Passionate about helping students navigate French education</p>
+              </div>
+            </div>
+
             <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Our Mission</h3>
-              <p className="text-gray-700">
-                To empower students worldwide with the tools, resources, and community support they need to successfully 
-                pursue their educational dreams in France and beyond. Every feature, partnership, and service is designed 
-                with student success and well-being at its core.
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Helping students navigate their journey to study in France</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Our mission is to provide comprehensive, reliable, and up-to-date information to help international students successfully pursue their education in France.
               </p>
+              <div className="bg-blue-50 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Made for students</strong> - We understand the challenges of studying abroad and have created this platform to make your journey smoother and more successful.
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
