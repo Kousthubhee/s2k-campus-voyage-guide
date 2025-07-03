@@ -18,10 +18,10 @@ import {
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
-  const { progress } = useLocalStorageProgress();
+  const [progress] = useLocalStorageProgress();
   
   const isHomePage = location.pathname === '/';
   const hasStartedJourney = progress?.unlocked_modules?.includes('pre-arrival-1') || false;
@@ -52,19 +52,19 @@ export function AppSidebar() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Sidebar className={cn("border-r", collapsed ? "w-14" : "w-64")} collapsible>
+    <Sidebar className={cn("border-r", state === "collapsed" ? "w-14" : "w-64")} collapsible="icon">
       <SidebarContent className="p-4">
         <div className="mb-6">
-          <h1 className={cn("font-bold text-lg text-blue-600", collapsed && "hidden")}>
+          <h1 className={cn("font-bold text-lg text-blue-600", state === "collapsed" && "hidden")}>
             pasS2Kampus
           </h1>
-          {collapsed && (
+          {state === "collapsed" && (
             <div className="text-blue-600 font-bold text-sm">P2K</div>
           )}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "hidden" : ""}>
+          <SidebarGroupLabel className={state === "collapsed" ? "hidden" : ""}>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -80,7 +80,7 @@ export function AppSidebar() {
                       )}
                     >
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {state !== "collapsed" && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

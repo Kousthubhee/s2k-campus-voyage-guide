@@ -47,22 +47,31 @@ export const useHubData = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch posts with user profile information
+      const { data: postsData, error } = await supabase
         .from('hub_posts')
-        .select(`
-          *,
-          profiles:user_id (name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const postsWithAuthor = data?.map(post => ({
+      // Get unique user IDs
+      const userIds = [...new Set(postsData?.map(post => post.user_id) || [])];
+      
+      // Fetch profiles for these users
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, name, email')
+        .in('id', userIds);
+
+      // Create a map of user profiles
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.id, profile]) || []
+      );
+
+      const postsWithAuthor = postsData?.map(post => ({
         ...post,
-        author: post.profiles ? {
-          name: post.profiles.name,
-          email: post.profiles.email
-        } : undefined
+        author: profilesMap.get(post.user_id) || undefined
       })) || [];
 
       setPosts(postsWithAuthor);
@@ -76,23 +85,31 @@ export const useHubData = () => {
 
   const fetchComments = async (postId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: commentsData, error } = await supabase
         .from('hub_comments')
-        .select(`
-          *,
-          profiles:user_id (name, email)
-        `)
+        .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      const commentsWithAuthor = data?.map(comment => ({
+      // Get unique user IDs for comments
+      const userIds = [...new Set(commentsData?.map(comment => comment.user_id) || [])];
+      
+      // Fetch profiles for these users
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, name, email')
+        .in('id', userIds);
+
+      // Create a map of user profiles
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.id, profile]) || []
+      );
+
+      const commentsWithAuthor = commentsData?.map(comment => ({
         ...comment,
-        author: comment.profiles ? {
-          name: comment.profiles.name,
-          email: comment.profiles.email
-        } : undefined
+        author: profilesMap.get(comment.user_id) || undefined
       })) || [];
 
       setComments(prev => ({
@@ -152,10 +169,12 @@ export const useHubData = () => {
       fetchComments(postId);
       
       // Update comment count
-      await supabase
+      const { error: updateError } = await supabase
         .from('hub_posts')
-        .update({ comments_count: supabase.raw('comments_count + 1') })
+        .update({ comments_count: supabase.sql`comments_count + 1` })
         .eq('id', postId);
+      
+      if (updateError) console.error('Error updating comment count:', updateError);
       
       fetchPosts();
     } catch (error) {
@@ -200,10 +219,12 @@ export const useHubData = () => {
       fetchComments(postId);
       
       // Update comment count
-      await supabase
+      const { error: updateError } = await supabase
         .from('hub_posts')
-        .update({ comments_count: supabase.raw('comments_count - 1') })
+        .update({ comments_count: supabase.sql`comments_count - 1` })
         .eq('id', postId);
+      
+      if (updateError) console.error('Error updating comment count:', updateError);
       
       fetchPosts();
     } catch (error) {
@@ -237,7 +258,7 @@ export const useHubData = () => {
 
         await supabase
           .from('hub_posts')
-          .update({ likes_count: supabase.raw('likes_count - 1') })
+          .update({ likes_count: supabase.sql`likes_count - 1` })
           .eq('id', postId);
       } else {
         // Like
@@ -250,7 +271,7 @@ export const useHubData = () => {
 
         await supabase
           .from('hub_posts')
-          .update({ likes_count: supabase.raw('likes_count + 1') })
+          .update({ likes_count: supabase.sql`likes_count + 1` })
           .eq('id', postId);
       }
 

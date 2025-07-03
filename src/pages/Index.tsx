@@ -48,7 +48,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
-import { MainRouter } from './MainRouter';
+import MainRouter from './MainRouter';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
 
 console.log("App.tsx is rendering");
@@ -201,12 +201,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
-        <AppSidebar
-          currentPage={currentPage}
-          setCurrentPage={handlePageNavigation}
-          userName={userProfile?.name || user?.email || 'Guest'}
-          userAvatarUrl=""
-        />
+        <AppSidebar />
         <SidebarInset>
           <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
             <div className="flex h-16 shrink-0 items-center gap-2 px-4">

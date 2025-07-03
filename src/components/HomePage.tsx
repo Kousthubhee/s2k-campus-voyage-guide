@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const { progress, updateProgress } = useLocalStorageProgress();
+  const [progress, updateProgress] = useLocalStorageProgress();
   const [isStarting, setIsStarting] = useState(false);
 
   const hasStartedJourney = progress?.unlocked_modules?.includes('pre-arrival-1') || false;
