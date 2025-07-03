@@ -249,6 +249,7 @@ const Index = () => {
                   setSelectedSchool={setSelectedSchool}
                   handleProgressUpdate={handleProgressUpdate}
                   profile={userProfile}
+                  setUserProfile={setUserProfile}
                 />
               )}
             </div>

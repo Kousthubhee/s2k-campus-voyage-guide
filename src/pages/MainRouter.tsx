@@ -1,4 +1,3 @@
-
 import { ChecklistModule } from '@/components/ChecklistModule';
 import { HomePage } from '@/components/HomePage';
 import { DocumentsPage } from '@/components/DocumentsPage';
@@ -39,6 +38,7 @@ interface MainRouterProps {
     prevEducation: string;
     workExperience: string;
   };
+  setUserProfile: (profile: any) => void;
 }
 
 export function MainRouter({
@@ -51,6 +51,7 @@ export function MainRouter({
   setSelectedSchool,
   handleProgressUpdate,
   profile,
+  setUserProfile,
 }: MainRouterProps) {
   // DEBUG LOG
   console.log("[MainRouter] Render props", {
@@ -174,7 +175,7 @@ export function MainRouter({
     case 'qa':
       return <QAPage />;
     case 'profile':  
-      return <ProfilePage />;
+      return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />;
     default:
       return (
         <HomePage 
