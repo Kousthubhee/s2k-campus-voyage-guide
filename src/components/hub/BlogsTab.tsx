@@ -21,6 +21,8 @@ interface BlogsTabProps {
   setNewComment: (comments: any) => void;
   onComment: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
   onReply: (itemId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onEditComment: (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
+  onDeleteComment: (postId: number, commentId: number, type: "post" | "reel" | "poll" | "blog") => void;
 }
 
 export const BlogsTab: React.FC<BlogsTabProps> = ({
@@ -36,7 +38,9 @@ export const BlogsTab: React.FC<BlogsTabProps> = ({
   newComment,
   setNewComment,
   onComment,
-  onReply
+  onReply,
+  onEditComment,
+  onDeleteComment
 }) => {
   return (
     <>
@@ -120,7 +124,29 @@ export const BlogsTab: React.FC<BlogsTabProps> = ({
             <div className="space-y-3">
               {blog.comments.map((comment: QAComment) => (
                 <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
-                  <div className="font-semibold text-sm mb-1">{comment.author}</div>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="font-semibold text-sm">{comment.author}</div>
+                    {comment.author === 'You' && (
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditComment(blog.id, comment.id, 'blog')}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDeleteComment(blog.id, comment.id, 'blog')}
+                          className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   <p className="text-sm mb-2">{comment.content}</p>
                   
                   {/* Reply Input */}
