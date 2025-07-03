@@ -76,6 +76,119 @@ const DocumentEditDialog: React.FC<DocumentEditDialogProps> = ({
   );
 };
 
+interface AddProcessDialogProps {
+  open: boolean;
+  formData: {
+    name: string;
+    category: string;
+    submissionDate: string;
+    expiryDate: string;
+    status: string;
+  };
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+}
+
+const AddProcessDialog: React.FC<AddProcessDialogProps> = ({
+  open,
+  formData,
+  onChange,
+  onCancel,
+  onSubmit
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={o => !o && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Process</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="process-name">Process Name</Label>
+            <Input
+              id="process-name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={onChange}
+              placeholder="e.g., Student Visa, Health Insurance"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="process-category">Category</Label>
+            <select
+              id="process-category"
+              name="category"
+              value={formData.category}
+              onChange={onChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Identity">Identity</option>
+              <option value="Visa">Visa</option>
+              <option value="Insurance">Insurance</option>
+              <option value="Education">Education</option>
+              <option value="Financial">Financial</option>
+              <option value="Housing">Housing</option>
+              <option value="Health">Health</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="process-submission-date">Submission Date</Label>
+            <Input
+              id="process-submission-date"
+              name="submissionDate"
+              type="date"
+              value={formData.submissionDate}
+              onChange={onChange}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="process-expiry-date">Expiry Date</Label>
+            <Input
+              id="process-expiry-date"
+              name="expiryDate"
+              type="date"
+              value={formData.expiryDate}
+              onChange={onChange}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="process-status">Status</Label>
+            <select
+              id="process-status"
+              name="status"
+              value={formData.status}
+              onChange={onChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="submitted">Submitted</option>
+              <option value="approved">Approved</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSubmit}>
+              Add Process
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const sampleDocuments: Document[] = [
   {
     id: "1",
@@ -115,9 +228,17 @@ export const DocumentsPage = () => {
   const [documents, setDocuments] = useState<Document[]>(sampleDocuments);
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
     submissionDate: '',
     expiryDate: ''
+  });
+  const [addFormData, setAddFormData] = useState({
+    name: '',
+    category: '',
+    submissionDate: '',
+    expiryDate: '',
+    status: 'pending'
   });
 
   const getStatusColor = (status: string) => {
@@ -164,12 +285,21 @@ export const DocumentsPage = () => {
   };
 
   const handleDeleteDocument = (docId: string) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== docId));
-    console.log('Document deleted:', docId);
+    if (confirm('Are you sure you want to delete this document?')) {
+      setDocuments(prev => prev.filter(doc => doc.id !== docId));
+      console.log('Document deleted:', docId);
+    }
   };
 
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleAddFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setAddFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
@@ -189,10 +319,48 @@ export const DocumentsPage = () => {
     console.log('Document updated:', { id: editingDoc.id, ...editFormData });
   };
 
+  const handleAddProcess = () => {
+    if (!addFormData.name || !addFormData.category || !addFormData.submissionDate || !addFormData.expiryDate) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    const newDocument: Document = {
+      id: Date.now().toString(),
+      name: addFormData.name,
+      category: addFormData.category,
+      submissionDate: addFormData.submissionDate,
+      expiryDate: addFormData.expiryDate,
+      status: addFormData.status as Document['status']
+    };
+
+    setDocuments(prev => [...prev, newDocument]);
+    setAddDialogOpen(false);
+    setAddFormData({
+      name: '',
+      category: '',
+      submissionDate: '',
+      expiryDate: '',
+      status: 'pending'
+    });
+    console.log('New process added:', newDocument);
+  };
+
   const handleCancelEdit = () => {
     setEditDialogOpen(false);
     setEditingDoc(null);
     setEditFormData({ submissionDate: '', expiryDate: '' });
+  };
+
+  const handleCancelAdd = () => {
+    setAddDialogOpen(false);
+    setAddFormData({
+      name: '',
+      category: '',
+      submissionDate: '',
+      expiryDate: '',
+      status: 'pending'
+    });
   };
 
   const upcomingRenewals = documents.filter(doc => 
@@ -284,8 +452,11 @@ export const DocumentsPage = () => {
           </Card>
         ))}
 
-        {/* Add New Document Card */}
-        <Card className="border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer">
+        {/* Add New Process Card */}
+        <Card 
+          className="border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer"
+          onClick={() => setAddDialogOpen(true)}
+        >
           <CardContent className="flex flex-col items-center justify-center h-full py-12">
             <Plus className="h-8 w-8 text-gray-400 mb-2" />
             <p className="text-gray-600 text-center">Add New Process</p>
@@ -351,6 +522,15 @@ export const DocumentsPage = () => {
         onChange={handleEditFormChange}
         onCancel={handleCancelEdit}
         onSubmit={handleSaveEdit}
+      />
+
+      {/* Add Process Dialog */}
+      <AddProcessDialog
+        open={addDialogOpen}
+        formData={addFormData}
+        onChange={handleAddFormChange}
+        onCancel={handleCancelAdd}
+        onSubmit={handleAddProcess}
       />
     </div>
   );

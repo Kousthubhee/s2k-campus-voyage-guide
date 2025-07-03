@@ -8,7 +8,8 @@ import {
   Phone,
   User,
   Home,
-  FileText
+  FileText,
+  Bell
 } from 'lucide-react';
 import {
   Sidebar,
@@ -58,84 +59,66 @@ export const AppSidebar = ({
     { id: 'news', icon: BookOpen, label: 'Stay Updated', tooltip: 'Latest campus and city news' },
     { id: 'affiliation', icon: Building2, label: 'Our Partners', tooltip: 'See our affiliations' },
     { id: 'language', icon: Languages, label: 'Learn French', tooltip: 'Practice French language skills' },
-    { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Translate documents or conversations' },
-    { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Reach support or ask for help' },
+    { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Universal translator tool' },
+    { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Get in touch with our support team' },
+    { id: 'profile', icon: User, label: 'Profile', tooltip: 'Manage your profile settings' },
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <div className="p-4 pb-2 border-b border-blue-100">
-          <div
-            className="text-xl cursor-pointer hover:scale-105 transition-transform font-bold"
-            onClick={() => setCurrentPage('home')}
-          >
-            pas<span className="text-cyan-600 font-bold">S</span>2<span className="text-blue-600 font-bold">K</span>ampus
+    <Sidebar collapsible="icon" className="border-r border-gray-200">
+      <SidebarHeader className="border-b border-gray-100 pb-4">
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">CV</span>
           </div>
-          <div className="text-xs text-gray-600 mt-1 font-normal">
-            Your guide to French education
-          </div>
-        </div>
-        <div className="flex items-center mb-3 px-4 mt-3">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="avatar"
-              className="w-12 h-12 rounded-full border-2 border-blue-400 shadow-sm"
-            />
-          ) : (
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold text-xl border">
-              {cleanedName ? cleanedName[0].toUpperCase() : 'S'}
-            </div>
-          )}
-          <div className="ml-4">
-            <div className="leading-6 text-base font-normal text-gray-900">
-              <span className="font-bold">
-                Hello{cleanedName ? "," : ", Stranger!"}
-              </span>
-              {cleanedName && (
-                <span className="font-bold"> {cleanedName}!</span>
-              )}
-              {!cleanedName && null}
-            </div>
-            <div className="text-xs text-gray-500 font-normal">Welcome!</div>
+          <div className="flex-1 group-data-[collapsible=icon]:hidden">
+            <h2 className="font-semibold text-gray-900">Campus Voyage</h2>
+            <p className="text-xs text-gray-500">Study Guide</p>
           </div>
         </div>
       </SidebarHeader>
-      
-      <SidebarContent>
+
+      <SidebarContent className="px-2 py-4">
         <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide group-data-[collapsible=icon]:hidden">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {menuItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = currentPage === item.id;
+                const Icon = item.icon;
+                
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
-                      isActive={isActive}
                       onClick={() => setCurrentPage(item.id)}
-                      className={`w-full group transition-all px-3 py-2 rounded-lg hover:bg-blue-50 hover:shadow-md hover:scale-[1.03] text-[15px] font-normal ${
-                        isActive
-                          ? 'bg-blue-100 text-blue-700 shadow'
-                          : 'text-gray-700'
-                      }`}
-                      tooltip={item.tooltip}
+                      className={`
+                        flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200
+                        hover:bg-gray-50 group relative
+                        ${isActive ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:text-gray-900'}
+                      `}
+                      title={item.tooltip}
                     >
-                      <span
-                        className={`
-                          rounded-full p-2 flex items-center justify-center mr-3 transition-all
-                          ${isActive
-                            ? `${iconActiveBgClass} ${iconActiveTextClass} scale-110 shadow`
-                            : `${iconInactiveBgClass} ${iconInactiveTextClass}`
-                          }
-                        `}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className={isActive ? "font-bold" : "font-normal"}>
+                      <div className={`
+                        p-2 rounded-md transition-colors
+                        ${isActive 
+                          ? `${iconActiveBgClass} ${iconActiveTextClass}` 
+                          : `${iconInactiveBgClass} ${iconInactiveTextClass}`
+                        }
+                      `}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="group-data-[collapsible=icon]:hidden">
                         {item.label}
                       </span>
+                      
+                      {/* Add notification badge for notifications */}
+                      {item.id === 'notifications' && (
+                        <div className="ml-auto">
+                          <Bell className="h-4 w-4" />
+                        </div>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -144,34 +127,24 @@ export const AppSidebar = ({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
-      <SidebarFooter>
-        <div className="bg-blue-50 p-3 rounded-lg mt-4">
-          <div className="text-sm text-blue-900 mb-1 font-normal">Need Help?</div>
-          <div className="text-xs text-blue-700 mb-2 font-normal">
-            Reach out to our support team for assistance
+
+      <SidebarFooter className="border-t border-gray-100 p-4">
+        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full" />
+            ) : (
+              <User className="h-4 w-4 text-gray-500" />
+            )}
           </div>
-          <Button 
-            size="sm" 
-            className="w-full bg-blue-600 hover:bg-blue-700 shadow"
-            onClick={() => setCurrentPage('contact')}
-          >
-            Contact Support
-          </Button>
+          <div className="flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium text-gray-900">
+              {cleanedName ? `Hello, ${cleanedName}!` : "Hello, Stranger!"}
+            </p>
+            <p className="text-xs text-gray-500">Student</p>
+          </div>
         </div>
       </SidebarFooter>
-      {/* ...keep existing custom animation styles */}
-      <style>
-        {`
-          @keyframes sidebarActive {
-            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.2);}
-            100% { box-shadow: 0 4px 24px 2px rgba(59,130,246,0.11);}
-          }
-          .animate-sidebar-active {
-            animation: sidebarActive 0.4s;
-          }
-        `}
-      </style>
     </Sidebar>
   );
 };

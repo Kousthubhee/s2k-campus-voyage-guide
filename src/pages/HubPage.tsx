@@ -158,21 +158,23 @@ export const HubPage = () => {
       const item = posts.find(p => p.id === itemId && p.type === type);
       if (item && item.author === 'You') {
         // Enable edit mode for the item
-        const newContent = prompt('Edit your content:', 
-          type === 'post' ? item.content : 
-          type === 'reel' ? item.caption : 
-          type === 'poll' ? item.question : ''
-        );
+        let currentContent = '';
+        if (item.type === 'post') currentContent = item.content;
+        else if (item.type === 'reel') currentContent = item.caption;
+        else if (item.type === 'poll') currentContent = item.question;
+        
+        const newContent = prompt('Edit your content:', currentContent);
         
         if (newContent && newContent.trim()) {
           if (blockIfPhone(newContent)) return;
           
           setPosts(posts.map(p => 
             p.id === itemId && p.type === type
-              ? { ...p, 
-                  content: type === 'post' ? newContent : p.content,
-                  caption: type === 'reel' ? newContent : p.caption,
-                  question: type === 'poll' ? newContent : p.question
+              ? { 
+                  ...p, 
+                  ...(p.type === 'post' && { content: newContent }),
+                  ...(p.type === 'reel' && { caption: newContent }),
+                  ...(p.type === 'poll' && { question: newContent })
                 }
               : p
           ));

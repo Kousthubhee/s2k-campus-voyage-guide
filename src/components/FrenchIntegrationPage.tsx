@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 interface FrenchIntegrationModuleCardProps {
-  icon: React.ComponentType<any>; // Accept anything (LucideProps etc)
+  icon: React.ComponentType<any>;
   title: string;
   topicCount: number;
   description: string;
@@ -43,7 +43,6 @@ const FrenchIntegrationModuleCard: React.FC<FrenchIntegrationModuleCardProps> = 
   >
     <div className="flex justify-center items-center w-full pt-8">
       <div className="bg-blue-50 rounded-xl w-20 h-20 flex items-center justify-center mb-5">
-        {/* Pass correct Lucide icon props */}
         <Icon className="text-[2.1rem] text-gray-700" size={34} />
       </div>
     </div>
@@ -52,7 +51,7 @@ const FrenchIntegrationModuleCard: React.FC<FrenchIntegrationModuleCardProps> = 
       <span className="text-sm text-gray-600 text-left">{description}</span>
       <div className="flex justify-between items-end mt-6">
         <span className="inline-block rounded-full bg-blue-100 text-blue-700 px-3 py-1 text-xs font-semibold select-none">
-          Available
+          {topicCount} Topics
         </span>
         <span className="flex items-center gap-1 ml-auto">
           <span className="bg-gray-900 hover:bg-gray-700 text-white font-semibold px-4 py-1.5 rounded-lg text-sm transition-all">

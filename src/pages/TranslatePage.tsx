@@ -48,7 +48,122 @@ export const TranslatePage = () => {
     { en: 'I don\'t understand', fr: 'Je ne comprends pas' }
   ];
 
-  // Auto-translate when sourceText changes
+  // Enhanced translation function with better mock translations
+  const getMockTranslation = (text: string, from: string, to: string) => {
+    const translations: { [key: string]: { [key: string]: string } } = {
+      'en-fr': {
+        'hello': 'bonjour',
+        'hello, how are you?': 'bonjour, comment allez-vous ?',
+        'thank you': 'merci',
+        'thank you very much': 'merci beaucoup',
+        'please': 's\'il vous plaît',
+        'goodbye': 'au revoir',
+        'yes': 'oui',
+        'no': 'non',
+        'excuse me': 'excusez-moi',
+        'excuse me, where is...?': 'excusez-moi, où est...?',
+        'how are you': 'comment allez-vous',
+        'i need help': 'j\'ai besoin d\'aide',
+        'where is': 'où est',
+        'how much does this cost?': 'combien ça coûte ?',
+        'i don\'t understand': 'je ne comprends pas',
+        'good morning': 'bonjour',
+        'good evening': 'bonsoir',
+        'good night': 'bonne nuit',
+        'see you later': 'à bientôt',
+        'my name is': 'je m\'appelle',
+        'nice to meet you': 'enchanté(e)',
+        'how much': 'combien',
+        'water': 'eau',
+        'food': 'nourriture',
+        'restaurant': 'restaurant',
+        'hotel': 'hôtel',
+        'airport': 'aéroport',
+        'train station': 'gare',
+        'university': 'université'
+      },
+      'fr-en': {
+        'bonjour': 'hello',
+        'bonjour, comment allez-vous ?': 'hello, how are you?',
+        'merci': 'thank you',
+        'merci beaucoup': 'thank you very much',
+        's\'il vous plaît': 'please',
+        'au revoir': 'goodbye',
+        'oui': 'yes',
+        'non': 'no',
+        'excusez-moi': 'excuse me',
+        'excusez-moi, où est...?': 'excuse me, where is...?',
+        'comment allez-vous': 'how are you',
+        'j\'ai besoin d\'aide': 'i need help',
+        'où est': 'where is',
+        'combien ça coûte ?': 'how much does this cost?',
+        'je ne comprends pas': 'i don\'t understand',
+        'bonsoir': 'good evening',
+        'bonne nuit': 'good night',
+        'à bientôt': 'see you later',
+        'je m\'appelle': 'my name is',
+        'enchanté': 'nice to meet you',
+        'combien': 'how much',
+        'eau': 'water',
+        'nourriture': 'food',
+        'restaurant': 'restaurant',
+        'hôtel': 'hotel',
+        'aéroport': 'airport',
+        'gare': 'train station',
+        'université': 'university'
+      }
+    };
+
+    const key = `${from}-${to}`;
+    const lowerText = text.toLowerCase().trim();
+    
+    if (translations[key] && translations[key][lowerText]) {
+      return translations[key][lowerText];
+    }
+    
+    // For common words, provide basic translations
+    if (from === 'en' && to === 'fr') {
+      if (lowerText.includes('hi') || lowerText.includes('hey')) return 'salut';
+      if (lowerText.includes('bye')) return 'au revoir';
+      if (lowerText.includes('sorry')) return 'désolé';
+      if (lowerText.includes('love')) return 'amour';
+      if (lowerText.includes('friend')) return 'ami';
+      if (lowerText.includes('study')) return 'étudier';
+      if (lowerText.includes('work')) return 'travail';
+      if (lowerText.includes('house')) return 'maison';
+      if (lowerText.includes('car')) return 'voiture';
+    }
+    
+    if (from === 'fr' && to === 'en') {
+      if (lowerText.includes('salut')) return 'hi';
+      if (lowerText.includes('désolé')) return 'sorry';
+      if (lowerText.includes('amour')) return 'love';
+      if (lowerText.includes('ami')) return 'friend';
+      if (lowerText.includes('étudier')) return 'study';
+      if (lowerText.includes('travail')) return 'work';
+      if (lowerText.includes('maison')) return 'house';
+      if (lowerText.includes('voiture')) return 'car';
+    }
+    
+    // Simple word-by-word translation for demonstration
+    const words = lowerText.split(' ');
+    if (words.length <= 3) {
+      const translatedWords = words.map(word => {
+        if (translations[key] && translations[key][word]) {
+          return translations[key][word];
+        }
+        return word; // Keep original if no translation found
+      });
+      const result = translatedWords.join(' ');
+      return result.charAt(0).toUpperCase() + result.slice(1);
+    }
+    
+    // For longer texts, provide a more realistic translation
+    const targetLangName = languages.find(l => l.code === to)?.name || to.toUpperCase();
+    return `Translated to ${targetLangName}: "${text}"`;
+  };
+
+  // Auto-translate when sourceText changes (like Google Translate)
   useEffect(() => {
     if (sourceText.trim()) {
       const delayedTranslate = setTimeout(() => {
@@ -66,53 +181,13 @@ export const TranslatePage = () => {
         };
         
         setTranslations(prev => [newTranslation, ...prev.slice(0, 9)]); // Keep last 10
-      }, 500); // 500ms delay for auto-translation
+      }, 300); // Faster response time like Google Translate
 
       return () => clearTimeout(delayedTranslate);
     } else {
       setTranslatedText('');
     }
   }, [sourceText, sourceLang, targetLang]);
-
-  const getMockTranslation = (text: string, from: string, to: string) => {
-    // Simple mock translations for common phrases
-    const translations: { [key: string]: { [key: string]: string } } = {
-      'en-fr': {
-        'hello': 'bonjour',
-        'thank you': 'merci',
-        'please': 's\'il vous plaît',
-        'goodbye': 'au revoir',
-        'yes': 'oui',
-        'no': 'non',
-        'excuse me': 'excusez-moi',
-        'how are you': 'comment allez-vous',
-        'i need help': 'j\'ai besoin d\'aide',
-        'where is': 'où est'
-      },
-      'fr-en': {
-        'bonjour': 'hello',
-        'merci': 'thank you',
-        's\'il vous plaît': 'please',
-        'au revoir': 'goodbye',
-        'oui': 'yes',
-        'non': 'no',
-        'excusez-moi': 'excuse me',
-        'comment allez-vous': 'how are you',
-        'j\'ai besoin d\'aide': 'i need help',
-        'où est': 'where is'
-      }
-    };
-
-    const key = `${from}-${to}`;
-    const lowerText = text.toLowerCase();
-    
-    if (translations[key] && translations[key][lowerText]) {
-      return translations[key][lowerText];
-    }
-    
-    // Default mock response
-    return `[${to.toUpperCase()} translation of: "${text}"]`;
-  };
 
   const swapLanguages = () => {
     const tempLang = sourceLang;
@@ -317,7 +392,6 @@ export const TranslatePage = () => {
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
           {/* Favorites */}
           {favorites.length > 0 && (
