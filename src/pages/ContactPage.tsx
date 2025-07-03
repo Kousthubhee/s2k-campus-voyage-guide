@@ -272,7 +272,7 @@ export const ContactPage = () => {
               
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">👨‍🎨</div>
+                  <div className="text-4xl mr-4">👨‍💻</div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Srivatsava</h3>
                     <p className="text-blue-600">Co-Founder & Content Creator</p>
