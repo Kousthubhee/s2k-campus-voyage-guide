@@ -168,11 +168,18 @@ export const useHubData = () => {
       toast.success('Comment added successfully!');
       fetchComments(postId);
       
-      // Update comment count manually
-      const { error: updateError } = await supabase
-        .from('hub_posts')
-        .update({ comments_count: supabase.from('hub_comments').select('*', { count: 'exact' }).eq('post_id', postId) })
-        .eq('id', postId);
+      // Update comment count by getting the current count and incrementing it
+      const { count } = await supabase
+        .from('hub_comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId);
+      
+      if (count !== null) {
+        await supabase
+          .from('hub_posts')
+          .update({ comments_count: count })
+          .eq('id', postId);
+      }
       
       fetchPosts();
     } catch (error) {
@@ -215,6 +222,20 @@ export const useHubData = () => {
 
       toast.success('Comment deleted successfully!');
       fetchComments(postId);
+      
+      // Update comment count after deletion
+      const { count } = await supabase
+        .from('hub_comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId);
+      
+      if (count !== null) {
+        await supabase
+          .from('hub_posts')
+          .update({ comments_count: count })
+          .eq('id', postId);
+      }
+      
       fetchPosts();
     } catch (error) {
       console.error('Error deleting comment:', error);
