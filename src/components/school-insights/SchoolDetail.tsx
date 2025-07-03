@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, GraduationCap, Globe, Award, ExternalLink, Euro, Phone, Mail, Building } from "lucide-react";
@@ -23,14 +24,14 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
       return Object.entries(fees).map(([key, value]) => (
         <div key={key} className="flex justify-between items-center">
           <span className="capitalize text-gray-600">{key}:</span>
-          <span className="font-semibold">€{String(value)}</span>
+          <span className="font-semibold">€{value}</span>
         </div>
       ));
     }
     return (
       <div className="flex justify-between items-center">
         <span className="text-gray-600">Tuition:</span>
-        <span className="font-semibold">{String(fees)}</span>
+        <span className="font-semibold">{fees}</span>
       </div>
     );
   };

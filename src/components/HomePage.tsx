@@ -1,192 +1,252 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
-import { ArrowRight, BookOpen, Users, FileText, Calculator, School, MapPin, MessageCircle, Bell, Globe, Sparkles, Target, CheckCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { 
+  CheckSquare, 
+  MessageSquare, 
+  Users, 
+  BookOpen, 
+  Languages,
+  ArrowRight,
+  Star,
+  Globe,
+  Award,
+  Clock,
+  Shield,
+  Sparkles
+} from 'lucide-react';
 
-export const HomePage = () => {
-  const navigate = useNavigate();
-  const [progress, updateProgress] = useLocalStorageProgress();
-  const [isStarting, setIsStarting] = useState(false);
+interface HomePageProps {
+  onGetStarted: () => void;
+  onPageNavigation: (page: string) => void;
+}
 
-  const hasStartedJourney = progress?.unlocked_modules?.includes('pre-arrival-1') || false;
-
-  const handleGetStarted = async () => {
-    setIsStarting(true);
-    
-    // Unlock the initial modules
-    const updatedProgress = {
-      ...progress,
-      unlocked_modules: ['school', 'pre-arrival-1', 'pre-arrival-2', 'post-arrival', 'documents', 'finance', 'hub', 'qa', 'translate', 'news', 'notifications', 'profile'],
-      current_page: 'school-insights'
-    };
-    
-    await updateProgress(updatedProgress);
-    
-    setTimeout(() => {
-      setIsStarting(false);
-      navigate('/school-insights');
-    }, 1500);
-  };
-
+export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
   const features = [
     {
-      icon: School,
-      title: "School Insights",
-      description: "Discover and compare French universities and programs",
-      color: "bg-blue-500"
+      icon: CheckSquare,
+      title: "Complete Checklist",
+      description: "Step-by-step guidance through your entire French education journey",
+      color: "text-blue-600"
     },
     {
-      icon: FileText,
-      title: "Document Management",
-      description: "Track and manage all your important documents",
-      color: "bg-green-500"
+      icon: MessageSquare,
+      title: "AI Assistant",
+      description: "Get instant answers to all your questions about studying in France",
+      color: "text-cyan-600"
     },
     {
       icon: Users,
       title: "Community Hub",
-      description: "Connect with fellow students and share experiences",
-      color: "bg-purple-500"
+      description: "Connect with fellow international students and share experiences",
+      color: "text-green-600"
     },
     {
-      icon: Calculator,
-      title: "Finance Tracking",
-      description: "Monitor your expenses and budget effectively",
-      color: "bg-orange-500"
+      icon: Languages,
+      title: "French Learning",
+      description: "Practice and improve your French language skills",
+      color: "text-purple-600"
     },
     {
-      icon: MessageCircle,
-      title: "AI Assistant",
-      description: "Get instant answers to your study abroad questions",
-      color: "bg-pink-500"
+      icon: BookOpen,
+      title: "Stay Updated",
+      description: "Latest news, updates, and important information",
+      color: "text-orange-600"
     },
     {
       icon: Globe,
-      title: "Language Tools",
-      description: "Translation and language learning resources",
-      color: "bg-indigo-500"
+      title: "School Insights",
+      description: "Comprehensive information about French universities and programs",
+      color: "text-red-600"
     }
   ];
 
   const stats = [
-    { label: "Universities", value: "500+", icon: School },
-    { label: "Students Helped", value: "10,000+", icon: Users },
-    { label: "Success Rate", value: "95%", icon: Target },
-    { label: "Countries", value: "50+", icon: Globe }
+    { number: "500+", label: "Universities", icon: Award },
+    { number: "50+", label: "Cities", icon: Globe },
+    { number: "24/7", label: "AI Support", icon: Clock },
+    { number: "100%", label: "Secure", icon: Shield }
   ];
 
-  if (hasStartedJourney) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <CheckCircle className="h-8 w-8 text-green-500" />
-            <h1 className="text-4xl font-bold text-gray-900">Welcome Back!</h1>
-          </div>
-          <p className="text-xl text-gray-600">Continue your journey to studying in France</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-3", feature.color)}>
-                  <feature.icon className="h-6 w-6 text-white" />
-                </div>
-                <CardTitle className="text-lg">{feature.title}</CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <Button 
-            onClick={() => navigate('/school-insights')} 
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            Continue Your Journey
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const testimonials = [
+    {
+      name: "Arjun Sharma",
+      role: "Master's Student at Sorbonne",
+      content: "pasS2Kampus made my transition to French university life so much smoother. The checklist helped me stay organized!",
+      rating: 5
+    },
+    {
+      name: "Priya Patel",
+      role: "Engineering Student at INSA Lyon",
+      content: "The expert guidance helped me with all my visa questions instantly. Couldn't have done it without this platform!",
+      rating: 5
+    },
+    {
+      name: "Ravi Kumar",
+      role: "Business Student at HEC Paris",
+      content: "The community feature helped me connect with other students before I even arrived in France.",
+      rating: 5
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
+      {/* Dynamic background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-16">
-          <Badge className="mb-4 bg-blue-100 text-blue-800 hover:bg-blue-200">
-            <Sparkles className="h-4 w-4 mr-1" />
-            Your Complete Study Abroad Guide
+      <section className="px-4 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto text-center">
+          <Badge variant="secondary" className="mb-6 text-sm font-medium">
+            <Sparkles className="h-4 w-4 mr-2" />
+            Your Complete Guide to French Education
           </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Your Gateway to
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              {" "}French Education
+          
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+            Welcome to{" "}
+            <span className="text-gray-900">
+              pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Navigate your journey to studying in France with our comprehensive platform. 
-            From university selection to document management, we've got you covered.
+          
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Your all-in-one platform for navigating French higher education. From visa applications to university life, we've got you covered.
           </p>
           
-          <Button 
-            onClick={handleGetStarted}
-            disabled={isStarting}
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 h-auto"
-          >
-            {isStarting ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Starting Your Journey...
-              </>
-            ) : (
-              <>
-                Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </>
-            )}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all"
+              onClick={onGetStarted}
+            >
+              Start Your Journey
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-6 hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-all"
+              onClick={() => window.open('https://wa.me/33745736466', '_blank')}
+            >
+              Talk to an Expert
+              <MessageSquare className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
+      </section>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, index) => (
-            <Card key={index} className="text-center">
-              <CardContent className="p-6">
-                <stat.icon className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform", feature.color)}>
-                  <feature.icon className="h-8 w-8 text-white" />
+      {/* Stats Section */}
+      <section className="px-4 py-12 bg-white/50">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                    <Icon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                  <div className="text-gray-600">{stat.label}</div>
                 </div>
-                <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                <CardDescription className="text-gray-600">{feature.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="px-4 py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Comprehensive tools and resources to make your French education journey successful
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={index} className="hover:shadow-lg transition-shadow border-0 shadow-md">
+                  <CardHeader>
+                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gray-50 mb-4 ${feature.color}`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="px-4 py-16 bg-white/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Students Say</h2>
+            <p className="text-xl text-gray-600">
+              Join thousands of successful international students
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="border-0 shadow-md">
+                <CardContent className="pt-6">
+                  <div className="flex mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-600 mb-4 italic">"{testimonial.content}"</p>
+                  <div>
+                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                    <div className="text-sm text-gray-500">{testimonial.role}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-4 py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 text-white">
+            <CardContent className="py-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Ready to Start Your Journey?
+              </h2>
+              <p className="text-xl mb-8 text-blue-100">
+                Join thousands of students who have successfully navigated their French education journey with pasS2Kampus
+              </p>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="text-lg px-8 py-6 bg-white text-blue-600 hover:bg-gray-50 shadow-lg"
+                onClick={onGetStarted}
+              >
+                Get Started Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+     
     </div>
   );
 };
-
-export default HomePage;

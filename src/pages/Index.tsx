@@ -6,7 +6,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import NotFound from "./NotFound";
+import { NotificationProvider } from "@/hooks/useNotifications";
 import React, { useState, useEffect } from "react";
 
 // Simple error boundary for root app
@@ -41,14 +43,15 @@ import { ProfilePage } from "@/components/ProfilePage";
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
+import { FileUpload } from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
-import MainRouter from './MainRouter';
+import { MainRouter } from './MainRouter';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
 
-console.log("Index.tsx is rendering");
+console.log("App.tsx is rendering");
 
 interface UserProfile {
   name: string;
@@ -83,7 +86,7 @@ const queryClient = new QueryClient();
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState('home');
-  const [progress, setProgress] = useLocalStorageProgress();
+  const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -136,7 +139,7 @@ const Index = () => {
   };
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
-    setProgress(newProgress);
+    setUserProgress(newProgress);
     if (newProgress.currentPage && newProgress.currentPage !== currentPage) {
       setCurrentPage(newProgress.currentPage);
     }
@@ -145,7 +148,7 @@ const Index = () => {
   const sidebarPages = ['qa', 'hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration', 'documents'];
   
   const checkIfPageRequiresKey = (page: string) => {
-    return sidebarPages.includes(page) && progress.keys < 1;
+    return sidebarPages.includes(page) && userProgress.keys < 1;
   };
 
   const handlePageNavigation = (page: string) => {
@@ -162,12 +165,6 @@ const Index = () => {
   };
 
   const handleResetProgress = () => {
-    const resetProgress = () => setProgress({
-      keys: 4,
-      completedModules: [],
-      unlockedModules: ['school', 'pre-arrival-1', 'pre-arrival-2'],
-      currentPage: 'checklist'
-    });
     resetProgress();
     setShowConfirm(false);
     setCurrentPage('home');
@@ -198,110 +195,109 @@ const Index = () => {
   }
 
   if (showAuth) {
-    return (
-      <BrowserRouter>
-        <AuthPage onBack={() => setShowAuth(false)} />
-      </BrowserRouter>
-    );
+    return <AuthPage onBack={() => setShowAuth(false)} />;
   }
 
   return (
-    <BrowserRouter>
-      <SidebarProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
-          <AppSidebar />
-          <SidebarInset>
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
-              <div className="flex h-16 shrink-0 items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <div className="flex flex-1 justify-between items-center">
-                  <div 
-                    className="text-2xl font-bold cursor-pointer"
-                    onClick={() => setCurrentPage('home')}
-                  >
-                    pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
-                  </div>
-                  <Header 
-                    currentPage={currentPage} 
-                    setCurrentPage={handlePageNavigation}
-                    userProgress={progress}
-                    userProfile={userProfile}
-                    setUserProfile={setUserProfile}
-                    showAuth={!user}
-                  />
+    <SidebarProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
+        <AppSidebar
+          currentPage={currentPage}
+          setCurrentPage={handlePageNavigation}
+          userName={userProfile?.name || user?.email || 'Guest'}
+          userAvatarUrl=""
+        />
+        <SidebarInset>
+          <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
+            <div className="flex h-16 shrink-0 items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex flex-1 justify-between items-center">
+                <div 
+                  className="text-2xl font-bold cursor-pointer"
+                  onClick={() => setCurrentPage('home')}
+                >
+                  pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
                 </div>
+                <Header 
+                  currentPage={currentPage} 
+                  setCurrentPage={handlePageNavigation}
+                  userProgress={userProgress}
+                  userProfile={userProfile}
+                  setUserProfile={setUserProfile}
+                  showAuth={!user}
+                />
               </div>
-            </header>
-            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
-              <div className="max-w-5xl mx-auto animate-fade-in section-padding">
-                {currentPage === "profile" ? (
-                  <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
-                ) : currentPage === "qa" ? (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl font-bold">AI Assistant</h1>
-                    <ChatInterface />
-                  </div>
-                ) : (
-                  <MainRouter
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    userProfile={userProfile}
-                    userProgress={progress}
-                    setUserProgress={setProgress}
-                    selectedSchool={selectedSchool}
-                    setSelectedSchool={setSelectedSchool}
-                    handleProgressUpdate={handleProgressUpdate}
-                    profile={userProfile}
-                  />
-                )}
-              </div>
-            </main>
-            <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
-              <div className="text-center text-gray-600">
-                🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> & <span className="text-cyan-600 font-semibold">Srivatsava CK</span>
-              </div>
-              <Button 
-                variant="destructive"
-                size="sm"
-                className="mt-1"
-                onClick={() => setShowConfirm(true)}
-              >
-                Reset Progress
-              </Button>
-              {showConfirm && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
-                    <div className="font-semibold text-lg mb-2">Reset Progress?</div>
-                    <div className="text-gray-700 text-sm mb-4 text-center">
-                      This will erase your checklist progress. Are you sure?
-                    </div>
-                    <div className="flex gap-3 justify-center">
-                      <Button 
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleResetProgress}
-                      >
-                        Yes, Reset
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowConfirm(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+            <div className="max-w-5xl mx-auto animate-fade-in section-padding">
+              {currentPage === "profile" ? (
+                <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
+              ) : currentPage === "qa" ? (
+                <div className="space-y-6">
+                  <h1 className="text-3xl font-bold">AI Assistant</h1>
+                  <ChatInterface />
                 </div>
+              ) : (
+                <MainRouter
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  userProfile={userProfile}
+                  userProgress={userProgress}
+                  setUserProgress={setUserProgress}
+                  selectedSchool={selectedSchool}
+                  setSelectedSchool={setSelectedSchool}
+                  handleProgressUpdate={handleProgressUpdate}
+                  profile={userProfile}
+                />
               )}
-            </footer>
-          </SidebarInset>
-          
-          {/* Floating Chatbot - visible on all pages */}
-          <FloatingChatbot currentModule={currentPage} />
-        </div>
-      </SidebarProvider>
-    </BrowserRouter>
+            </div>
+          </main>
+          <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
+            <div className="text-center text-gray-600">
+              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> & <span className="text-cyan-600 font-semibold">Srivatsava CK</span>
+            </div>
+            <Button 
+              variant="destructive"
+              size="sm"
+              className="mt-1"
+              onClick={() => setShowConfirm(true)}
+            >
+              Reset Progress
+            </Button>
+            {showConfirm && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
+                  <div className="font-semibold text-lg mb-2">Reset Progress?</div>
+                  <div className="text-gray-700 text-sm mb-4 text-center">
+                    This will erase your checklist progress. Are you sure?
+                  </div>
+                  <div className="flex gap-3 justify-center">
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleResetProgress}
+                    >
+                      Yes, Reset
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowConfirm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </footer>
+        </SidebarInset>
+        
+        {/* Floating Chatbot - visible on all pages */}
+        <FloatingChatbot currentModule={currentPage} />
+      </div>
+    </SidebarProvider>
   );
 };
 

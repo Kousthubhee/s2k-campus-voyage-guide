@@ -1,179 +1,68 @@
-
-export const checklistModules = [
+/**
+ * Checklist modules array for main checklist navigation.
+ * Each object represents a module to display.
+ */
+const checklistModules = [
   {
     id: 'school',
-    title: 'School Research & Selection',
-    description: 'Research and select your ideal French institution',
-    icon: '🎓',
-    color: 'bg-blue-500',
-    textColor: 'text-blue-700',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    tasks: [
-      {
-        id: 'research-schools',
-        title: 'Research French Universities',
-        description: 'Explore different universities and their programs',
-        estimatedTime: '2-3 hours',
-        priority: 'high',
-        category: 'research'
-      },
-      {
-        id: 'compare-programs',
-        title: 'Compare Academic Programs',
-        description: 'Compare curricula, faculty, and specializations',
-        estimatedTime: '3-4 hours',
-        priority: 'high',
-        category: 'research'
-      },
-      {
-        id: 'check-requirements',
-        title: 'Check Admission Requirements',
-        description: 'Verify language requirements, GPA, and prerequisites',
-        estimatedTime: '1-2 hours',
-        priority: 'high',
-        category: 'requirements'
-      },
-      {
-        id: 'shortlist-schools',
-        title: 'Create School Shortlist',
-        description: 'Narrow down to 3-5 preferred institutions',
-        estimatedTime: '1 hour',
-        priority: 'medium',
-        category: 'planning'
-      }
-    ]
+    title: 'School & Local Insights',
+    description: 'Explore French schools and get local insights for each city',
+    icon: '🏫',
+    color: 'from-blue-500 to-cyan-500',
+    type: 'school'
   },
   {
     id: 'pre-arrival-1',
-    title: 'Pre-Arrival Phase 1',
-    description: 'Essential preparations before departure',
+    title: 'Pre-Arrival Checklist (Part 1)',
+    description: 'Campus France, VFS, and essential preparations',
     icon: '✈️',
-    color: 'bg-green-500',
-    textColor: 'text-green-700',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    tasks: [
-      {
-        id: 'passport-visa',
-        title: 'Passport & Visa Application',
-        description: 'Ensure passport validity and apply for student visa',
-        estimatedTime: '2-4 weeks',
-        priority: 'high',
-        category: 'documents'
-      },
-      {
-        id: 'university-application',
-        title: 'University Application',
-        description: 'Submit applications through Campus France or directly',
-        estimatedTime: '1-2 weeks',
-        priority: 'high',
-        category: 'application'
-      },
-      {
-        id: 'language-certification',
-        title: 'Language Certification',
-        description: 'Obtain required French/English language certificates',
-        estimatedTime: '1-3 months',
-        priority: 'high',
-        category: 'language'
-      },
-      {
-        id: 'health-insurance',
-        title: 'Health Insurance',
-        description: 'Arrange international health insurance coverage',
-        estimatedTime: '1-2 weeks',
-        priority: 'medium',
-        category: 'insurance'
-      }
-    ]
+    color: 'from-green-500 to-emerald-500',
+    type: 'checklist'
   },
   {
     id: 'pre-arrival-2',
-    title: 'Pre-Arrival Phase 2',
-    description: 'Final preparations and arrangements',
-    icon: '🏠',
-    color: 'bg-purple-500',
-    textColor: 'text-purple-700',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-    tasks: [
-      {
-        id: 'accommodation',
-        title: 'Secure Accommodation',
-        description: 'Find and book student housing or apartments',
-        estimatedTime: '2-4 weeks',
-        priority: 'high',
-        category: 'housing'
-      },
-      {
-        id: 'flight-booking',
-        title: 'Book Flight Tickets',
-        description: 'Reserve flights and plan travel itinerary',
-        estimatedTime: '1-2 days',
-        priority: 'high',
-        category: 'travel'
-      },
-      {
-        id: 'financial-planning',
-        title: 'Financial Planning',
-        description: 'Set up international banking and budget planning',
-        estimatedTime: '1-2 weeks',
-        priority: 'medium',
-        category: 'finance'
-      },
-      {
-        id: 'packing-essentials',
-        title: 'Pack Essentials',
-        description: 'Prepare luggage with necessary items and documents',
-        estimatedTime: '2-3 days',
-        priority: 'medium',
-        category: 'preparation'
-      }
-    ]
+    title: 'Packing Assistant',
+    description: 'Food, clothes, and cultural preparation',
+    icon: '🎒',
+    color: 'from-orange-500 to-red-500',
+    type: 'checklist'
   },
   {
     id: 'post-arrival',
-    title: 'Post-Arrival Tasks',
-    description: 'Essential tasks after arriving in France',
-    icon: '🇫🇷',
-    color: 'bg-orange-500',
-    textColor: 'text-orange-700',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
-    tasks: [
-      {
-        id: 'residence-permit',
-        title: 'Apply for Residence Permit',
-        description: 'Complete residence permit application at prefecture',
-        estimatedTime: '1-2 weeks',
-        priority: 'high',
-        category: 'legal'
-      },
-      {
-        id: 'bank-account',
-        title: 'Open Bank Account',
-        description: 'Set up French bank account for daily transactions',
-        estimatedTime: '1-2 weeks',
-        priority: 'high',
-        category: 'banking'
-      },
-      {
-        id: 'university-enrollment',
-        title: 'Complete University Enrollment',
-        description: 'Finalize registration and orientation programs',
-        estimatedTime: '1 week',
-        priority: 'high',
-        category: 'academic'
-      },
-      {
-        id: 'local-integration',
-        title: 'Local Integration',
-        description: 'Explore the city, meet people, and settle in',
-        estimatedTime: 'Ongoing',
-        priority: 'medium',
-        category: 'social'
-      }
-    ]
+    title: 'Post-Arrival Checklist',
+    description: 'Bank account, SSN, insurance, CAF, and more',
+    icon: '🏠',
+    color: 'from-indigo-500 to-purple-500',
+    type: 'checklist',
+    keysRequired: 2
+  },
+  {
+    id: 'integration',
+    title: 'French Integration',
+    description: 'Cultural adaptation and social integration',
+    icon: '🤝',
+    color: 'from-rose-500 to-pink-500',
+    type: 'integration',
+    keysRequired: 3
+  },
+  {
+    id: 'finance',
+    title: 'Tracking your Finances',
+    description: 'Important paperwork and renewal processes',
+    icon: '📄',
+    color: 'from-teal-500 to-blue-500',
+    type: 'documents',
+    keysRequired: 1
+  },
+  {
+    id: 'suggestions',
+    title: 'Suggestions for You',
+    description: 'Explore new features and ideas to enhance your journey',
+    icon: '💡',
+    color: 'from-yellow-400 to-amber-500',
+    type: 'suggestions',
+    keysRequired: 1
   }
 ];
+
+export default checklistModules;
