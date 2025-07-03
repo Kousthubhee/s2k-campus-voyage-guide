@@ -25,12 +25,12 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   
   // Use the passed userProfile or fall back to default
   const profile = userProfile || {
-    name: 'Sarah Mitchell',
-    email: 'sarah.mitchell@email.com',
-    about: 'International student from Canada studying Business Administration at HEC Paris. Passionate about sustainable business practices and French culture.',
+    name: 'Stranger',
+    email: 'unknown@email.com',
+    about: 'International student from India studying Business Administration at Neoma Rouen. Passionate about sustainable business practices and French culture.',
     memberSince: 'September 2024',
     photo: 'https://images.unsplash.com/photo-1494790108755-2616b88f04b1?w=150&h=150&fit=crop&crop=face',
-    age: '22',
+    age: '25',
     prevEducation: 'Bachelor of Commerce, University of Toronto',
     workExperience: 'Marketing Intern at Tech Startup (2023)'
   };
