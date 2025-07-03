@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, MapPin, GraduationCap, Info } from 'lucide-react';
 
 interface City {
   name: string;
   emoji: string;
   description: string;
   schoolCount: number;
-  localTips: string;
+  programs: string[];
   localInsights: {
     title: string;
     description: string;
@@ -26,146 +26,11 @@ interface CitiesGridPageProps {
 
 const cities: City[] = [
   {
-    name: 'Bordeaux',
-    emoji: '🍇',
-    description: 'Wine capital by the Atlantic, UNESCO World Heritage.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Navigate Bordeaux efficiently with trams and buses',
-        tips: [
-          'Get a TBM monthly pass for unlimited public transport',
-          'Use V³ bike-sharing system for short trips',
-          'Bordeaux airport connects to city center via shuttle'
-        ]
-      },
-      {
-        title: 'Student Life & Culture',
-        description: 'Bordeaux offers rich cultural experiences and vibrant student life',
-        tips: [
-          'Visit the wine museums and vineyards in the region',
-          'Join student associations at your university',
-          'Explore the historic city center (UNESCO site)'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Cergy',
-    emoji: '🌲',
-    description: 'Modern city in Paris\' green belt, lively student hub.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Easy access to Paris and surrounding areas',
-        tips: [
-          'RER A connects directly to central Paris in 45 minutes',
-          'Navigo weekly/monthly pass covers all zones',
-          'Regular bus services within Cergy-Pontoise'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Grenoble',
-    emoji: '⛰️',
-    description: 'Alpine city known for technology and winter sports.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Efficient public transport in mountain setting',
-        tips: [
-          'TAG network covers trams, buses throughout the city',
-          'Student discounts available for ski resorts',
-          'Cable car (Bastille) offers scenic city views'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Lille',
-    emoji: '🏢',
-    description: 'Young, vibrant and friendly in France\'s north.',
-    schoolCount: 0,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Well-connected northern French city',
-        tips: [
-          'Metro and bus network covers greater Lille area',
-          'High-speed trains to Paris, Brussels, London',
-          'Student transport discounts available'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Lyon',
-    emoji: '🦁',
-    description: 'France\'s culinary capital and student city.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Excellent public transport network',
-        tips: [
-          'TCL network: metro, trams, buses, funiculars',
-          'Vélo\'v bike-sharing system throughout the city',
-          'TER trains connect to nearby cities and ski resorts'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Marseille',
-    emoji: '⛵',
-    description: 'Mediterranean port city with rich multicultural heritage.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'Coastal city transport options',
-        tips: [
-          'RTM metro, trams, and buses cover the metropolitan area',
-          'Ferry connections to Corsica and North Africa',
-          'Airport shuttle connects to city center'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Nice',
-    emoji: '🏖️',
-    description: 'Sunny Riviera, Mediterranean beaches and culture.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'French Riviera transport hub',
-        tips: [
-          'Tram and bus network covers Nice and surroundings',
-          'Train connections along the Mediterranean coast',
-          'Nice Côte d\'Azur Airport serves international destinations'
-        ]
-      }
-    ]
-  },
-  {
     name: 'Paris',
     emoji: '🗼',
-    description: 'The heart of France – rich history, fashion, and art.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
+    description: 'Capital of France with world-class universities and cultural heritage',
+    schoolCount: 25,
+    programs: ['Business & Management', 'Engineering', 'Arts & Design', 'Medicine & Health'],
     localInsights: [
       {
         title: 'Transportation',
@@ -190,73 +55,55 @@ const cities: City[] = [
     ]
   },
   {
-    name: 'Reims',
-    emoji: '🍾',
-    description: 'Champagne capital with rich history and student life.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
+    name: 'Lyon',
+    emoji: '🦁',
+    description: 'France\'s culinary capital and major student city',
+    schoolCount: 18,
+    programs: ['Business & Management', 'Engineering', 'Medicine & Health', 'Social Sciences'],
     localInsights: [
       {
         title: 'Transportation',
-        description: 'Historic city with good connections',
+        description: 'Excellent public transport network',
         tips: [
-          'Citura bus network covers the city',
-          'TGV connections to Paris in 45 minutes',
-          'Regional trains to other Champagne towns'
+          'TCL network: metro, trams, buses, funiculars',
+          'Vélo\'v bike-sharing system throughout the city',
+          'TER trains connect to nearby cities and ski resorts'
+        ]
+      },
+      {
+        title: 'Cost of Living',
+        description: 'More affordable than Paris with excellent quality of life',
+        tips: [
+          'Average rent: €400-600 for student housing',
+          'Excellent student restaurants (RU) at €3.30 per meal',
+          'Part-time work opportunities in hospitality and retail'
         ]
       }
     ]
   },
   {
-    name: 'Rouen',
-    emoji: '🏰',
-    description: 'Medieval history on the Seine, lively student city.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
+    name: 'Marseille',
+    emoji: '⛵',
+    description: 'Mediterranean port city with diverse academic programs',
+    schoolCount: 12,
+    programs: ['Engineering', 'Medicine & Health', 'Languages & Literature', 'Social Sciences'],
     localInsights: [
       {
         title: 'Transportation',
-        description: 'Norman capital transport options',
+        description: 'Coastal city transport options',
         tips: [
-          'TEOR bus rapid transit and regular bus lines',
-          'Trains to Paris in 1.5 hours',
-          'Ferry connections to England via nearby ports'
+          'RTM metro, trams, and buses cover the metropolitan area',
+          'Ferry connections to Corsica and North Africa',
+          'Airport shuttle connects to city center'
         ]
-      }
-    ]
-  },
-  {
-    name: 'Sophia Antipolis',
-    emoji: '🌲',
-    description: 'Innovative science and tech park near Nice.',
-    schoolCount: 4,
-    localTips: 'Local Tips',
-    localInsights: [
+      },
       {
-        title: 'Transportation',
-        description: 'Tech hub transport connections',
+        title: 'Student Life',
+        description: 'Vibrant Mediterranean lifestyle',
         tips: [
-          'Bus connections to Nice and surrounding areas',
-          'Car-sharing services popular in tech community',
-          'Bike paths throughout the technology park'
-        ]
-      }
-    ]
-  },
-  {
-    name: 'Strasbourg',
-    emoji: '🏛️',
-    description: 'European city with Franco-German heritage.',
-    schoolCount: 5,
-    localTips: 'Local Tips',
-    localInsights: [
-      {
-        title: 'Transportation',
-        description: 'European capital transport hub',
-        tips: [
-          'CTS tram and bus network covers the metropolitan area',
-          'Vélhop bike-sharing system',
-          'Direct trains to Germany and other European cities'
+          'Beach access for outdoor activities year-round',
+          'Diverse cultural scene with international influences',
+          'Lower cost of living compared to Paris and Lyon'
         ]
       }
     ]
@@ -264,9 +111,9 @@ const cities: City[] = [
   {
     name: 'Toulouse',
     emoji: '🚀',
-    description: 'Pink city, aerospace hub with vibrant student life.',
-    schoolCount: 0,
-    localTips: 'Local Tips',
+    description: 'Pink city and aerospace hub with vibrant student life',
+    schoolCount: 15,
+    programs: ['Engineering', 'Computer Science', 'Business & Management', 'Languages & Literature'],
     localInsights: [
       {
         title: 'Transportation',
@@ -275,6 +122,69 @@ const cities: City[] = [
           'Tisséo metro, trams, and buses',
           'VélôToulouse bike-sharing system',
           'Airport connections to major European cities'
+        ]
+      },
+      {
+        title: 'Industry Connections',
+        description: 'Strong ties to aerospace and technology sectors',
+        tips: [
+          'Internship opportunities at Airbus and other aerospace companies',
+          'Tech startup ecosystem for computer science students',
+          'Research partnerships with CNES (French Space Agency)'
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Nice',
+    emoji: '🏖️',
+    description: 'French Riviera destination with international programs',
+    schoolCount: 8,
+    programs: ['Business & Management', 'Arts & Design', 'Languages & Literature'],
+    localInsights: [
+      {
+        title: 'Transportation',
+        description: 'French Riviera transport hub',
+        tips: [
+          'Tram and bus network covers Nice and surroundings',
+          'Train connections along the Mediterranean coast',
+          'Nice Côte d\'Azur Airport serves international destinations'
+        ]
+      },
+      {
+        title: 'International Environment',
+        description: 'Multicultural student community',
+        tips: [
+          'High concentration of international students',
+          'English-taught programs available',
+          'Networking opportunities with global business community'
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Strasbourg',
+    emoji: '🏛️',
+    description: 'European capital with Franco-German heritage',
+    schoolCount: 10,
+    programs: ['Social Sciences', 'Languages & Literature', 'Medicine & Health', 'Engineering'],
+    localInsights: [
+      {
+        title: 'European Opportunities',
+        description: 'Gateway to European institutions and careers',
+        tips: [
+          'Internships at European Parliament and Council of Europe',
+          'Strong German language programs and exchange opportunities',
+          'Cross-border study programs with German universities'
+        ]
+      },
+      {
+        title: 'Transportation',
+        description: 'European capital transport hub',
+        tips: [
+          'CTS tram and bus network covers the metropolitan area',
+          'Vélhop bike-sharing system',
+          'Direct trains to Germany and other European cities'
         ]
       }
     ]
@@ -298,106 +208,148 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
 
   const filteredCities = selectedProgram === 'All Programs' 
     ? cities 
-    : cities.filter(city => {
-        // This is a placeholder filter - in a real app, you'd filter based on actual program data
-        return city.schoolCount > 0;
-      });
+    : cities.filter(city => city.programs.includes(selectedProgram));
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Study Destination</h1>
-        <p className="text-lg text-gray-600 mb-6">
-          Explore French cities and discover schools that match your academic goals
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          Choose Your Study Destination in France
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          Explore French cities and discover the perfect place for your academic journey
         </p>
         
-        {/* Program Filter */}
-        <div className="max-w-xs mx-auto">
-          <Select value={selectedProgram} onValueChange={setSelectedProgram}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by program" />
-            </SelectTrigger>
-            <SelectContent>
-              {programs.map((program) => (
-                <SelectItem key={program} value={program}>
-                  {program}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Filter */}
+        <div className="flex justify-center mb-8">
+          <div className="w-80">
+            <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+              <SelectTrigger className="w-full h-12 text-base">
+                <SelectValue placeholder="Filter by program" />
+              </SelectTrigger>
+              <SelectContent>
+                {programs.map((program) => (
+                  <SelectItem key={program} value={program} className="text-base py-3">
+                    {program}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Cities Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredCities.map((city) => (
           <Card 
             key={city.name} 
-            className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1 border border-gray-200"
+            className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 shadow-lg overflow-hidden"
+            onClick={() => onCitySelect(city.name)}
           >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{city.emoji}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{city.name}</h3>
+            <CardContent className="p-0">
+              {/* City Header */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 relative">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">{city.emoji}</span>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">{city.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="h-4 w-4" />
+                        <span>France</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-gray-400 group-hover:text-blue-600 transition-colors" />
                 </div>
-                <ArrowRight 
-                  className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors cursor-pointer" 
-                  onClick={() => onCitySelect(city.name)}
-                />
+                
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  {city.description}
+                </p>
+                
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1">
+                    <GraduationCap className="h-4 w-4 mr-1" />
+                    {city.schoolCount} Schools
+                  </Badge>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white hover:bg-gray-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCity(city);
+                        }}
+                      >
+                        <Info className="h-4 w-4 mr-1" />
+                        Local Tips
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3 text-2xl">
+                          <span className="text-3xl">{city.emoji}</span>
+                          Local Insights for {city.name}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-8 mt-6">
+                        {city.localInsights.map((insight, index) => (
+                          <div key={index} className="border-l-4 border-blue-500 pl-6 pb-6 border-b border-gray-100 last:border-b-0">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">
+                              {insight.title}
+                            </h3>
+                            <p className="text-gray-600 mb-4 text-lg">
+                              {insight.description}
+                            </p>
+                            <div className="grid gap-3">
+                              {insight.tips.map((tip, tipIndex) => (
+                                <div key={tipIndex} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-gray-700 leading-relaxed">{tip}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
               
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                {city.description}
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1">
-                  {city.schoolCount} Schools
-                </Badge>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Badge 
-                      variant="outline" 
-                      className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 cursor-pointer text-xs font-medium px-2 py-1"
-                      onClick={() => setSelectedCity(city)}
-                    >
-                      {city.localTips}
+              {/* Programs */}
+              <div className="p-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Popular Programs</h4>
+                <div className="flex flex-wrap gap-2">
+                  {city.programs.slice(0, 3).map((program, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs px-2 py-1">
+                      {program}
                     </Badge>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <span className="text-2xl">{city.emoji}</span>
-                        Local Insights for {city.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 mt-4">
-                      {city.localInsights.map((insight, index) => (
-                        <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {insight.title}
-                          </h3>
-                          <p className="text-gray-600 mb-3">
-                            {insight.description}
-                          </p>
-                          <ul className="space-y-2">
-                            {insight.tips.map((tip, tipIndex) => (
-                              <li key={tipIndex} className="flex items-start gap-2 text-sm text-gray-700">
-                                <span className="text-blue-600 font-bold">•</span>
-                                <span>{tip}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                  ))}
+                  {city.programs.length > 3 && (
+                    <Badge variant="outline" className="text-xs px-2 py-1">
+                      +{city.programs.length - 3} more
+                    </Badge>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {filteredCities.length === 0 && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">🏫</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No cities found</h3>
+          <p className="text-gray-600">Try selecting a different program filter</p>
+        </div>
+      )}
     </div>
   );
 };

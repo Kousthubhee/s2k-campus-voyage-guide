@@ -77,72 +77,80 @@ export const AffiliationPage = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header Section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Trusted Partners</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">Our Trusted Partners</h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           We collaborate with leading organizations to provide you with comprehensive support 
           throughout your French education journey.
         </p>
       </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      {/* Statistics Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         {stats.map((stat, index) => (
-          <Card key={index} className="text-center">
-            <CardContent className="p-6">
-              <stat.icon className="h-10 w-10 text-blue-600 mx-auto mb-4" />
+          <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-8">
+              <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <stat.icon className="h-8 w-8 text-blue-600" />
+              </div>
               <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+              <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Partners Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {partners.map((partner, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="text-4xl">{partner.logo}</div>
+          <Card key={index} className="h-full hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
+            <CardHeader className="pb-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="text-4xl bg-gray-50 w-16 h-16 rounded-lg flex items-center justify-center">
+                  {partner.logo}
+                </div>
                 <div className="flex-1">
-                  <CardTitle className="text-xl mb-1">{partner.name}</CardTitle>
-                  <Badge variant="secondary" className="text-xs">
+                  <CardTitle className="text-xl mb-2 leading-tight">{partner.name}</CardTitle>
+                  <Badge variant="secondary" className="text-xs font-medium">
                     {partner.category}
                   </Badge>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600 text-sm leading-relaxed">
+            
+            <CardContent className="space-y-6 pt-0">
+              <p className="text-gray-600 leading-relaxed">
                 {partner.description}
               </p>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Services</h4>
-                  <div className="flex flex-wrap gap-1">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Key Services</h4>
+                  <div className="flex flex-wrap gap-2">
                     {partner.services.map((service, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
+                      <Badge key={idx} variant="outline" className="text-xs py-1">
                         {service}
                       </Badge>
                     ))}
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-                  <div>
-                    <span className="font-medium">Est:</span> {partner.established}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <span className="font-medium text-gray-900 block">Founded</span>
+                    <span className="text-gray-600">{partner.established}</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Locations:</span> {partner.locations}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <span className="font-medium text-gray-900 block">Coverage</span>
+                    <span className="text-gray-600">{partner.locations}</span>
                   </div>
                 </div>
               </div>
               
               {partner.website !== '#' && (
-                <Button variant="outline" size="sm" className="w-full" asChild>
+                <Button variant="outline" size="sm" className="w-full mt-4" asChild>
                   <a href={partner.website} target="_blank" rel="noopener noreferrer">
                     <Globe className="h-4 w-4 mr-2" />
                     Visit Website
@@ -156,22 +164,25 @@ export const AffiliationPage = () => {
       </div>
 
       {/* Call to Action */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <CardContent className="p-8 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <Card className="bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 border-0 shadow-xl">
+        <CardContent className="p-12 text-center">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Award className="h-10 w-10 text-blue-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Ready to Start Your French Education Journey?
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               Our network of trusted partners is here to support you every step of the way. 
               From university applications to visa processing, we've got you covered.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-3">
                 <Award className="h-5 w-5 mr-2" />
                 Get Started Today
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="px-8 py-3">
                 <Users className="h-5 w-5 mr-2" />
                 Contact Our Team
               </Button>

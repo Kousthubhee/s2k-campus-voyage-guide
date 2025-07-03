@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,17 +48,10 @@ export const TranslatePage = () => {
 
       const data = await response.json();
       setTranslatedText(data.translatedText);
-      toast({
-        title: "Translation Complete",
-        description: "Text translated successfully!",
-      });
+      toast("Translation Complete - Text translated successfully!");
     } catch (error: any) {
       console.error('Translation error:', error);
-      toast({
-        title: "Translation Error",
-        description: error.message || "Failed to translate text.",
-        variant: "destructive",
-      });
+      toast("Translation Error - Failed to translate text.");
     } finally {
       setIsTranslating(false);
     }
@@ -65,11 +59,7 @@ export const TranslatePage = () => {
 
   const handleTextToSpeech = () => {
     if (!translatedText) {
-      toast({
-        title: "No Text to Speak",
-        description: "Please translate some text first.",
-        variant: "warning",
-      });
+      toast("No Text to Speak - Please translate some text first.");
       return;
     }
 
@@ -80,10 +70,7 @@ export const TranslatePage = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(translatedText);
-    toast({
-      title: "Text Copied",
-      description: "Translated text copied to clipboard!",
-    });
+    toast("Text Copied - Translated text copied to clipboard!");
   };
 
   const handleSwapLanguages = () => {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, ArrowLeft, FileText, CheckCircle2, Circle, User, Phone, Mail } from 'lucide-react';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface CheckboxItemProps {
   id: string;
