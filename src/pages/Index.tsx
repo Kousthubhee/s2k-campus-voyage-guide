@@ -39,7 +39,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
-import { ProfilePage } from "@/components/ProfilePage";
+import { ProfilePage } from "./ProfilePage";
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';

@@ -275,8 +275,8 @@ export const ProfilePage = () => {
 
       {/* Profile Edit Dialog */}
       <ProfileEditDialog
-        isOpen={isEditing}
-        onClose={() => setIsEditing(false)}
+        open={isEditing}
+        onOpenChange={setIsEditing}
         profile={profile}
         onSave={handleSaveProfile}
       />
