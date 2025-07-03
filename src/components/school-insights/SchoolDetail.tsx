@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, GraduationCap, Globe, Award, ExternalLink, Euro, Phone, Mail, Building } from "lucide-react";
+import { ArrowLeft, MapPin, GraduationCap, Globe, Award, ExternalLink, Euro, Phone, Mail, Building, Instagram, Linkedin } from "lucide-react";
 import { DatabaseSchool } from "@/types/database";
 
 interface SchoolDetailProps {
@@ -24,14 +24,14 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
       return Object.entries(fees).map(([key, value]) => (
         <div key={key} className="flex justify-between items-center">
           <span className="capitalize text-gray-600">{key}:</span>
-          <span className="font-semibold">€{value}</span>
+          <span className="font-semibold">€{String(value)}</span>
         </div>
       ));
     }
     return (
       <div className="flex justify-between items-center">
         <span className="text-gray-600">Tuition:</span>
-        <span className="font-semibold">{fees}</span>
+        <span className="font-semibold">{String(fees)}</span>
       </div>
     );
   };
@@ -168,6 +168,32 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
                       className="text-blue-600 hover:underline"
                     >
                       {contactInfo.email}
+                    </a>
+                  </div>
+                )}
+                {contactInfo?.linkedin && (
+                  <div className="flex items-center">
+                    <Linkedin className="h-4 w-4 mr-2 text-gray-400" />
+                    <a 
+                      href={contactInfo.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      LinkedIn Profile
+                    </a>
+                  </div>
+                )}
+                {contactInfo?.instagram && (
+                  <div className="flex items-center">
+                    <Instagram className="h-4 w-4 mr-2 text-gray-400" />
+                    <a 
+                      href={contactInfo.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Instagram Page
                     </a>
                   </div>
                 )}
