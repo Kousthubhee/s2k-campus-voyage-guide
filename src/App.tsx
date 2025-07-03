@@ -1,3 +1,4 @@
+
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -5,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { NotificationProvider } from "@/hooks/useNotifications";
@@ -18,6 +18,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     this.state = { hasError: false, error: undefined };
   }
   static getDerivedStateFromError(error: Error) {
+    console.error("Error caught by boundary:", error);
     return { hasError: true, error };
   }
   componentDidCatch(error: Error, info: any) {
@@ -29,6 +30,10 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
         <b>Critical Error:</b> {this.state.error?.message}
         <br />
         <small>See console for details.</small>
+        <br />
+        <button onClick={() => window.location.reload()} style={{marginTop: 16, padding: '8px 16px'}}>
+          Reload Page
+        </button>
       </div>
     }
     return this.props.children;
@@ -37,7 +42,14 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 
 import { AuthProvider } from '@/hooks/useAuth';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 console.log("App.tsx is rendering");
 
@@ -49,12 +61,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/*" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <Index />
           </TooltipProvider>
         </AuthProvider>
       </NotificationProvider>

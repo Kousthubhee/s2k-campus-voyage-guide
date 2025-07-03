@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Layout from '@/components/Layout';
 import { HomePage } from '@/components/HomePage';
 import { SchoolInsightsPage } from '@/pages/SchoolInsightsPage';
 import { PreArrival1Page } from '@/pages/PreArrival1Page';
@@ -41,75 +40,73 @@ const MainRouter: React.FC<MainRouterProps> = ({
 
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
-        <Route 
-          path="school-insights" 
-          element={
-            <SchoolInsightsPage 
-              onBack={handleBack}
-            />
-          } 
-        />
-        <Route 
-          path="school-insights/:cityName" 
-          element={
-            <SchoolInsightsPage 
-              onBack={handleBack}
-            />
-          } 
-        />
-        <Route 
-          path="school-insights/:cityName/:schoolId" 
-          element={
-            <SchoolInsightsPage 
-              onBack={handleBack}
-            />
-          } 
-        />
-        <Route 
-          path="pre-arrival-1" 
-          element={
-            <PreArrival1Page 
-              onBack={handleBack}
-              onComplete={handleComplete}
-              isCompleted={false}
-              profile={profile}
-            />
-          } 
-        />
-        <Route 
-          path="pre-arrival-2" 
-          element={
-            <PreArrival2Page 
-              onBack={handleBack}
-              onComplete={handleComplete}
-              isCompleted={false}
-              profile={profile}
-            />
-          } 
-        />
-        <Route 
-          path="post-arrival" 
-          element={
-            <PostArrivalPage 
-              onBack={handleBack}
-              onComplete={handleComplete}
-              isCompleted={false}
-            />
-          } 
-        />
-        <Route path="documents" element={<DocumentsPage />} />
-        <Route 
-          path="finance" 
-          element={
-            <FinanceTrackingPage 
-              onBack={handleBack}
-            />
-          } 
-        />
-        <Route path="hub" element={<InteractiveHubPage />} />
-      </Route>
+      <Route path="/" element={<HomePage />} />
+      <Route 
+        path="/school-insights" 
+        element={
+          <SchoolInsightsPage 
+            onBack={handleBack}
+          />
+        } 
+      />
+      <Route 
+        path="/school-insights/:cityName" 
+        element={
+          <SchoolInsightsPage 
+            onBack={handleBack}
+          />
+        } 
+      />
+      <Route 
+        path="/school-insights/:cityName/:schoolId" 
+        element={
+          <SchoolInsightsPage 
+            onBack={handleBack}
+          />
+        } 
+      />
+      <Route 
+        path="/pre-arrival-1" 
+        element={
+          <PreArrival1Page 
+            onBack={handleBack}
+            onComplete={handleComplete}
+            isCompleted={false}
+            profile={profile}
+          />
+        } 
+      />
+      <Route 
+        path="/pre-arrival-2" 
+        element={
+          <PreArrival2Page 
+            onBack={handleBack}
+            onComplete={handleComplete}
+            isCompleted={false}
+            profile={profile}
+          />
+        } 
+      />
+      <Route 
+        path="/post-arrival" 
+        element={
+          <PostArrivalPage 
+            onBack={handleBack}
+            onComplete={handleComplete}
+            isCompleted={false}
+          />
+        } 
+      />
+      <Route path="/documents" element={<DocumentsPage />} />
+      <Route 
+        path="/finance" 
+        element={
+          <FinanceTrackingPage 
+            onBack={handleBack}
+          />
+        } 
+      />
+      <Route path="/hub" element={<InteractiveHubPage />} />
     </Routes>
   );
 };

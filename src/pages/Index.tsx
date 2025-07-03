@@ -6,9 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotFound from "./NotFound";
-import { NotificationProvider } from "@/hooks/useNotifications";
+import { BrowserRouter } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 
 // Simple error boundary for root app
@@ -43,7 +41,6 @@ import { ProfilePage } from "@/components/ProfilePage";
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
-import { FileUpload } from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -51,7 +48,7 @@ import { Header } from '@/components/Header';
 import MainRouter from './MainRouter';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
 
-console.log("App.tsx is rendering");
+console.log("Index.tsx is rendering");
 
 interface UserProfile {
   name: string;
@@ -86,7 +83,7 @@ const queryClient = new QueryClient();
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState('home');
-  const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
+  const [progress, setProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -139,7 +136,7 @@ const Index = () => {
   };
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
-    setUserProgress(newProgress);
+    setProgress(newProgress);
     if (newProgress.currentPage && newProgress.currentPage !== currentPage) {
       setCurrentPage(newProgress.currentPage);
     }
@@ -148,7 +145,7 @@ const Index = () => {
   const sidebarPages = ['qa', 'hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration', 'documents'];
   
   const checkIfPageRequiresKey = (page: string) => {
-    return sidebarPages.includes(page) && userProgress.keys < 1;
+    return sidebarPages.includes(page) && progress.keys < 1;
   };
 
   const handlePageNavigation = (page: string) => {
@@ -165,6 +162,12 @@ const Index = () => {
   };
 
   const handleResetProgress = () => {
+    const resetProgress = () => setProgress({
+      keys: 4,
+      completedModules: [],
+      unlockedModules: ['school', 'pre-arrival-1', 'pre-arrival-2'],
+      currentPage: 'checklist'
+    });
     resetProgress();
     setShowConfirm(false);
     setCurrentPage('home');
@@ -195,7 +198,11 @@ const Index = () => {
   }
 
   if (showAuth) {
-    return <AuthPage onBack={() => setShowAuth(false)} />;
+    return (
+      <BrowserRouter>
+        <AuthPage onBack={() => setShowAuth(false)} />
+      </BrowserRouter>
+    );
   }
 
   return (
@@ -217,7 +224,7 @@ const Index = () => {
                   <Header 
                     currentPage={currentPage} 
                     setCurrentPage={handlePageNavigation}
-                    userProgress={userProgress}
+                    userProgress={progress}
                     userProfile={userProfile}
                     setUserProfile={setUserProfile}
                     showAuth={!user}
@@ -239,8 +246,8 @@ const Index = () => {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     userProfile={userProfile}
-                    userProgress={userProgress}
-                    setUserProgress={setUserProgress}
+                    userProgress={progress}
+                    setUserProgress={setProgress}
                     selectedSchool={selectedSchool}
                     setSelectedSchool={setSelectedSchool}
                     handleProgressUpdate={handleProgressUpdate}
