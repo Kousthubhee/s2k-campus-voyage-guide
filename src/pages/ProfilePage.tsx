@@ -6,9 +6,25 @@ import { Badge } from '@/components/ui/badge';
 import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2 } from 'lucide-react';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 
-export const ProfilePage = () => {
+interface ProfilePageProps {
+  userProfile: {
+    name: string;
+    email: string;
+    about: string;
+    memberSince: string;
+    photo: string;
+    age: string;
+    prevEducation: string;
+    workExperience: string;
+  } | null;
+  setUserProfile: (profile: any) => void;
+}
+
+export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
+  
+  // Use the passed userProfile or fall back to default
+  const profile = userProfile || {
     name: 'Sarah Mitchell',
     email: 'sarah.mitchell@email.com',
     about: 'International student from Canada studying Business Administration at HEC Paris. Passionate about sustainable business practices and French culture.',
@@ -17,7 +33,7 @@ export const ProfilePage = () => {
     age: '22',
     prevEducation: 'Bachelor of Commerce, University of Toronto',
     workExperience: 'Marketing Intern at Tech Startup (2023)'
-  });
+  };
 
   const achievements = [
     {
@@ -82,7 +98,7 @@ export const ProfilePage = () => {
   ];
 
   const handleSaveProfile = (updatedProfile: typeof profile) => {
-    setProfile(updatedProfile);
+    setUserProfile(updatedProfile);
     setIsEditing(false);
   };
 
