@@ -199,100 +199,102 @@ const Index = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
-        <AppSidebar />
-        <SidebarInset>
-          <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
-            <div className="flex h-16 shrink-0 items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1" />
-              <div className="flex flex-1 justify-between items-center">
-                <div 
-                  className="text-2xl font-bold cursor-pointer"
-                  onClick={() => setCurrentPage('home')}
-                >
-                  pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+    <BrowserRouter>
+      <SidebarProvider>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
+          <AppSidebar />
+          <SidebarInset>
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
+              <div className="flex h-16 shrink-0 items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <div className="flex flex-1 justify-between items-center">
+                  <div 
+                    className="text-2xl font-bold cursor-pointer"
+                    onClick={() => setCurrentPage('home')}
+                  >
+                    pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+                  </div>
+                  <Header 
+                    currentPage={currentPage} 
+                    setCurrentPage={handlePageNavigation}
+                    userProgress={userProgress}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    showAuth={!user}
+                  />
                 </div>
-                <Header 
-                  currentPage={currentPage} 
-                  setCurrentPage={handlePageNavigation}
-                  userProgress={userProgress}
-                  userProfile={userProfile}
-                  setUserProfile={setUserProfile}
-                  showAuth={!user}
-                />
               </div>
-            </div>
-          </header>
-          <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
-            <div className="max-w-5xl mx-auto animate-fade-in section-padding">
-              {currentPage === "profile" ? (
-                <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
-              ) : currentPage === "qa" ? (
-                <div className="space-y-6">
-                  <h1 className="text-3xl font-bold">AI Assistant</h1>
-                  <ChatInterface />
+            </header>
+            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+              <div className="max-w-5xl mx-auto animate-fade-in section-padding">
+                {currentPage === "profile" ? (
+                  <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
+                ) : currentPage === "qa" ? (
+                  <div className="space-y-6">
+                    <h1 className="text-3xl font-bold">AI Assistant</h1>
+                    <ChatInterface />
+                  </div>
+                ) : (
+                  <MainRouter
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    userProfile={userProfile}
+                    userProgress={userProgress}
+                    setUserProgress={setUserProgress}
+                    selectedSchool={selectedSchool}
+                    setSelectedSchool={setSelectedSchool}
+                    handleProgressUpdate={handleProgressUpdate}
+                    profile={userProfile}
+                  />
+                )}
+              </div>
+            </main>
+            <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
+              <div className="text-center text-gray-600">
+                🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> & <span className="text-cyan-600 font-semibold">Srivatsava CK</span>
+              </div>
+              <Button 
+                variant="destructive"
+                size="sm"
+                className="mt-1"
+                onClick={() => setShowConfirm(true)}
+              >
+                Reset Progress
+              </Button>
+              {showConfirm && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
+                    <div className="font-semibold text-lg mb-2">Reset Progress?</div>
+                    <div className="text-gray-700 text-sm mb-4 text-center">
+                      This will erase your checklist progress. Are you sure?
+                    </div>
+                    <div className="flex gap-3 justify-center">
+                      <Button 
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleResetProgress}
+                      >
+                        Yes, Reset
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowConfirm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <MainRouter
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  userProfile={userProfile}
-                  userProgress={userProgress}
-                  setUserProgress={setUserProgress}
-                  selectedSchool={selectedSchool}
-                  setSelectedSchool={setSelectedSchool}
-                  handleProgressUpdate={handleProgressUpdate}
-                  profile={userProfile}
-                />
               )}
-            </div>
-          </main>
-          <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
-            <div className="text-center text-gray-600">
-              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> & <span className="text-cyan-600 font-semibold">Srivatsava CK</span>
-            </div>
-            <Button 
-              variant="destructive"
-              size="sm"
-              className="mt-1"
-              onClick={() => setShowConfirm(true)}
-            >
-              Reset Progress
-            </Button>
-            {showConfirm && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
-                  <div className="font-semibold text-lg mb-2">Reset Progress?</div>
-                  <div className="text-gray-700 text-sm mb-4 text-center">
-                    This will erase your checklist progress. Are you sure?
-                  </div>
-                  <div className="flex gap-3 justify-center">
-                    <Button 
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleResetProgress}
-                    >
-                      Yes, Reset
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowConfirm(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </footer>
-        </SidebarInset>
-        
-        {/* Floating Chatbot - visible on all pages */}
-        <FloatingChatbot currentModule={currentPage} />
-      </div>
-    </SidebarProvider>
+            </footer>
+          </SidebarInset>
+          
+          {/* Floating Chatbot - visible on all pages */}
+          <FloatingChatbot currentModule={currentPage} />
+        </div>
+      </SidebarProvider>
+    </BrowserRouter>
   );
 };
 

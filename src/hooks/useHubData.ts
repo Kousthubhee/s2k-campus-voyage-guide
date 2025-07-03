@@ -168,13 +168,11 @@ export const useHubData = () => {
       toast.success('Comment added successfully!');
       fetchComments(postId);
       
-      // Update comment count
+      // Update comment count manually
       const { error: updateError } = await supabase
         .from('hub_posts')
-        .update({ comments_count: supabase.sql`comments_count + 1` })
+        .update({ comments_count: supabase.from('hub_comments').select('*', { count: 'exact' }).eq('post_id', postId) })
         .eq('id', postId);
-      
-      if (updateError) console.error('Error updating comment count:', updateError);
       
       fetchPosts();
     } catch (error) {
@@ -217,15 +215,6 @@ export const useHubData = () => {
 
       toast.success('Comment deleted successfully!');
       fetchComments(postId);
-      
-      // Update comment count
-      const { error: updateError } = await supabase
-        .from('hub_posts')
-        .update({ comments_count: supabase.sql`comments_count - 1` })
-        .eq('id', postId);
-      
-      if (updateError) console.error('Error updating comment count:', updateError);
-      
       fetchPosts();
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -256,10 +245,19 @@ export const useHubData = () => {
           .eq('post_id', postId)
           .eq('user_id', user.id);
 
-        await supabase
+        // Get current post to decrement likes
+        const { data: currentPost } = await supabase
           .from('hub_posts')
-          .update({ likes_count: supabase.sql`likes_count - 1` })
-          .eq('id', postId);
+          .select('likes_count')
+          .eq('id', postId)
+          .single();
+
+        if (currentPost) {
+          await supabase
+            .from('hub_posts')
+            .update({ likes_count: Math.max(0, (currentPost.likes_count || 0) - 1) })
+            .eq('id', postId);
+        }
       } else {
         // Like
         await supabase
@@ -269,10 +267,19 @@ export const useHubData = () => {
             user_id: user.id
           });
 
-        await supabase
+        // Get current post to increment likes
+        const { data: currentPost } = await supabase
           .from('hub_posts')
-          .update({ likes_count: supabase.sql`likes_count + 1` })
-          .eq('id', postId);
+          .select('likes_count')
+          .eq('id', postId)
+          .single();
+
+        if (currentPost) {
+          await supabase
+            .from('hub_posts')
+            .update({ likes_count: (currentPost.likes_count || 0) + 1 })
+            .eq('id', postId);
+        }
       }
 
       fetchPosts();
