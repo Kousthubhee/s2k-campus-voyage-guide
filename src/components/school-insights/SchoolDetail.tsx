@@ -22,18 +22,29 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
     if (!fees) return null;
     if (typeof fees === 'object') {
       return Object.entries(fees).map(([key, value]) => (
-        <div key={key} className="flex justify-between items-center">
-          <span className="capitalize text-gray-600">{key}:</span>
-          <span className="font-semibold">€{String(value)}</span>
+        <div key={key} className="flex justify-between items-center py-1">
+          <span className="capitalize text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+          <span className="font-semibold text-green-700">
+            {String(value).includes('€') ? String(value) : `€${String(value)}`}
+          </span>
         </div>
       ));
     }
     return (
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600">Tuition:</span>
-        <span className="font-semibold">{String(fees)}</span>
+      <div className="flex justify-between items-center py-1">
+        <span className="text-gray-600">Annual Tuition:</span>
+        <span className="font-semibold text-green-700">
+          {String(fees).includes('€') ? String(fees) : `€${String(fees)}`}
+        </span>
       </div>
     );
+  };
+
+  const formatProgramDuration = (program: any) => {
+    if (program.duration) {
+      return `${program.duration} • ${program.type || 'Program'}`;
+    }
+    return program.type || 'Program';
   };
 
   return (
@@ -48,8 +59,8 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
             <div className="text-5xl mr-4">{school.emoji || "🎓"}</div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{school.name}</h1>
-              <p className="text-lg text-gray-600">{school.long_description || school.description}</p>
-              <div className="flex items-center mt-2 text-gray-500">
+              <p className="text-lg text-gray-600 mb-2">{school.long_description || school.description}</p>
+              <div className="flex items-center text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>{school.city}, France</span>
               </div>
@@ -58,34 +69,29 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Programs Card */}
         {detailedPrograms.length > 0 && (
-          <Card>
+          <Card className="lg:col-span-2">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
                 Programs Offered
               </h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {detailedPrograms.map((program: any, index: number) => (
                   <div 
                     key={index}
-                    className={`p-3 rounded-lg border ${
-                      index % 2 === 0 
-                        ? 'bg-blue-50 border-blue-100' 
-                        : 'bg-green-50 border-green-100'
-                    }`}
+                    className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:shadow-md transition-shadow"
                   >
-                    <div className={`font-semibold ${
-                      index % 2 === 0 ? 'text-blue-900' : 'text-green-900'
-                    }`}>
+                    <div className="font-semibold text-blue-900 mb-2">
                       {program.name}
                     </div>
-                    <div className={`text-sm ${
-                      index % 2 === 0 ? 'text-blue-700' : 'text-green-700'
-                    }`}>
+                    <div className="text-sm text-blue-700 mb-2">
                       {program.description}
+                    </div>
+                    <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full inline-block">
+                      {formatProgramDuration(program)}
                     </div>
                   </div>
                 ))}
@@ -100,28 +106,29 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Euro className="h-5 w-5 mr-2 text-green-600" />
-                Tuition Fees
+                Tuition Fees (Annual)
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2 bg-green-50 p-4 rounded-lg">
                 {formatTuitionDetails(tuitionFees)}
               </div>
+              <p className="text-xs text-gray-500 mt-3">
+                *Fees may vary based on program and nationality. Contact the school for the most current information.
+              </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Rankings/Accreditations/Recognition Card */}
+        {/* Rankings & Recognition Card */}
         {(rankings.length > 0 || accreditations.length > 0 || recognition.length > 0 || specializations.length > 0) && (
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <Award className="h-5 w-5 mr-2 text-yellow-600" />
-                {rankings.length > 0 ? 'Rankings & Recognition' : 
-                 accreditations.length > 0 ? 'Accreditations' : 
-                 specializations.length > 0 ? 'Specializations' : 'Recognition'}
+                Rankings & Recognition
               </h3>
               <div className="space-y-3">
                 {[...rankings, ...accreditations, ...recognition, ...specializations].map((item: any, index: number) => (
-                  <div key={index} className="bg-yellow-50 border border-yellow-100 p-3 rounded-lg">
+                  <div key={index} className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
                     <div className="font-semibold text-yellow-800">{item.title}</div>
                     <div className="text-sm text-yellow-700">{item.description}</div>
                   </div>
@@ -132,17 +139,17 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
         )}
 
         {/* Contact Information Card */}
-        {(school.website || contactInfo) && (
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Building className="h-5 w-5 mr-2 text-gray-600" />
-                Contact Information
-              </h3>
+        <Card className="lg:col-span-2">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <Building className="h-5 w-5 mr-2 text-gray-600" />
+              Contact Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 {school.website && (
                   <div className="flex items-center">
-                    <Globe className="h-4 w-4 mr-2 text-gray-400" />
+                    <Globe className="h-4 w-4 mr-3 text-gray-400" />
                     <a 
                       href={school.website}
                       target="_blank"
@@ -154,15 +161,9 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
                     </a>
                   </div>
                 )}
-                {contactInfo?.phone && (
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                    <span className="text-gray-700">{contactInfo.phone}</span>
-                  </div>
-                )}
                 {contactInfo?.email && (
                   <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                    <Mail className="h-4 w-4 mr-3 text-gray-400" />
                     <a 
                       href={`mailto:${contactInfo.email}`}
                       className="text-blue-600 hover:underline"
@@ -171,9 +172,17 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
                     </a>
                   </div>
                 )}
+                {contactInfo?.phone && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-3 text-gray-400" />
+                    <span className="text-gray-700">{contactInfo.phone}</span>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-3">
                 {contactInfo?.linkedin && (
                   <div className="flex items-center">
-                    <Linkedin className="h-4 w-4 mr-2 text-gray-400" />
+                    <Linkedin className="h-4 w-4 mr-3 text-gray-400" />
                     <a 
                       href={contactInfo.linkedin}
                       target="_blank"
@@ -186,7 +195,7 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
                 )}
                 {contactInfo?.instagram && (
                   <div className="flex items-center">
-                    <Instagram className="h-4 w-4 mr-2 text-gray-400" />
+                    <Instagram className="h-4 w-4 mr-3 text-gray-400" />
                     <a 
                       href={contactInfo.instagram}
                       target="_blank"
@@ -199,14 +208,14 @@ export function SchoolDetail({ school, onBack }: SchoolDetailProps) {
                 )}
                 {contactInfo?.address && (
                   <div className="flex items-start">
-                    <Building className="h-4 w-4 mr-2 text-gray-400 mt-0.5" />
+                    <Building className="h-4 w-4 mr-3 text-gray-400 mt-0.5" />
                     <span className="text-gray-700">{contactInfo.address}</span>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
