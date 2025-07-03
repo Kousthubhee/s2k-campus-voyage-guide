@@ -3,8 +3,9 @@ import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Video, Heart, MessageSquare } from 'lucide-react'; // Removed Share2
+import { Video, Heart, MessageSquare, Edit2, Trash2 } from 'lucide-react';
 import { Reel, QAComment, QAReply } from './hubTypes';
+import { useState } from 'react';
 
 interface ReelsTabProps {
   reels: Reel[];
@@ -37,6 +38,32 @@ export function ReelsTab({
   onComment,
   onReply,
 }: ReelsTabProps) {
+  const [editingComment, setEditingComment] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState('');
+
+  const handleEditComment = (commentId: number, currentContent: string) => {
+    setEditingComment(commentId);
+    setEditContent(currentContent);
+  };
+
+  const handleSaveEdit = (reelId: number, commentId: number) => {
+    console.log('Saving edit for comment:', commentId, 'with content:', editContent);
+    setEditingComment(null);
+    setEditContent('');
+  };
+
+  const handleDeleteComment = (reelId: number, commentId: number) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      console.log('Deleting comment:', commentId);
+    }
+  };
+
+  const handleDeleteReply = (reelId: number, commentId: number, replyId: number) => {
+    if (window.confirm('Are you sure you want to delete this reply?')) {
+      console.log('Deleting reply:', replyId);
+    }
+  };
+
   return (
     <>
       <Card>
@@ -110,11 +137,54 @@ export function ReelsTab({
               <div className="mt-4 space-y-4">
                 {item.comments.map((comment) => (
                   <div key={comment.id} className="border-l-2 border-gray-200 pl-4">
-                    <div className="flex items-center mb-2">
-                      <span className="font-semibold text-gray-900 mr-2">{comment.author}</span>
-                      <span className="text-sm text-gray-500">{comment.time || 'Just now'}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="font-semibold text-gray-900 mr-2">{comment.author}</span>
+                        <span className="text-sm text-gray-500">{comment.time || 'Just now'}</span>
+                      </div>
+                      {comment.author === 'You' && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditComment(comment.id, comment.content)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteComment(item.id, comment.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-700 mb-2">{comment.content}</p>
+                    {editingComment === comment.id ? (
+                      <div className="mb-2">
+                        <Textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="mb-2"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => handleSaveEdit(item.id, comment.id)}>
+                            Save
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setEditingComment(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 mb-2">{comment.content}</p>
+                    )}
                     <div className="mt-2">
                       <Input
                         placeholder="Write a reply..."
@@ -139,9 +209,21 @@ export function ReelsTab({
                       <div className="mt-2 space-y-2 pl-4">
                         {comment.replies.map((reply) => (
                           <div key={reply.id} className="border-l-2 border-gray-300 pl-4">
-                            <div className="flex items-center mb-1">
-                              <span className="font-semibold text-gray-900 mr-2">{reply.author}</span>
-                              <span className="text-sm text-gray-500">{reply.time || 'Just now'}</span>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center">
+                                <span className="font-semibold text-gray-900 mr-2">{reply.author}</span>
+                                <span className="text-sm text-gray-500">{reply.time || 'Just now'}</span>
+                              </div>
+                              {reply.author === 'You' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteReply(item.id, comment.id, reply.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                             <p className="text-gray-700">{reply.content}</p>
                           </div>

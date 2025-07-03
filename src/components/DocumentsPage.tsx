@@ -1,12 +1,14 @@
+
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { FileText, Plus, Bell, Calendar, AlertTriangle, CheckCircle, Clock, Trash2 } from 'lucide-react';
+import { FileText, Plus, Bell, Calendar, AlertTriangle, CheckCircle, Clock, Trash2, Edit2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/sonner';
+import { DocumentEditDialog } from './documents/DocumentEditDialog';
 
 interface Document {
   id: string;
@@ -58,6 +60,12 @@ export const DocumentsPage = () => {
   ]);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editFormData, setEditFormData] = useState<{ submissionDate: string; expiryDate: string }>({
+    submissionDate: '',
+    expiryDate: ''
+  });
   const [newDocument, setNewDocument] = useState({
     name: '',
     type: '',
@@ -96,6 +104,44 @@ export const DocumentsPage = () => {
     setIsAddDialogOpen(false);
     setNewDocument({ name: '', type: '', submissionDate: '', expiryDate: '', renewalProcess: '', notes: '' });
     toast.success('Document added successfully');
+  };
+
+  const handleEditDocument = (doc: Document) => {
+    setEditingDocument(doc);
+    setEditFormData({
+      submissionDate: doc.submissionDate,
+      expiryDate: doc.expiryDate
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingDocument) return;
+
+    const updatedStatus = calculateStatus(editFormData.expiryDate);
+    const updatedDocuments = documents.map(doc =>
+      doc.id === editingDocument.id
+        ? {
+            ...doc,
+            submissionDate: editFormData.submissionDate,
+            expiryDate: editFormData.expiryDate,
+            status: updatedStatus
+          }
+        : doc
+    );
+
+    setDocuments(updatedDocuments);
+    setIsEditDialogOpen(false);
+    setEditingDocument(null);
+    toast.success('Document updated successfully');
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const deleteDocument = (docId: string) => {
@@ -206,6 +252,13 @@ export const DocumentsPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => handleEditDocument(doc)}
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className={doc.notificationEnabled ? 'text-blue-600' : 'text-gray-400'}
                     onClick={() => toggleNotification(doc.id)}
                   >
@@ -309,6 +362,15 @@ export const DocumentsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <DocumentEditDialog
+        open={isEditDialogOpen}
+        submissionDate={editFormData.submissionDate}
+        expiryDate={editFormData.expiryDate}
+        onChange={handleEditFormChange}
+        onCancel={() => setIsEditDialogOpen(false)}
+        onSubmit={handleSaveEdit}
+      />
     </div>
   );
 };
