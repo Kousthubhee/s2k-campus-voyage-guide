@@ -76,7 +76,7 @@ export const AppSidebar = ({
       <SidebarHeader className={`border-b border-gray-100 pb-4 ${isCollapsed ? 'px-2' : ''}`}>
         <div className={`flex items-center gap-3 px-3 py-2 ${isCollapsed ? 'justify-center px-0' : ''}`}>
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">pS</span>
+            <span className="text-white font-bold text-sm">SK</span>
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
