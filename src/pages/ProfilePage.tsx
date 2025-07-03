@@ -1,202 +1,285 @@
 
-import { useState } from 'react';
-import { User, Mail, MapPin, Calendar, Edit, Save, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2 } from 'lucide-react';
+import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 
-interface ProfileData {
-  name: string;
-  email: string;
-  location: string;
-  university: string;
-  program: string;
-  yearOfStudy: string;
-}
-
-export function ProfilePage() {
+export const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState<ProfileData>({
-    name: 'Kousthubhee Krishna',
-    email: 'kousthubheekrishna@gmail.com',
-    location: 'Rouen, France',
-    university: 'NEOMA Business School',
-    program: 'Master in Management',
-    yearOfStudy: '2024-2025'
+  const [profile, setProfile] = useState({
+    name: 'Sarah Mitchell',
+    email: 'sarah.mitchell@email.com',
+    about: 'International student from Canada studying Business Administration at HEC Paris. Passionate about sustainable business practices and French culture.',
+    memberSince: 'September 2024',
+    photo: 'https://images.unsplash.com/photo-1494790108755-2616b88f04b1?w=150&h=150&fit=crop&crop=face',
+    age: '22',
+    prevEducation: 'Bachelor of Commerce, University of Toronto',
+    workExperience: 'Marketing Intern at Tech Startup (2023)'
   });
 
-  const { toast } = useToast();
+  const achievements = [
+    {
+      id: '1',
+      title: 'First Steps',
+      description: 'Completed your first pre-arrival module',
+      icon: '🎯',
+      earnedAt: '2024-09-15',
+      points: 50,
+      category: 'milestone'
+    },
+    {
+      id: '2',
+      title: 'Document Master',
+      description: 'Successfully organized all required documents',
+      icon: '📋',
+      earnedAt: '2024-09-20',
+      points: 100,
+      category: 'organization'
+    },
+    {
+      id: '3',
+      title: 'Banking Pro',
+      description: 'Opened your first French bank account',
+      icon: '🏦',
+      earnedAt: '2024-10-01',
+      points: 75,
+      category: 'financial'
+    },
+    {
+      id: '4',
+      title: 'Community Helper',
+      description: 'Helped 5 other students in the hub',
+      icon: '🤝',
+      earnedAt: '2024-10-10',
+      points: 125,
+      category: 'community'
+    },
+    {
+      id: '5',
+      title: 'Language Enthusiast',
+      description: 'Completed 10 French lessons',
+      icon: '🗣️',
+      earnedAt: '2024-10-15',
+      points: 150,
+      category: 'language'
+    }
+  ];
 
-  const handleSave = () => {
+  const stats = [
+    { label: 'Modules Completed', value: '8/12', color: 'bg-blue-500' },
+    { label: 'Documents Organized', value: '15', color: 'bg-green-500' },
+    { label: 'Hub Contributions', value: '23', color: 'bg-purple-500' },
+    { label: 'French Lessons', value: '45', color: 'bg-orange-500' }
+  ];
+
+  const recentActivity = [
+    { action: 'Completed Post-Arrival Module', time: '2 hours ago', icon: CheckCircle2 },
+    { action: 'Uploaded Residence Permit', time: '1 day ago', icon: User },
+    { action: 'Helped student with CAF application', time: '2 days ago', icon: Trophy },
+    { action: 'Completed French Lesson: Greetings', time: '3 days ago', icon: Award }
+  ];
+
+  const handleSaveProfile = (updatedProfile: typeof profile) => {
+    setProfile(updatedProfile);
     setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-    // Reset to original data if needed
-  };
-
-  const handleChange = (field: keyof ProfileData, value: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
+  const completedModules = 8;
+  const totalModules = 12;
+  const progressPercentage = (completedModules / totalModules) * 100;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Profile</h1>
-        <p className="text-gray-600">Manage your personal information and preferences</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Profile Header */}
-        <div className="s2k-gradient p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                <User size={32} className="text-white" />
+    <div className="max-w-6xl mx-auto space-y-6">
+      {/* Profile Header */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="flex-shrink-0">
+              <img
+                src={profile.photo}
+                alt={profile.name}
+                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            </div>
+            
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                  size="sm"
+                  className="self-start sm:self-auto"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
               </div>
+              
+              <div className="flex flex-wrap items-center gap-4 text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  <span className="text-sm">{profile.email}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">Member since {profile.memberSince}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">Paris, France</span>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mt-3">{profile.about}</p>
+              
+              <div className="flex items-center gap-4 mt-4">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  <Trophy className="h-3 w-3 mr-1" />
+                  {totalPoints} Points
+                </Badge>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Target className="h-3 w-3 mr-1" />
+                  Level {Math.floor(totalPoints / 200) + 1}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Stats and Progress */}
+        <div className="space-y-6">
+          {/* Progress Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Progress Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <h2 className="text-2xl font-bold">{profileData.name}</h2>
-                <p className="opacity-90">{profileData.program}</p>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Overall Progress</span>
+                  <span>{Math.round(progressPercentage)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
               </div>
-            </div>
-            <Button
-              onClick={() => setIsEditing(!isEditing)}
-              variant="secondary"
-              size="sm"
-            >
-              <Edit size={16} className="mr-2" />
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </Button>
-          </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                    <activity.icon className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {activity.action}
+                      </p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Profile Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              {isEditing ? (
-                <Input
-                  value={profileData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.name}</p>
-              )}
-            </div>
+        {/* Right Column - Achievements */}
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Achievements ({achievements.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {achievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-gradient-to-r from-white to-gray-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl flex-shrink-0">{achievement.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {achievement.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {achievement.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-xs">
+                            +{achievement.points} points
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {new Date(achievement.earnedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              {isEditing ? (
-                <Input
-                  type="email"
-                  value={profileData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Current Location
-              </label>
-              {isEditing ? (
-                <Input
-                  value={profileData.location}
-                  onChange={(e) => handleChange('location', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.location}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                University
-              </label>
-              {isEditing ? (
-                <Input
-                  value={profileData.university}
-                  onChange={(e) => handleChange('university', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.university}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Program
-              </label>
-              {isEditing ? (
-                <Input
-                  value={profileData.program}
-                  onChange={(e) => handleChange('program', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.program}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Academic Year
-              </label>
-              {isEditing ? (
-                <Input
-                  value={profileData.yearOfStudy}
-                  onChange={(e) => handleChange('yearOfStudy', e.target.value)}
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{profileData.yearOfStudy}</p>
-              )}
-            </div>
-          </div>
-
-          {isEditing && (
-            <div className="mt-6 flex gap-3">
-              <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-                <Save size={16} className="mr-2" />
-                Save Changes
-              </Button>
-              <Button onClick={handleCancel} variant="outline">
-                <X size={16} className="mr-2" />
-                Cancel
-              </Button>
-            </div>
-          )}
+              {/* Achievement Categories */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4 text-center">Achievement Categories</h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {[
+                    { name: 'Milestone', icon: '🎯', count: 1 },
+                    { name: 'Organization', icon: '📋', count: 1 },
+                    { name: 'Financial', icon: '🏦', count: 1 },
+                    { name: 'Community', icon: '🤝', count: 1 },
+                    { name: 'Language', icon: '🗣️', count: 1 }
+                  ].map((category, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-2xl mb-1">{category.icon}</div>
+                      <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                      <div className="text-xs text-gray-600">{category.count} earned</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Additional Profile Stats */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-2">5</div>
-          <p className="text-gray-600">Modules Completed</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-          <div className="text-3xl font-bold text-green-600 mb-2">7</div>
-          <p className="text-gray-600">Keys Available</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">15</div>
-          <p className="text-gray-600">Days Active</p>
-        </div>
-      </div>
+      {/* Profile Edit Dialog */}
+      <ProfileEditDialog
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        profile={profile}
+        onSave={handleSaveProfile}
+      />
     </div>
   );
-}
+};

@@ -1,120 +1,263 @@
 
-import { Bell, Check, Clock, Info, AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Bell, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import { PageTitle } from '../components/PageTitle';
+import { useNotifications, getTimeAgo } from "@/hooks/useNotifications";
+import { ReminderNotificationActions } from "../components/notifications/ReminderNotificationActions";
+import { toast } from "@/components/ui/sonner";
+import { useEffect } from "react";
+import { NotificationErrorBoundary } from "../components/NotificationErrorBoundary";
 
-interface Notification {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'reminder';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
+export const NotificationsPage = ({ reminders }: { reminders?: { [id: string]: string } }) => {
+  // Debug log for troubleshooting blank screen
+  console.log("[NotificationsPage] Rendering with reminders:", reminders);
 
-const notifications: Notification[] = [
-  {
-    id: '1',
-    type: 'success',
-    title: 'Module Unlocked!',
-    message: 'Pre-Arrival Checklist (Part 1) is now available',
-    time: '2 hours ago',
-    read: false
-  },
-  {
-    id: '2',
-    type: 'info',
-    title: 'New School Added',
-    message: 'NEOMA Business School has been added to Lyon schools list',
-    time: '1 day ago',
-    read: false
-  },
-  {
-    id: '3',
-    type: 'reminder',
-    title: 'Visa Application Reminder',
-    message: 'Don\'t forget to submit your visa application at least 3 months before your planned arrival',
-    time: '3 days ago',
-    read: true
-  },
-  {
-    id: '4',
-    type: 'warning',
-    title: 'Document Deadline',
-    message: 'Housing application deadline is approaching - 2 weeks remaining',
-    time: '5 days ago',
-    read: true
+  // Attempt to get notifications via hook, handle context error
+  let notificationsData:
+    | ReturnType<typeof useNotifications>
+    | undefined = undefined;
+  let hookError: Error | null = null;
+
+  try {
+    notificationsData = useNotifications();
+  } catch (err: any) {
+    hookError = err;
   }
-];
 
-export function NotificationsPage() {
-  const getIcon = (type: string) => {
+  // If error during hook, render error state
+  if (hookError) {
+    console.error("[NotificationsPage] useNotifications error: ", hookError);
+    return (
+      <div className="p-8 bg-red-100 text-red-800 rounded-lg">
+        <b>Error loading notifications:</b>
+        <br />
+        {hookError?.message || String(hookError)}
+      </div>
+    );
+  }
+
+  // If notificationsData couldn't be retrieved, also render fallback
+  if (!notificationsData) {
+    return (
+      <div className="p-8 bg-red-50 text-red-600">Notifications not available.</div>
+    );
+  }
+
+  const {
+    notifications,
+    removeNotification,
+    markAsRead,
+    markAllAsRead,
+    clearAll,
+    syncReminders,
+  } = notificationsData;
+
+  // Defensive: check if notifications is array
+  if (!Array.isArray(notifications)) {
+    console.error("[NotificationsPage] notifications is not an array:", notifications);
+    return (
+      <div className="text-red-600 p-4">
+        <b>NotificationsPage error:</b> notifications is not an array.
+      </div>
+    );
+  }
+
+  // Sync reminders—done on mount and whenever reminders prop changes
+  useEffect(() => {
+    if (reminders) syncReminders(reminders);
+  }, [reminders, syncReminders]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success': return <Check size={20} className="text-green-600" />;
-      case 'warning': return <AlertCircle size={20} className="text-yellow-600" />;
-      case 'reminder': return <Clock size={20} className="text-blue-600" />;
-      default: return <Info size={20} className="text-blue-600" />;
+      case "success":
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case "warning":
+        return <AlertCircle className="h-5 w-5 text-yellow-600" />;
+      case "reminder":
+        return <Bell className="h-5 w-5 text-indigo-600 animate-pulse" />;
+      case "info":
+      default:
+        return <Info className="h-5 w-5 text-blue-600" />;
+    }
+  };
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case "success":
+        return "border-l-green-500 bg-green-50";
+      case "warning":
+        return "border-l-yellow-500 bg-yellow-50";
+      case "reminder":
+        return "border-l-indigo-400 bg-indigo-50";
+      case "info":
+      default:
+        return "border-l-blue-500 bg-blue-50";
     }
   };
 
-  const getBgColor = (type: string) => {
-    switch (type) {
-      case 'success': return 'bg-green-50 border-green-200';
-      case 'warning': return 'bg-yellow-50 border-yellow-200';
-      case 'reminder': return 'bg-blue-50 border-blue-200';
-      default: return 'bg-gray-50 border-gray-200';
+  // Handle notification actions
+  const handleMarkRead = (id: string) => {
+    markAsRead(id);
+    toast("Marked as read");
+  };
+  const handleRemove = (id: string) => {
+    removeNotification(id);
+    toast("Notification removed");
+  };
+  const handleMarkAllRead = () => {
+    markAllAsRead();
+    toast.success("All notifications marked as read");
+  };
+  const handleClearAll = () => {
+    clearAll();
+    toast("All notifications cleared");
+  };
+
+  const handleReminderAction = (notifId: string, action: string) => {
+    switch (action) {
+      case "done":
+        removeNotification(notifId);
+        toast.success("Reminder completed!");
+        break;
+      case "snooze":
+        // Snooze just marks as read and updates the time
+        markAsRead(notifId);
+        toast("Snoozed for later");
+        break;
+      case "dismiss":
+        removeNotification(notifId);
+        toast("Reminder dismissed");
+        break;
+      default:
+        break;
     }
   };
 
+  // All notification logic inside error boundary
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Notifications</h1>
-          <p className="text-gray-600">Stay updated with important information</p>
+    <NotificationErrorBoundary>
+      <div className="max-w-4xl mx-auto">
+        {/* debugging log */}
+        <div style={{ display: "none" }} id="notif-debug">{JSON.stringify(notifications)}</div>
+        <div className="text-center mb-8">
+          <PageTitle>
+            <span className="align-middle">
+              <Bell className="h-6 w-6 mr-2 inline-block text-blue-600 animate-pulse" />
+              Notifications
+            </span>
+          </PageTitle>
+          <p className="text-base text-gray-600 font-calibri">
+            Stay updated with your progress and important information
+          </p>
         </div>
-        <Button variant="outline" size="sm">
-          Mark all as read
-        </Button>
-      </div>
-
-      <div className="space-y-4">
-        {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className={`border rounded-xl p-4 transition-all duration-200 ${getBgColor(notification.type)} ${
-              !notification.read ? 'shadow-md' : 'opacity-75'
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="mt-1">
-                {getIcon(notification.type)}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-gray-800">{notification.title}</h3>
-                  <span className="text-sm text-gray-500">{notification.time}</span>
-                </div>
-                <p className="text-gray-700 text-sm">{notification.message}</p>
-                {!notification.read && (
-                  <div className="mt-2">
-                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                      Mark as read
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-700">
+              {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
+            </span>
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                {unreadCount}
+              </span>
+            )}
           </div>
-        ))}
-      </div>
-
-      {notifications.length === 0 && (
-        <div className="text-center py-12">
-          <Bell size={48} className="text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-800 mb-2">No notifications</h3>
-          <p className="text-gray-600">You're all caught up!</p>
+          <div className="flex space-x-2">
+            <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
+              Mark All as Read
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleClearAll}>
+              Clear All
+            </Button>
+          </div>
         </div>
-      )}
-    </div>
+        {/* Notification list */}
+        <div className="space-y-4">
+          {notifications.length === 0 ? (
+            <Card className="bg-gray-50">
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <Bell className="h-10 w-10 text-gray-300 mb-2" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">You're all caught up!</h3>
+                <p className="text-gray-500">No notifications at the moment.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            notifications.map((notification) => (
+              <Card
+                key={notification.id}
+                className={`transition-all duration-200 hover:shadow-md ${
+                  !notification.read ? "ring-2 ring-blue-200" : ""
+                }`}
+                aria-live={notification.read ? "polite" : "assertive"}
+              >
+                <CardContent className="p-0">
+                  <div className={`border-l-4 p-4 ${getNotificationColor(notification.type)}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className="mt-0.5">{getNotificationIcon(notification.type)}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">{notification.title}</h3>
+                            {!notification.read && (
+                              <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                            )}
+                          </div>
+                          <p className="text-gray-700 mb-1">{notification.message}</p>
+                          <div className="text-sm text-gray-500" aria-label="Time of notification">
+                            {getTimeAgo(notification.time)}
+                          </div>
+                          {/* Reminder actions */}
+                          {notification.type === "reminder" && (
+                            <ReminderNotificationActions
+                              onDone={() => handleReminderAction(notification.id, "done")}
+                              onSnooze={() => handleReminderAction(notification.id, "snooze")}
+                              onDismiss={() => handleReminderAction(notification.id, "dismiss")}
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex space-x-1">
+                        {!notification.read && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            aria-label="Mark notification as read"
+                            onClick={() => handleMarkRead(notification.id)}
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          aria-label="Remove notification"
+                          onClick={() => handleRemove(notification.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+        {/* Settings block - link */}
+        <Card className="mt-8">
+          <CardContent className="p-6 text-center">
+            <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Stay Updated</h3>
+            <p className="text-gray-600 mb-4">
+              Customize your notification preferences to get the most relevant updates.
+            </p>
+            <Button variant="outline">Notification Settings</Button>
+          </CardContent>
+        </Card>
+      </div>
+    </NotificationErrorBoundary>
   );
-}
+};

@@ -1,177 +1,495 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Users, MessageSquare, Share2, Heart, Calendar, Video, Edit, Search, Award, Pin } from 'lucide-react';
+import { QATab } from '../components/hub/QATab';
+import { BlogsTab } from '../components/hub/BlogsTab';
+import { ReelsTab } from '../components/hub/ReelsTab';
+import { PollsTab } from '../components/hub/PollsTab';
+import { EventsCard } from '../components/hub/EventsCard';
+import { AchievementsCard } from '../components/hub/AchievementsCard';
+import { StatsCard } from '../components/hub/StatsCard';
+import { QuickHelpCard } from '../components/hub/QuickHelpCard';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
+import { HubNoticeAlert } from '../components/hub/HubNoticeAlert';
+import { HubTripPlanCard } from '../components/hub/HubTripPlanCard';
+import { HubSearchFilterBar } from '../components/hub/HubSearchFilterBar';
+import { HubTabNav } from '../components/hub/HubTabNav';
 
-import { useState } from 'react';
-import { Users, MessageCircle, Share2, Heart, Clock } from 'lucide-react';
+// Import shared types from hubTypes
+import { QAPost, QAComment, QAReply, Reel, Poll, Blog } from '../components/hub/hubTypes';
 
-interface Post {
-  id: string;
-  author: string;
-  avatar: string;
-  title: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  category: string;
-}
+// Unified Post type
+type Post = QAPost | Reel | Poll;
 
-const samplePosts: Post[] = [
-  {
-    id: '1',
-    author: 'Sarah M.',
-    avatar: '👩‍🎓',
-    title: 'Just arrived in Lyon! Any tips for the first week?',
-    content: 'Hey everyone! I just arrived in Lyon for my MBA at emlyon. Looking for advice on the best places to shop for essentials and maybe some friendly faces to grab coffee with!',
-    timestamp: '2 hours ago',
-    likes: 12,
-    comments: 8,
-    category: 'Arrival'
-  },
-  {
-    id: '2',
-    author: 'Ahmed K.',
-    avatar: '👨‍💼',
-    title: 'CAF application approved! Here\'s what helped me',
-    content: 'Finally got my CAF housing aid approved after 2 months. Key tips: have all documents translated, follow up regularly, and be patient. Happy to help others with questions!',
-    timestamp: '5 hours ago',
-    likes: 24,
-    comments: 15,
-    category: 'Housing'
-  },
-  {
-    id: '3',
-    author: 'Priya S.',
-    avatar: '👩‍🔬',
-    title: 'Best student discounts in Paris?',
-    content: 'Studying at Sciences Po and looking to save money. What are the best student discounts for transport, food, and entertainment in Paris?',
-    timestamp: '1 day ago',
-    likes: 18,
-    comments: 22,
-    category: 'Money'
-  },
-  {
-    id: '4',
-    author: 'Luis R.',
-    avatar: '👨‍🎓',
-    title: 'French bank account success story',
-    content: 'Opened my account at BNP Paribas yesterday. Took my passport, student card, and housing proof. Process was smooth, got my card in 5 days. Ask me anything!',
-    timestamp: '2 days ago',
-    likes: 31,
-    comments: 12,
-    category: 'Banking'
+const CATEGORIES = ["All", "Arrival", "Housing", "Travel", "Poll", "General"];
+
+export const HubPage = () => {
+  const [activeTab, setActiveTab] = useState('qa'); // Default to Q&A tab
+  const [newPost, setNewPost] = useState('');
+  const [newReel, setNewReel] = useState<string | null>(null);
+  const [newReelCaption, setNewReelCaption] = useState('');
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogContent, setBlogContent] = useState('');
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState(['', '']);
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: 1,
+      type: 'post',
+      author: 'Sarah M.',
+      avatar: '👩‍🎓',
+      time: '2 hours ago',
+      content: 'Just arrived in Lyon! The campus is amazing and everyone is so helpful. Any tips for opening a bank account here?',
+      likes: 12,
+      comments: [],
+      category: 'Arrival'
+    },
+    {
+      id: 2,
+      type: 'reel',
+      author: 'John D.',
+      avatar: '👨‍🎓',
+      time: '3 hours ago',
+      videoUrl: 'https://example.com/reel1.mp4',
+      caption: 'Exploring Paris on a budget! 🗼',
+      likes: 20,
+      comments: [],
+      category: 'Travel'
+    },
+    {
+      id: 3,
+      type: 'poll',
+      author: 'Maria L.',
+      avatar: '👩‍🔬',
+      time: '1 day ago',
+      question: 'Best city to study in France?',
+      options: [{ text: 'Paris', votes: 10 }, { text: 'Lyon', votes: 5 }],
+      likes: 8,
+      comments: [],
+      category: 'Poll'
+    }
+  ]);
+  const [blogs, setBlogs] = useState([
+    {
+      id: 1,
+      author: 'Alex K.',
+      title: 'My First Month in France: A Journey',
+      time: '5 hours ago',
+      content: 'Sharing my experience with the CAF application...',
+      likes: 28,
+      comments: []
+    }
+  ]);
+  const [newComment, setNewComment] = useState({});
+
+  const upcomingEvents = [
+    { id: 1, title: 'Virtual Networking Event', date: 'Dec 15, 2024', time: '7:00 PM CET', attendees: 45 },
+    { id: 2, title: 'French Language Exchange', date: 'Dec 18, 2024', time: '6:30 PM CET', attendees: 23 },
+    { id: 3, title: 'Live Q&A: Visa Tips', date: 'Dec 20, 2024', time: '5:00 PM CET', attendees: 30 }
+  ];
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [likedItems, setLikedItems] = useState<string[]>([]);
+
+  // Load liked items from localStorage once
+  useEffect(() => {
+    const stored = localStorage.getItem("hub-liked-items");
+    if (stored) setLikedItems(JSON.parse(stored));
+  }, []);
+
+  // Save likes to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem("hub-liked-items", JSON.stringify(likedItems));
+  }, [likedItems]);
+
+  // Helper: is this item liked?
+  function isLiked(id: number, type: string) {
+    return likedItems.includes(`${type}-${id}`);
   }
-];
 
-export function HubPage() {
-  const [posts] = useState<Post[]>(samplePosts);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  // Phone number detection regex (simple, international & local)
+  function containsPhoneNumber(text: string): boolean {
+    // Match sequences of 8-15 digits, allowing spaces, dashes or start with +, ignore year ranges etc.
+    return /(?:\+?\d[\d .-]{7,14})/.test(text);
+  }
 
-  const categories = ['All', 'Arrival', 'Housing', 'Banking', 'Money', 'Social'];
+  // Show alert and block if content has phone number
+  function blockIfPhone(content: string): boolean {
+    if (containsPhoneNumber(content)) {
+      toast("Sharing personal contact info is not allowed.");
+      return true;
+    }
+    return false;
+  }
 
-  const filteredPosts = selectedCategory === 'All' 
-    ? posts 
-    : posts.filter(post => post.category === selectedCategory);
+  // Update handleLike to limit to once per item per person
+  const handleLike = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
+    const likeKey = `${type}-${itemId}`;
+    if (isLiked(itemId, type)) {
+      toast("You may only like this once.");
+      return;
+    }
+    setLikedItems([...likedItems, likeKey]);
+    // ... Keep previous liking logic ...
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      setPosts(posts.map(item =>
+        item.id === itemId && item.type === type
+          ? { ...item, likes: item.likes + 1 }
+          : item
+      ));
+    } else if (type === 'blog') {
+      setBlogs(blogs.map(blog =>
+        blog.id === itemId ? { ...blog, likes: blog.likes + 1 } : blog
+      ));
+    }
+  };
+
+  // Update handleComment with phone detection
+  const handleComment = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
+    const commentText = newComment[`${type}-${itemId}`] || '';
+    if (!commentText) return;
+    if (blockIfPhone(commentText)) return;
+    const newCommentObj: QAComment = {
+      id: Date.now(),
+      author: 'You',
+      content: commentText,
+      likes: 0,
+      replies: []
+    };
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      setPosts(posts.map(item =>
+        item.id === itemId && item.type === type
+          ? { ...item, comments: [...item.comments, newCommentObj] }
+          : item
+      ));
+    } else if (type === 'blog') {
+      setBlogs(blogs.map(blog =>
+        blog.id === itemId
+          ? { ...blog, comments: [...blog.comments, newCommentObj] }
+          : blog
+      ));
+    }
+    setNewComment({ ...newComment, [`${type}-${itemId}`]: '' });
+  };
+
+  // Update handleReply for phone check
+  const handleReply = (
+    itemId: number,
+    commentId: number,
+    type: "post" | "reel" | "poll" | "blog"
+  ) => {
+    const replyText = newComment[`reply-${type}-${itemId}-${commentId}`] || '';
+    if (!replyText) return;
+    if (blockIfPhone(replyText)) return;
+    const newReply: QAReply = {
+      id: Date.now(),
+      author: 'You',
+      content: replyText,
+      likes: 0
+    };
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      setPosts(posts.map(post =>
+        post.id === itemId && post.type === type
+          ? {
+            ...post,
+            comments: post.comments.map(comment =>
+              comment.id === commentId
+                ? { ...comment, replies: [...comment.replies, newReply] }
+                : comment
+            )
+          }
+          : post
+      ));
+    } else if (type === 'blog') {
+      setBlogs(blogs.map(blog =>
+        blog.id === itemId
+          ? {
+            ...blog,
+            comments: blog.comments.map(comment =>
+              comment.id === commentId
+                ? { ...comment, replies: [...comment.replies, newReply] }
+                : comment
+            )
+          }
+          : blog
+      ));
+    }
+    setNewComment({ ...newComment, [`reply-${type}-${itemId}-${commentId}`]: '' });
+  };
+
+  // Restrict phone sharing on post/blog/reel/poll creation
+  const handlePublishPost = () => {
+    if (!newPost) return;
+    if (blockIfPhone(newPost)) return;
+    const newPostObj: QAPost = {
+      id: Date.now(),
+      type: 'post',
+      author: 'You',
+      avatar: '🧑‍🎓',
+      time: 'Just now',
+      content: newPost,
+      likes: 0,
+      comments: [],
+      category: categoryFilter === "All" ? "General" : categoryFilter
+    };
+    setPosts([newPostObj, ...posts]);
+    setNewPost('');
+    setActiveTab('qa');
+  };
+
+  const handleReelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) setNewReel(URL.createObjectURL(file));
+  };
+
+  const handlePublishReel = () => {
+    if (!newReel || !newReelCaption) return;
+    if (blockIfPhone(newReelCaption)) return;
+    const newReelObj: Reel = {
+      id: Date.now(),
+      type: 'reel',
+      author: 'You',
+      avatar: '🧑‍🎓',
+      time: 'Just now',
+      videoUrl: newReel,
+      caption: newReelCaption,
+      likes: 0,
+      comments: [],
+      category: 'Travel'
+    };
+    setPosts([newReelObj, ...posts]);
+    setNewReel(null);
+    setNewReelCaption('');
+    setActiveTab('reels');
+  };
+
+  const handlePublishBlog = () => {
+    if (!blogTitle || !blogContent) return;
+    if (blockIfPhone(blogContent)) return;
+    const newBlog = {
+      id: Date.now(),
+      author: 'You',
+      title: blogTitle,
+      time: 'Just now',
+      content: blogContent,
+      likes: 0,
+      comments: []
+    };
+    setBlogs([newBlog, ...blogs]);
+    setBlogTitle('');
+    setBlogContent('');
+    setActiveTab('blogs');
+  };
+
+  const addPollOption = () => setPollOptions([...pollOptions, '']);
+  const updatePollOption = (index: number, value: string) => {
+    const updatedOptions = [...pollOptions];
+    updatedOptions[index] = value;
+    setPollOptions(updatedOptions);
+  };
+
+  const handlePublishPoll = () => {
+    if (!pollQuestion || pollOptions.some(opt => !opt)) return;
+    const newPoll: Poll = {
+      id: Date.now(),
+      type: 'poll',
+      author: 'You',
+      avatar: '🧑‍🎓',
+      time: 'Just now',
+      question: pollQuestion,
+      options: pollOptions.map(opt => ({ text: opt, votes: 0 })),
+      likes: 0,
+      comments: [],
+      category: 'Poll'
+    };
+    setPosts([newPoll, ...posts]);
+    setPollQuestion('');
+    setPollOptions(['', '']);
+    setActiveTab('polls');
+  };
+
+  const handleVotePoll = (pollId: number, optionIndex: number) => {
+    setPosts(posts.map(post =>
+      post.type === 'poll' && post.id === pollId
+        ? {
+          ...post,
+          options: post.options.map((opt, idx) =>
+            idx === optionIndex ? { ...opt, votes: opt.votes + 1 } : opt
+          )
+        }
+        : post
+    ));
+  };
+
+  // For search and filter: filter posts per type safely
+  function searchQAPosts(posts: QAPost[]): QAPost[] {
+    let result = posts;
+    if (categoryFilter !== "All") {
+      result = result.filter(p => p.category === categoryFilter);
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      result = result.filter(p =>
+        p.content.toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }
+
+  function searchReels(posts: Reel[]): Reel[] {
+    let result = posts;
+    if (categoryFilter !== "All") {
+      result = result.filter(p => p.category === categoryFilter);
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      result = result.filter(p =>
+        p.caption.toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }
+
+  function searchPolls(posts: Poll[]): Poll[] {
+    let result = posts;
+    if (categoryFilter !== "All") {
+      result = result.filter(p => categoryFilter === "Poll" || p.category === categoryFilter);
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      result = result.filter(p =>
+        p.question.toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }
+
+  // Fix: Annotate function to return Blog[] type
+  function searchBlogs(blogsArr: Blog[]): Blog[] {
+    let result = blogsArr;
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      result = result.filter(b =>
+        b.title.toLowerCase().includes(term) ||
+        b.content.toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }
+
+  // Content-typed datasets for tabs
+  const qaPosts = searchQAPosts(posts.filter((p): p is QAPost => p.type === "post"));
+  const reels = searchReels(posts.filter((p): p is Reel => p.type === "reel"));
+  const polls = searchPolls(posts.filter((p): p is Poll => p.type === "poll"));
+  const filteredBlogs = searchBlogs(blogs);
+
+  // Community stats (use all posts for stats, not just filtered)
+  const activeMembers = 1247;
+  const postsThisWeek = posts.filter(p => p.time === 'Just now').length + 89;
+  const questionsAnswered = posts.reduce((acc, post) => acc + post.comments.length, 0) + 156;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Community Hub</h1>
-        <p className="text-gray-600">Connect with fellow students and share your experiences</p>
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+          <Users className="h-8 w-8 mr-3 text-purple-600" />
+          Community Hub
+        </h1>
+        <p className="text-lg text-gray-600">
+          Connect with fellow students, share experiences, and get support
+        </p>
+        {/* Search and Filter bar */}
+        <HubSearchFilterBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          categories={CATEGORIES}
+        />
+        <HubTabNav activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
-      {/* Categories */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {activeTab === 'qa' && (
+            <QATab
+              qaPosts={qaPosts}
+              newPost={newPost}
+              onNewPostChange={setNewPost}
+              onPublishPost={handlePublishPost}
+              onLike={handleLike}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              onComment={handleComment}
+              onReply={handleReply}
+            />
+          )}
+          {activeTab === 'blogs' && (
+            <BlogsTab
+              blogTitle={blogTitle}
+              blogContent={blogContent}
+              onChangeTitle={setBlogTitle}
+              onChangeContent={setBlogContent}
+              onPublish={handlePublishBlog}
+              blogs={filteredBlogs}
+              onLike={handleLike}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              onComment={handleComment}
+              onReply={handleReply}
+            />
+          )}
+          {activeTab === 'reels' && (
+            <ReelsTab
+              reels={reels}
+              newReel={newReel}
+              newReelCaption={newReelCaption}
+              onReelUpload={handleReelUpload}
+              onChangeCaption={setNewReelCaption}
+              onPublish={handlePublishReel}
+              onLike={handleLike}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              onComment={handleComment}
+              onReply={handleReply}
+            />
+          )}
+          {activeTab === 'polls' && (
+            <PollsTab
+              polls={polls}
+              pollQuestion={pollQuestion}
+              pollOptions={pollOptions}
+              onChangeQuestion={setPollQuestion}
+              onUpdateOption={updatePollOption}
+              onAddOption={addPollOption}
+              onPublish={handlePublishPoll}
+              onVote={handleVotePoll}
+              onLike={handleLike}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              onComment={handleComment}
+              onReply={handleReply}
+            />
+          )}
         </div>
-      </div>
 
-      {/* New Post Button */}
-      <div className="mb-6">
-        <button className="w-full bg-green-50 border-2 border-dashed border-green-300 rounded-lg p-4 text-green-700 hover:bg-green-100 transition-colors">
-          <div className="flex items-center justify-center gap-2">
-            <Share2 size={20} />
-            <span className="font-medium">Share your experience with the community</span>
+        <div className="space-y-6">
+          <div>
+            <HubNoticeAlert />
           </div>
-        </button>
-      </div>
-
-      {/* Posts */}
-      <div className="space-y-6">
-        {filteredPosts.map((post) => (
-          <div key={post.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-            {/* Post Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="text-2xl">{post.avatar}</div>
-                <div>
-                  <h3 className="font-semibold text-gray-800">{post.author}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Clock size={14} />
-                    {post.timestamp}
-                  </div>
-                </div>
-              </div>
-              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                {post.category}
-              </span>
-            </div>
-
-            {/* Post Content */}
-            <div className="mb-4">
-              <h4 className="font-semibold text-gray-800 mb-2">{post.title}</h4>
-              <p className="text-gray-600 leading-relaxed">{post.content}</p>
-            </div>
-
-            {/* Post Actions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
-              <button className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors">
-                <Heart size={16} />
-                <span className="text-sm">{post.likes}</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors">
-                <MessageCircle size={16} />
-                <span className="text-sm">{post.comments} comments</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 transition-colors ml-auto">
-                <Share2 size={16} />
-                <span className="text-sm">Share</span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Community Stats */}
-      <div className="mt-12 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Community Stats</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">1,247</div>
-            <div className="text-sm text-gray-600">Active Members</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">89</div>
-            <div className="text-sm text-gray-600">Posts This Week</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">324</div>
-            <div className="text-sm text-gray-600">Questions Answered</div>
+          <div>
+            <HubTripPlanCard />
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default HubPage;

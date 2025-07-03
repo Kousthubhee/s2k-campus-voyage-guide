@@ -1,14 +1,5 @@
 
 import { ChecklistModule } from '@/components/ChecklistModule';
-import { HubPage } from '@/components/HubPage';
-import { NewsPage } from '@/components/NewsPage';
-import { AffiliationPage } from '@/components/AffiliationPage';
-import { LanguagePage } from '@/components/LanguagePage';
-import { TranslatePage } from '@/components/TranslatePage';
-import { ContactPage } from '@/components/ContactPage';
-import { ProfilePage } from '@/components/ProfilePage';
-import { NotificationPage } from '@/components/NotificationPage';
-import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { HomePage } from '@/components/HomePage';
 import { DocumentsPage } from '@/components/DocumentsPage';
 import { SchoolInsightsPage } from './SchoolInsightsPage';
@@ -18,6 +9,15 @@ import { PostArrivalPage } from './PostArrivalPage';
 import { FinanceTrackingPage } from './FinanceTrackingPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { QAPage } from './QAPage';
+import { HubPage } from './HubPage';
+import { NewsPage } from './NewsPage';
+import { AffiliationPage } from '@/components/AffiliationPage';
+import { LanguagePage } from './LanguagePage';
+import { TranslatePage } from './TranslatePage';
+import { ContactPage } from './ContactPage';
+import { ProfilePage } from './ProfilePage';
+import { NotificationsPage } from './NotificationsPage';
+import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import checklistModules from '@/constants/checklistModules';
 
 interface MainRouterProps {
@@ -160,7 +160,7 @@ export function MainRouter({
     case 'contact':
       return <ContactPage />;
     case 'notifications':
-      return <NotificationPage />;
+      return <NotificationsPage />;
     case 'integration':
       return <FrenchIntegrationPage />;
     case 'documents':
@@ -173,6 +173,8 @@ export function MainRouter({
       );
     case 'qa':
       return <QAPage />;
+    case 'profile':  
+      return <ProfilePage />;
     default:
       return (
         <HomePage 

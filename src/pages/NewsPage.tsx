@@ -1,199 +1,118 @@
 
-import { useState } from 'react';
-import { Calendar, ExternalLink, Filter } from 'lucide-react';
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen, ExternalLink } from "lucide-react";
 
-interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  date: string;
-  category: string;
-  readTime: string;
-  link?: string;
-  featured: boolean;
-}
+// Placeholder news data structure
+const placeholders = {
+  france: [
+    {
+      id: 1,
+      title: "Government Reforms Student Visa Process",
+      summary: "The French government is simplifying the visa process for international students.",
+      type: "Visa",
+      link: "#"
+    },
+    {
+      id: 2,
+      title: "New Law on Student Housing Subsidies",
+      summary: "Revised CAF rules for 2025: easier access to housing benefits.",
+      type: "Housing",
+      link: "#"
+    },
+  ],
+  india: [
+    {
+      id: 1,
+      title: "Big Rise in Indian Students Going to France",
+      summary: "Numbers soar as Indo-French partnerships make study abroad easier.",
+      type: "International",
+      link: "#"
+    },
+    {
+      id: 2,
+      title: "Indian Govt Recognizes French Masters for Jobs",
+      summary: "Policy update links French degrees with Indian job market.",
+      type: "Policy",
+      link: "#"
+    },
+  ],
+  world: [
+    {
+      id: 1,
+      title: "UNESCO Ranks France #3 Study Destination Globally",
+      summary: "France remains a top choice for students worldwide.",
+      type: "Ranking",
+      link: "#"
+    },
+    {
+      id: 2,
+      title: "Visa Updates in Europe for International Students",
+      summary: "Several EU countries update post-study work rights.",
+      type: "Visa",
+      link: "#"
+    },
+  ]
+};
 
-const newsItems: NewsItem[] = [
-  {
-    id: '1',
-    title: 'New Student Visa Requirements for 2024',
-    summary: 'Campus France announces updated requirements for student visa applications, including new financial thresholds and documentation.',
-    date: 'March 15, 2024',
-    category: 'Visa Updates',
-    readTime: '3 min read',
-    featured: true,
-    link: 'https://campusfrance.org'
-  },
-  {
-    id: '2',
-    title: 'CAF Housing Aid Increases by 5%',
-    summary: 'The French government announces an increase in student housing assistance rates effective April 2024.',
-    date: 'March 12, 2024',
-    category: 'Housing',
-    readTime: '2 min read',
-    featured: true
-  },
-  {
-    id: '3',
-    title: 'New Business School Rankings Released',
-    summary: 'Financial Times releases 2024 European Business School rankings with several French schools in top positions.',
-    date: 'March 10, 2024',
-    category: 'Education',
-    readTime: '4 min read',
-    featured: false
-  },
-  {
-    id: '4',
-    title: 'Student Work Permit Hours Extended',
-    summary: 'Non-EU students can now work up to 24 hours per week during their studies, up from the previous 20-hour limit.',
-    date: 'March 8, 2024',
-    category: 'Work Rights',
-    readTime: '2 min read',
-    featured: false
-  },
-  {
-    id: '5',
-    title: 'Free French Language Courses for International Students',
-    summary: 'Universities across France announce new initiatives offering free French language courses to international students.',
-    date: 'March 5, 2024',
-    category: 'Language',
-    readTime: '3 min read',
-    featured: false
-  }
-];
-
-export function NewsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  
-  const categories = ['All', 'Visa Updates', 'Housing', 'Education', 'Work Rights', 'Language'];
-  
-  const filteredNews = selectedCategory === 'All' 
-    ? newsItems 
-    : newsItems.filter(item => item.category === selectedCategory);
-
-  const featuredNews = newsItems.filter(item => item.featured);
-  const regularNews = filteredNews.filter(item => !item.featured);
+export const NewsPage = () => {
+  const [region, setRegion] = useState("france");
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Stay Updated</h1>
-        <p className="text-gray-600">Latest news and updates for international students in France</p>
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+          <BookOpen className="h-8 w-8 mr-3 text-orange-600" />
+          Top News: France • India • World
+        </h1>
+        <p className="text-lg text-gray-600">
+          The latest study, visa, housing, and student news curated by region and interest
+        </p>
       </div>
 
-      {/* Filters */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <Filter size={20} className="text-gray-500" />
-          <span className="font-medium text-gray-700">Filter by category:</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Tabs value={region} onValueChange={setRegion}>
+        <TabsList className="w-full justify-center mb-6">
+          <TabsTrigger value="france">France</TabsTrigger>
+          <TabsTrigger value="india">India</TabsTrigger>
+          <TabsTrigger value="world">World</TabsTrigger>
+        </TabsList>
 
-      {/* Featured News */}
-      {selectedCategory === 'All' && featuredNews.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Featured News</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {featuredNews.map((item) => (
-              <div key={item.id} className="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-blue-200">
-                <div className="flex items-start justify-between mb-4">
-                  <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                    {item.category}
-                  </span>
-                  <span className="text-sm text-gray-500">{item.readTime}</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{item.title}</h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">{item.summary}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Calendar size={16} />
-                    {item.date}
-                  </div>
-                  {item.link && (
-                    <a 
-                      href={item.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Read More <ExternalLink size={14} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Regular News */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          {selectedCategory === 'All' ? 'Latest Updates' : `${selectedCategory} News`}
-        </h2>
-        <div className="space-y-6">
-          {regularNews.map((item) => (
-            <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                  {item.category}
-                </span>
-                <span className="text-sm text-gray-500">{item.readTime}</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">{item.title}</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">{item.summary}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Calendar size={16} />
-                  {item.date}
-                </div>
-                {item.link && (
-                  <a 
-                    href={item.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    Read More <ExternalLink size={14} />
-                  </a>
-                )}
-              </div>
+        {["france", "india", "world"].map((regionKey) => (
+          <TabsContent key={regionKey} value={regionKey}>
+            <div className="space-y-6">
+              {placeholders[regionKey as keyof typeof placeholders].length === 0 ? (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <div className="text-gray-500">No news of this type yet. Coming soon!</div>
+                  </CardContent>
+                </Card>
+              ) : (
+                placeholders[regionKey as keyof typeof placeholders].map(article => (
+                  <Card key={article.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6 flex flex-col md:flex-row items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">{article.type}</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{article.title}</h3>
+                        <p className="text-gray-600 mb-4">{article.summary}</p>
+                        <a href={article.link} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm" variant="outline">
+                            Read More
+                            <ExternalLink className="h-4 w-4 ml-2" />
+                          </Button>
+                        </a>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Newsletter Signup */}
-      <div className="mt-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Stay in the Loop</h2>
-        <p className="text-gray-600 mb-6">Get the latest updates delivered directly to your inbox</p>
-        <div className="max-w-md mx-auto flex gap-2">
-          <input 
-            type="email" 
-            placeholder="Enter your email"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Subscribe
-          </button>
-        </div>
-      </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
-}
+};

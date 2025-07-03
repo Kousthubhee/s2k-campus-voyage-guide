@@ -1,262 +1,354 @@
 
-import { useState } from 'react';
-import { Play, Pause, Volume2, Book, Award, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Languages, Play, Volume2, BookOpen, Award, Star, Check } from 'lucide-react';
+import { useFavorites } from '../hooks/useFavorites';
+import { FavoriteStar } from '../components/FavoriteStar';
 
-interface Lesson {
-  id: string;
-  title: string;
-  level: string;
-  duration: string;
-  category: string;
-  completed: boolean;
-  locked: boolean;
-}
+export const LanguagePage = () => {
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [hideFrench, setHideFrench] = useState(false);
+  const [hideEnglish, setHideEnglish] = useState(false);
 
-const lessons: Lesson[] = [
-  { id: '1', title: 'Basic Greetings', level: 'Beginner', duration: '10 min', category: 'Conversation', completed: true, locked: false },
-  { id: '2', title: 'Introducing Yourself', level: 'Beginner', duration: '15 min', category: 'Conversation', completed: true, locked: false },
-  { id: '3', title: 'Numbers 1-20', level: 'Beginner', duration: '12 min', category: 'Vocabulary', completed: false, locked: false },
-  { id: '4', title: 'Days of the Week', level: 'Beginner', duration: '8 min', category: 'Vocabulary', completed: false, locked: false },
-  { id: '5', title: 'Asking for Directions', level: 'Intermediate', duration: '20 min', category: 'Conversation', completed: false, locked: true },
-  { id: '6', title: 'At the Restaurant', level: 'Intermediate', duration: '18 min', category: 'Conversation', completed: false, locked: true },
-];
+  // --- Track completed lessons in state
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
-const phrases = [
-  { french: 'Bonjour', english: 'Hello/Good morning', audio: true },
-  { french: 'Comment allez-vous?', english: 'How are you? (formal)', audio: true },
-  { french: 'Je ne parle pas français', english: "I don't speak French", audio: true },
-  { french: 'Parlez-vous anglais?', english: 'Do you speak English?', audio: true },
-  { french: 'Où est la gare?', english: 'Where is the train station?', audio: true },
-  { french: 'Combien ça coûte?', english: 'How much does it cost?', audio: true },
-];
+  // Persist phrase favorites
+  const [favorites, toggleFavorite] = useFavorites("french-phrase-favs-v1");
 
-export function LanguagePage() {
-  const [activeTab, setActiveTab] = useState<'lessons' | 'phrases' | 'progress'>('lessons');
-  const [playingPhrase, setPlayingPhrase] = useState<string | null>(null);
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    const loadVoices = () => {
+      const availableVoices = synth.getVoices();
+      setVoices(availableVoices);
+    };
+    loadVoices();
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = loadVoices;
+    }
+  }, []);
 
-  const completedLessons = lessons.filter(l => l.completed).length;
-  const progressPercentage = (completedLessons / lessons.length) * 100;
-
-  const playPronunciation = (french: string) => {
+  const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(french);
+      const synth = window.speechSynthesis;
+      const frenchVoice = voices.find(voice => voice.lang === 'fr-FR');
+      const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'fr-FR';
-      utterance.rate = 0.8;
-      
-      setPlayingPhrase(french);
-      utterance.onend = () => setPlayingPhrase(null);
-      
-      speechSynthesis.speak(utterance);
+      if (frenchVoice) utterance.voice = frenchVoice;
+      synth.cancel();
+      synth.speak(utterance);
     }
   };
 
+  const lessons = [
+    {
+      id: 'greetings',
+      title: 'Greetings & Politeness',
+      level: 'Beginner',
+      duration: '10 min',
+      phrases: [
+        { french: 'Bonjour', english: 'Hello/Good morning', pronunciation: 'bon-ZHOOR' },
+        { french: 'Bonsoir', english: 'Good evening', pronunciation: 'bon-SWAHR' },
+        { french: 'S\'il vous plaît', english: 'Please', pronunciation: 'see voo PLAY' },
+        { french: 'Merci beaucoup', english: 'Thank you very much', pronunciation: 'mer-SEE bo-KOO' },
+        { french: 'Excusez-moi', english: 'Excuse me', pronunciation: 'ex-ku-ZAY mwah' }
+      ]
+    },
+    {
+      id: 'university',
+      title: 'University Life',
+      level: 'Intermediate',
+      duration: '15 min',
+      phrases: [
+        { french: 'Où est la bibliothèque?', english: 'Where is the library?', pronunciation: 'oo ay la bee-blee-oh-TEHK' },
+        { french: 'J\'ai un cours à 14h', english: 'I have a class at 2 PM', pronunciation: 'zhay uh koor ah ka-TORZ ur' },
+        { french: 'Pouvez-vous répéter?', english: 'Can you repeat?', pronunciation: 'poo-vay voo ray-pay-TAY' },
+        { french: 'Je ne comprends pas', english: 'I don\'t understand', pronunciation: 'zhuh nuh kom-prahn pah' }
+      ]
+    },
+    {
+      id: 'daily-life',
+      title: 'Daily Life & Shopping',
+      level: 'Intermediate',
+      duration: '12 min',
+      phrases: [
+        { french: 'Combien ça coûte?', english: 'How much does it cost?', pronunciation: 'kom-bee-AHN sah koot' },
+        { french: 'Où est le supermarché?', english: 'Where is the supermarket?', pronunciation: 'oo ay luh su-per-mar-SHAY' },
+        { french: 'L\'addition, s\'il vous plaît', english: 'The check, please', pronunciation: 'lah-dee-see-YOHN see voo PLAY' },
+        { french: 'Je voudrais...', english: 'I would like...', pronunciation: 'zhuh voo-DRAY' }
+      ]
+    },
+    {
+      id: 'bureaucracy',
+      title: 'Bureaucracy & Administration',
+      level: 'Advanced',
+      duration: '20 min',
+      phrases: [
+        { french: 'J\'ai besoin d\'un rendez-vous', english: 'I need an appointment', pronunciation: 'zhay buh-ZWAHN duhn rahn-day VOO' },
+        { french: 'Où puis-je obtenir ce document?', english: 'Where can I get this document?', pronunciation: 'oo pwee zhuh ob-tuh-NEER suh do-ku-MAHN' },
+        { french: 'Mon numéro de sécurité sociale', english: 'My social security number', pronunciation: 'mohn nu-may-ROH duh say-ku-ree-TAY so-see-AHL' },
+        { french: 'Quels documents sont nécessaires?', english: 'What documents are necessary?', pronunciation: 'kel do-ku-MAHN sohn nay-say-SAIR' }
+      ]
+    }
+  ];
+
+  const tips = [
+    'Practice pronunciation daily for 10-15 minutes',
+    'Use hand gestures - French people are expressive!',
+    'Don\'t be afraid to make mistakes',
+    'Listen to French music and podcasts',
+    'Practice with native speakers when possible'
+  ];
+
+  // Helper: each phrase gets a unique id for favoriting
+  const getPhraseId = (lessonId: string, index: number) => `${lessonId}-${index}`;
+
+  // Find favorite phrases for "Favorites" section
+  const favoriteSet = favorites;
+
+  // Helper for progress percentage
+  const completedCount = completedLessons.length;
+  const totalLessons = lessons.length;
+  const progressPercent = Math.round((completedCount / totalLessons) * 100);
+
+  // Check if selected lesson is completed
+  const isLessonCompleted = selectedLesson && completedLessons.includes(selectedLesson.id);
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Learn French</h1>
-        <p className="text-gray-600">Master basic French for your student life in France</p>
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+          <Languages className="h-8 w-8 mr-3 text-indigo-600" />
+          Learn French
+        </h1>
+        <p className="text-lg text-gray-600">
+          Essential French phrases for your studies and daily life in France
+        </p>
       </div>
+      
+      {/* --- Favorites Section at the top (show if any) --- */}
+      {favoriteSet.size > 0 && (
+        <Card className="mb-8 border-yellow-300 bg-yellow-50">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold flex items-center mb-4">
+              <Star className="h-5 w-5 text-yellow-400 mr-2" />
+              Favorite Phrases
+            </h3>
+            <ul className="flex flex-wrap gap-4">
+              {Array.from(favoriteSet).map(favId => {
+                // locate phrase
+                let phrase, lessonTitle;
+                for (const lesson of lessons) {
+                  const idx = lesson.phrases.findIndex((_, i) => getPhraseId(lesson.id, i) === favId);
+                  if (idx >= 0) {
+                    phrase = lesson.phrases[idx];
+                    lessonTitle = lesson.title;
+                    break;
+                  }
+                }
+                if (!phrase) return null;
+                return (
+                  <li key={favId} className="border rounded px-3 py-2 bg-white shadow-sm">
+                    <div className="flex items-center mb-1">
+                      <FavoriteStar isActive={true} onClick={() => toggleFavorite(favId)} />
+                      <span className="font-semibold text-gray-900 mr-2">
+                        {phrase.french}
+                      </span>
+                      <span className="ml-auto text-xs text-gray-500">{lessonTitle}</span>
+                    </div>
+                    <div className="text-sm text-gray-700">{phrase.english}</div>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Progress Overview */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Your Progress</h2>
-          <div className="flex items-center gap-2">
-            <Award className="text-yellow-500" size={20} />
-            <span className="text-sm font-medium text-gray-700">{completedLessons} lessons completed</span>
-          </div>
+      {/* --- Hide/Reveal toggles when viewing lesson --- */}
+      {selectedLesson && (
+        <div className="flex gap-2 justify-end mb-4">
+          <Button
+            size="sm"
+            variant={hideFrench ? "default" : "outline"}
+            onClick={() => setHideFrench(x => !x)}
+          >
+            {hideFrench ? "Show French" : "Hide French"}
+          </Button>
+          <Button
+            size="sm"
+            variant={hideEnglish ? "default" : "outline"}
+            onClick={() => setHideEnglish(x => !x)}
+          >
+            {hideEnglish ? "Show English" : "Hide English"}
+          </Button>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex-1 bg-white rounded-full h-3">
-            <div 
-              className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <span className="text-lg font-bold text-gray-800">{Math.round(progressPercentage)}%</span>
-        </div>
-      </div>
+      )}
 
-      {/* Tabs */}
-      <div className="mb-8">
-        <div className="flex gap-2">
-          {[
-            { id: 'lessons', label: 'Lessons', icon: Book },
-            { id: 'phrases', label: 'Essential Phrases', icon: Volume2 },
-            { id: 'progress', label: 'Progress', icon: Award }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+      {/* --- Lessons Display --- */}
+      {selectedLesson ? (
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center mb-6">
+            <Button variant="ghost" onClick={() => setSelectedLesson(null)} className="mr-4">
+              ← Back to Lessons
+            </Button>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{selectedLesson.title}</h2>
+              <div className="flex items-center text-sm text-gray-500 mt-1">
+                <span className="mr-4">{selectedLesson.level}</span>
+                <span>{selectedLesson.duration}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {selectedLesson.phrases.map((phrase, index) => {
+              const phraseId = getPhraseId(selectedLesson.id, index);
+              return (
+                <Card key={index} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                      <div className="flex items-center">
+                        <FavoriteStar
+                          isActive={favoriteSet.has(phraseId)}
+                          onClick={() => toggleFavorite(phraseId)}
+                        />
+                        <div>
+                          <div className="text-lg font-semibold text-gray-900 mb-1">
+                            {!hideFrench ? phrase.french : <span className="text-gray-400 italic">[hidden]</span>}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {!hideFrench ? `[${phrase.pronunciation}]` : <span className="text-gray-400 italic">[hidden]</span>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-gray-700">
+                        {!hideEnglish ? phrase.english : <span className="text-gray-400 italic">[hidden]</span>}
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => speakText(phrase.french)}>
+                          <Volume2 className="h-4 w-4 mr-2" />
+                          Listen
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Play className="h-4 w-4 mr-2" />
+                          Practice
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <Card className="mt-8 bg-green-50 border-green-200">
+            <CardContent className="p-6 text-center">
+              <Award className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-green-900 mb-2">
+                Lesson Complete!
+              </h3>
+              <p className="text-green-700 mb-4">
+                Great job! You've learned {selectedLesson.phrases.length} essential phrases.
+              </p>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isLessonCompleted}
+                onClick={() => {
+                  if (selectedLesson && !isLessonCompleted) {
+                    setCompletedLessons((prev) => [...prev, selectedLesson.id]);
+                  }
+                }}
               >
-                <Icon size={16} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Content */}
-      {activeTab === 'lessons' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {lessons.map((lesson) => (
-            <div
-              key={lesson.id}
-              className={`bg-white rounded-xl border p-6 transition-all duration-200 ${
-                lesson.locked
-                  ? 'border-gray-200 opacity-50'
-                  : lesson.completed
-                  ? 'border-green-200 bg-green-50'
-                  : 'border-blue-200 hover:shadow-lg cursor-pointer hover:scale-105'
-              }`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className={`font-bold mb-1 ${lesson.completed ? 'text-green-800' : 'text-gray-800'}`}>
-                    {lesson.title}
-                  </h3>
-                  <div className="flex gap-2 mb-2">
-                    <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                      {lesson.level}
-                    </span>
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
-                      {lesson.category}
-                    </span>
-                  </div>
-                </div>
-                {lesson.completed && (
-                  <div className="bg-green-500 text-white rounded-full p-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
+                {isLessonCompleted ? (
+                  <span className="flex items-center">
+                    <Check className="h-4 w-4 mr-2" /> Marked Complete
+                  </span>
+                ) : (
+                  "Mark as Complete"
                 )}
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                <Clock size={14} />
-                {lesson.duration}
-              </div>
-
-              {lesson.locked ? (
-                <div className="text-center py-4">
-                  <div className="text-gray-400 mb-2">🔒</div>
-                  <p className="text-sm text-gray-500">Complete previous lessons to unlock</p>
-                </div>
-              ) : (
-                <button
-                  className={`w-full py-2 rounded-lg font-medium transition-colors ${
-                    lesson.completed
-                      ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {lesson.completed ? 'Review' : 'Start Lesson'}
-                </button>
-              )}
-            </div>
-          ))}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      )}
-
-      {activeTab === 'phrases' && (
-        <div className="space-y-4">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Essential French Phrases</h2>
-            <p className="text-gray-600">Click the speaker icon to hear pronunciation</p>
-          </div>
-          
-          {phrases.map((phrase, index) => (
-            <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-lg font-semibold text-gray-800 mb-1">{phrase.french}</div>
-                  <div className="text-gray-600">{phrase.english}</div>
-                </div>
-                <button
-                  onClick={() => playPronunciation(phrase.french)}
-                  className={`ml-4 p-3 rounded-full transition-colors ${
-                    playingPhrase === phrase.french
-                      ? 'bg-green-500 text-white'
-                      : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                  }`}
-                >
-                  {playingPhrase === phrase.french ? <Pause size={20} /> : <Play size={20} />}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {activeTab === 'progress' && (
-        <div className="space-y-8">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Learning Statistics</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">{completedLessons}</div>
-                <div className="text-gray-600">Lessons Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">{phrases.length}</div>
-                <div className="text-gray-600">Phrases Learned</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
-                  {Math.round(completedLessons * 15)}
-                </div>
-                <div className="text-gray-600">Minutes Practiced</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Achievements</h3>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { title: 'First Steps', description: 'Complete your first lesson', earned: completedLessons >= 1 },
-                { title: 'Conversation Starter', description: 'Complete 3 conversation lessons', earned: completedLessons >= 3 },
-                { title: 'Vocabulary Builder', description: 'Learn 20 new words', earned: false },
-                { title: 'Pronunciation Pro', description: 'Practice 50 phrases', earned: false },
-              ].map((achievement, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-lg border-2 ${
-                    achievement.earned
-                      ? 'border-yellow-300 bg-yellow-50'
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
+              {lessons.map((lesson) => (
+                <Card 
+                  key={lesson.id} 
+                  className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105"
+                  onClick={() => setSelectedLesson(lesson)}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`text-2xl ${achievement.earned ? '' : 'grayscale opacity-50'}`}>
-                      🏆
+                  <CardContent className="p-6">
+                    <div className="h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg mb-4 flex items-center justify-center">
+                      <BookOpen className="h-8 w-8 text-white" />
                     </div>
-                    <div>
-                      <h4 className={`font-semibold ${achievement.earned ? 'text-yellow-800' : 'text-gray-500'}`}>
-                        {achievement.title}
-                      </h4>
-                      <p className={`text-sm ${achievement.earned ? 'text-yellow-700' : 'text-gray-400'}`}>
-                        {achievement.description}
-                      </p>
+                    
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {lesson.title}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        lesson.level === 'Beginner' ? 'bg-green-100 text-green-800' :
+                        lesson.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {lesson.level}
+                      </span>
+                      <span className="text-sm text-gray-500">{lesson.duration}</span>
                     </div>
-                  </div>
-                </div>
+                    
+                    <Button className="w-full" size="sm">
+                      Start Lesson
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Learning Tips</h3>
+                <div className="space-y-3">
+                  {tips.map((tip, index) => (
+                    <div key={index} className="flex items-start">
+                      <div className="text-indigo-600 mr-2 mt-0.5">💡</div>
+                      <span className="text-sm text-gray-700">{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Your Progress</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Lessons Completed</span>
+                    <span className="font-semibold">{completedCount} / {totalLessons}</span>
+                  </div>
+                  <div className="bg-gray-200 rounded-full h-2">
+                    <div className="bg-indigo-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {completedCount === 0
+                      ? "Complete lessons to track your progress"
+                      : `You've completed ${completedCount} lesson${completedCount > 1 ? 's' : ''}!`}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
     </div>
   );
-}
+};
