@@ -80,21 +80,6 @@ export const ContactPage = () => {
     }
   ];
 
-  const officeLocations = [
-    {
-      city: 'Paris',
-      address: '123 Rue de la République, 75001 Paris, France',
-      hours: 'Mon-Fri: 9:00 AM - 6:00 PM',
-      phone: '+33 1 23 45 67 89'
-    },
-    {
-      city: 'Lyon',
-      address: '45 Place Bellecour, 69002 Lyon, France',
-      hours: 'Mon-Fri: 9:00 AM - 5:00 PM',
-      phone: '+33 4 78 90 12 34'
-    }
-  ];
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -142,7 +127,7 @@ export const ContactPage = () => {
       {/* Creators Section */}
       <Card className="mb-8 bg-gradient-to-r from-blue-50 to-cyan-50">
         <CardContent className="p-6">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">Creators: Kousthubhee Krishna & Srivatsava</h2>
+          <h2 className="text-xl font-bold text-blue-900 mb-4">Created by Kousthubhee Krishna & Srivatsava</h2>
           <p className="text-blue-800 mb-6">
             We're passionate about helping students navigate their journey to study in France. 
             Our platform provides comprehensive guides, checklists, and support to make your 
@@ -156,8 +141,8 @@ export const ContactPage = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg text-blue-900">Kousthubhee Krishna</h3>
-                <p className="text-blue-700 font-medium">Co-Founder & Developer</p>
-                <p className="text-blue-600 text-sm mt-1">Passionate about helping students navigate French education</p>
+                <p className="text-blue-700 font-medium">Co-Creator & Developer</p>
+                <p className="text-blue-600 text-sm mt-1">Passionate about helping students navigate French education systems and providing technical solutions</p>
               </div>
             </div>
             
@@ -167,8 +152,8 @@ export const ContactPage = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg text-blue-900">Srivatsava</h3>
-                <p className="text-blue-700 font-medium">Co-Founder & Content Creator</p>
-                <p className="text-blue-600 text-sm mt-1">Passionate about helping students navigate French education</p>
+                <p className="text-blue-700 font-medium">Co-Creator & Content Strategist</p>
+                <p className="text-blue-600 text-sm mt-1">Dedicated to creating comprehensive resources and guides for international students in France</p>
               </div>
             </div>
           </div>
@@ -178,16 +163,17 @@ export const ContactPage = () => {
       {/* Mission Section */}
       <Card className="mb-8">
         <CardContent className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Helping students navigate their journey to study in France</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Our Mission: Empowering Your French Study Journey</h2>
           <p className="text-gray-700 mb-4">
-            Our mission is to provide comprehensive, reliable, and up-to-date information to 
-            help international students successfully pursue their education in France.
+            We understand the challenges of studying abroad and have created this platform to make your journey 
+            smoother and more successful. From visa applications to finding accommodation, from understanding 
+            French culture to navigating academic systems - we've got you covered.
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">Made for students</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">Made by Students, for Students</h3>
             <p className="text-blue-800 text-sm">
-              We understand the challenges of studying abroad and have created 
-              this platform to make your journey smoother and more successful.
+              Having experienced the journey ourselves, we know exactly what challenges you'll face and 
+              have built tools and resources to help you overcome them with confidence.
             </p>
           </div>
         </CardContent>
@@ -301,41 +287,6 @@ export const ContactPage = () => {
                   <Send className="h-4 w-4 ml-2" />
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-
-          {/* Office Locations */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Office Locations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {officeLocations.map((office, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <h3 className="font-semibold text-lg mb-2">{office.city}</h3>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span>{office.address}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 flex-shrink-0" />
-                        <span>{office.hours}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 flex-shrink-0" />
-                        <a href={`tel:${office.phone}`} className="text-blue-600 hover:underline">
-                          {office.phone}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
         </div>

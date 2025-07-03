@@ -163,6 +163,11 @@ export const DocumentsPage = () => {
     setEditDialogOpen(true);
   };
 
+  const handleDeleteDocument = (docId: string) => {
+    setDocuments(prev => prev.filter(doc => doc.id !== docId));
+    console.log('Document deleted:', docId);
+  };
+
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditFormData(prev => ({
       ...prev,
@@ -240,6 +245,14 @@ export const DocumentsPage = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteDocument(doc.id)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -275,8 +288,8 @@ export const DocumentsPage = () => {
         <Card className="border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer">
           <CardContent className="flex flex-col items-center justify-center h-full py-12">
             <Plus className="h-8 w-8 text-gray-400 mb-2" />
-            <p className="text-gray-600 text-center">Add New Document</p>
-            <p className="text-sm text-gray-500 text-center mt-1">Upload and track important documents</p>
+            <p className="text-gray-600 text-center">Add New Process</p>
+            <p className="text-sm text-gray-500 text-center mt-1">Track a new document renewal process</p>
           </CardContent>
         </Card>
       </div>

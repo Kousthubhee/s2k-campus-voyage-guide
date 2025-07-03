@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Users, MessageSquare, Share2, Heart, Calendar, Video, Edit, Search, Award, Pin } from 'lucide-react';
+import { Users, MessageSquare, Share2, Heart, Calendar, Video, Edit, Search, Award, Pin, Trash2 } from 'lucide-react';
 import { QATab } from '../components/hub/QATab';
 import { BlogsTab } from '../components/hub/BlogsTab';
 import { ReelsTab } from '../components/hub/ReelsTab';
@@ -136,7 +137,7 @@ export const HubPage = () => {
       return;
     }
     setLikedItems([...likedItems, likeKey]);
-    // ... Keep previous liking logic ...
+    
     if (type === 'post' || type === 'reel' || type === 'poll') {
       setPosts(posts.map(item =>
         item.id === itemId && item.type === type
@@ -147,6 +148,82 @@ export const HubPage = () => {
       setBlogs(blogs.map(blog =>
         blog.id === itemId ? { ...blog, likes: blog.likes + 1 } : blog
       ));
+    }
+  };
+
+  // Handle edit functionality
+  const handleEdit = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
+    // Check if the item belongs to the current user (for now, assume "You" is the current user)
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      const item = posts.find(p => p.id === itemId && p.type === type);
+      if (item && item.author === 'You') {
+        // Enable edit mode for the item
+        const newContent = prompt('Edit your content:', 
+          type === 'post' ? item.content : 
+          type === 'reel' ? item.caption : 
+          type === 'poll' ? item.question : ''
+        );
+        
+        if (newContent && newContent.trim()) {
+          if (blockIfPhone(newContent)) return;
+          
+          setPosts(posts.map(p => 
+            p.id === itemId && p.type === type
+              ? { ...p, 
+                  content: type === 'post' ? newContent : p.content,
+                  caption: type === 'reel' ? newContent : p.caption,
+                  question: type === 'poll' ? newContent : p.question
+                }
+              : p
+          ));
+          toast("Content updated successfully!");
+        }
+      } else {
+        toast("You can only edit your own posts.");
+      }
+    } else if (type === 'blog') {
+      const blog = blogs.find(b => b.id === itemId);
+      if (blog && blog.author === 'You') {
+        const newTitle = prompt('Edit blog title:', blog.title);
+        if (newTitle && newTitle.trim()) {
+          const newContent = prompt('Edit blog content:', blog.content);
+          if (newContent && newContent.trim()) {
+            if (blockIfPhone(newContent)) return;
+            
+            setBlogs(blogs.map(b =>
+              b.id === itemId ? { ...b, title: newTitle, content: newContent } : b
+            ));
+            toast("Blog updated successfully!");
+          }
+        }
+      } else {
+        toast("You can only edit your own blogs.");
+      }
+    }
+  };
+
+  // Handle delete functionality
+  const handleDelete = (itemId: number, type: "post" | "reel" | "poll" | "blog") => {
+    if (type === 'post' || type === 'reel' || type === 'poll') {
+      const item = posts.find(p => p.id === itemId && p.type === type);
+      if (item && item.author === 'You') {
+        if (confirm('Are you sure you want to delete this ' + type + '?')) {
+          setPosts(posts.filter(p => !(p.id === itemId && p.type === type)));
+          toast("Content deleted successfully!");
+        }
+      } else {
+        toast("You can only delete your own posts.");
+      }
+    } else if (type === 'blog') {
+      const blog = blogs.find(b => b.id === itemId);
+      if (blog && blog.author === 'You') {
+        if (confirm('Are you sure you want to delete this blog?')) {
+          setBlogs(blogs.filter(b => b.id !== itemId));
+          toast("Blog deleted successfully!");
+        }
+      } else {
+        toast("You can only delete your own blogs.");
+      }
     }
   };
 
@@ -424,6 +501,8 @@ export const HubPage = () => {
               onNewPostChange={setNewPost}
               onPublishPost={handlePublishPost}
               onLike={handleLike}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
@@ -439,6 +518,8 @@ export const HubPage = () => {
               onPublish={handlePublishBlog}
               blogs={filteredBlogs}
               onLike={handleLike}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
@@ -454,6 +535,8 @@ export const HubPage = () => {
               onChangeCaption={setNewReelCaption}
               onPublish={handlePublishReel}
               onLike={handleLike}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}
@@ -471,6 +554,8 @@ export const HubPage = () => {
               onPublish={handlePublishPoll}
               onVote={handleVotePoll}
               onLike={handleLike}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               newComment={newComment}
               setNewComment={setNewComment}
               onComment={handleComment}

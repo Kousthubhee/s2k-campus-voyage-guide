@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +21,6 @@ export const TranslatePage = () => {
   const [translatedText, setTranslatedText] = useState('');
   const [sourceLang, setSourceLang] = useState('en');
   const [targetLang, setTargetLang] = useState('fr');
-  const [isTranslating, setIsTranslating] = useState(false);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [favorites, setFavorites] = useState<Translation[]>([]);
 
@@ -49,35 +48,31 @@ export const TranslatePage = () => {
     { en: 'I don\'t understand', fr: 'Je ne comprends pas' }
   ];
 
-  const handleTranslate = async () => {
-    if (!sourceText.trim()) {
-      toast("Please enter text to translate");
-      return;
-    }
+  // Auto-translate when sourceText changes
+  useEffect(() => {
+    if (sourceText.trim()) {
+      const delayedTranslate = setTimeout(() => {
+        const mockTranslation = getMockTranslation(sourceText, sourceLang, targetLang);
+        setTranslatedText(mockTranslation);
+        
+        // Add to history
+        const newTranslation: Translation = {
+          id: Date.now().toString(),
+          sourceText,
+          translatedText: mockTranslation,
+          sourceLang,
+          targetLang,
+          timestamp: new Date()
+        };
+        
+        setTranslations(prev => [newTranslation, ...prev.slice(0, 9)]); // Keep last 10
+      }, 500); // 500ms delay for auto-translation
 
-    setIsTranslating(true);
-    
-    // Simulate translation delay
-    setTimeout(() => {
-      // This is a mock translation - in a real app, you'd use Google Translate API or similar
-      const mockTranslation = getMockTranslation(sourceText, sourceLang, targetLang);
-      setTranslatedText(mockTranslation);
-      
-      // Add to history
-      const newTranslation: Translation = {
-        id: Date.now().toString(),
-        sourceText,
-        translatedText: mockTranslation,
-        sourceLang,
-        targetLang,
-        timestamp: new Date()
-      };
-      
-      setTranslations(prev => [newTranslation, ...prev.slice(0, 9)]); // Keep last 10
-      setIsTranslating(false);
-      toast("Translation completed!");
-    }, 1000);
-  };
+      return () => clearTimeout(delayedTranslate);
+    } else {
+      setTranslatedText('');
+    }
+  }, [sourceText, sourceLang, targetLang]);
 
   const getMockTranslation = (text: string, from: string, to: string) => {
     // Simple mock translations for common phrases
@@ -156,10 +151,8 @@ export const TranslatePage = () => {
   const useCommonPhrase = (phrase: { en: string; fr: string }) => {
     if (sourceLang === 'en') {
       setSourceText(phrase.en);
-      setTranslatedText(phrase.fr);
     } else {
       setSourceText(phrase.fr);
-      setTranslatedText(phrase.en);
     }
   };
 
@@ -175,7 +168,7 @@ export const TranslatePage = () => {
           Universal Translator
         </h1>
         <p className="text-lg text-gray-600">
-          Translate between multiple languages with voice support
+          Real-time translation between multiple languages
         </p>
       </div>
 
@@ -287,22 +280,12 @@ export const TranslatePage = () => {
                   </div>
                   <Textarea
                     value={translatedText}
-                    onChange={(e) => setTranslatedText(e.target.value)}
-                    placeholder="Translation will appear here..."
+                    placeholder="Translation will appear here automatically..."
                     className="min-h-[120px] bg-gray-50"
                     readOnly
                   />
                 </div>
               </div>
-
-              <Button
-                onClick={handleTranslate}
-                disabled={isTranslating || !sourceText.trim()}
-                className="w-full"
-                size="lg"
-              >
-                {isTranslating ? 'Translating...' : 'Translate'}
-              </Button>
             </CardContent>
           </Card>
 
@@ -404,7 +387,7 @@ export const TranslatePage = () => {
             </Card>
           )}
 
-          {/* Language Statistics */}
+          {/* Translation Statistics */}
           <Card>
             <CardHeader>
               <CardTitle>Translation Stats</CardTitle>
