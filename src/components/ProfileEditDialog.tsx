@@ -22,7 +22,7 @@ interface ProfileType {
 interface ProfileEditDialogProps {
   open: boolean;
   onOpenChange: (value: boolean) => void;
-  profile: ProfileType;
+  profile: ProfileType | null;
   onSave: (profile: ProfileType) => void;
 }
 
@@ -74,13 +74,24 @@ const ProfileEditExtra = ({
 );
 
 export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: ProfileEditDialogProps) {
-  const [editingProfile, setEditingProfile] = useState(profile);
+  const defaultProfile: ProfileType = {
+    name: '',
+    email: '',
+    about: '',
+    memberSince: new Date().toLocaleDateString(),
+    photo: '',
+    age: '',
+    prevEducation: '',
+    workExperience: ''
+  };
+
+  const [editingProfile, setEditingProfile] = useState(profile || defaultProfile);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Reset editing fields when dialog is reopened
   React.useEffect(() => {
-    if (open) setEditingProfile(profile);
+    if (open) setEditingProfile(profile || defaultProfile);
   }, [open, profile]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

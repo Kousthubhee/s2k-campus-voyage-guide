@@ -72,8 +72,10 @@ export const AppSidebar = ({
             <span className="text-white font-bold text-sm">pS</span>
           </div>
           <div className="flex-1 group-data-[collapsible=icon]:hidden">
-            <h2 className="font-semibold text-gray-900">pasS2Kampus</h2>
-            <p className="text-xs text-gray-500">Study Guide</p>
+            <h2 className="font-semibold text-gray-900">
+              pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+            </h2>
+            <p className="text-xs text-gray-500">Your guide to French education</p>
           </div>
         </div>
       </SidebarHeader>

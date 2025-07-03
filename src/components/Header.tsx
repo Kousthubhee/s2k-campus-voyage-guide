@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfileEditDialog } from './ProfileEditDialog';
@@ -22,6 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
   setUserProfile,
   showAuth
 }) => {
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
   const handleNotificationClick = () => {
     setCurrentPage('notifications');
   };
@@ -66,10 +68,15 @@ export const Header: React.FC<HeaderProps> = ({
         </Button>
       ) : (
         <div className="flex items-center gap-2">
-          <ProfileEditDialog 
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditingProfile(true)}
+            className="flex items-center gap-2"
+          >
+            <User className="h-4 w-4" />
+            Edit Profile
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -81,6 +88,14 @@ export const Header: React.FC<HeaderProps> = ({
           </Button>
         </div>
       )}
+
+      {/* Profile Edit Dialog */}
+      <ProfileEditDialog
+        open={isEditingProfile}
+        onOpenChange={setIsEditingProfile}
+        profile={userProfile}
+        onSave={setUserProfile}
+      />
     </div>
   );
 };
