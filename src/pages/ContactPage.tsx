@@ -261,7 +261,7 @@ export const ContactPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">👨‍💻</div>
+                  <div className="text-4xl mr-4">👩‍🎓</div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Kousthubhee Krishna</h3>
                     <p className="text-blue-600">Co-Founder & Developer</p>
