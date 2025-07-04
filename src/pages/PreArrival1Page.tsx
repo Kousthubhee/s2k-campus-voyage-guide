@@ -92,7 +92,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
         return docs;
       })(),
       process: [
-        "Create account on Etudes en France portal (www.campusfrance.org)",
+        "Create account on Etudes en France portal (www.campusfrance.org) https://www.campusfrance.org/fr",
         "Fill out personal information and academic history",
         "Upload all required documents in PDF format",
         "Pay Campus France processing fee (varies by country)",
