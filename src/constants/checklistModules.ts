@@ -18,7 +18,7 @@ const checklistModules = [
   },
   {
     id: 'pre-arrival-2',
-    title: 'Pre-Arrival Setup 2',
+    title: 'Packing Assistant',
     description: 'Accommodation, banking, and final preparations before departure.',
     icon: '🏠',
     color: 'bg-purple-500',
