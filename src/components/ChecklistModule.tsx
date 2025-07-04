@@ -21,6 +21,7 @@ interface ChecklistModuleProps {
   setUserProgress: (progress: any) => void;
   onSchoolSelect: (school: any) => void;
   currentPage: string;
+  setCurrentPage: (page: string) => void;
 }
 
 const ChecklistHeader = () => {
@@ -84,7 +85,8 @@ export const ChecklistModule = ({
   userProgress,
   setUserProgress,
   onSchoolSelect,
-  currentPage
+  currentPage,
+  setCurrentPage
 }: ChecklistModuleProps) => {
   const pageMapping: { [key: string]: string } = {
     'school': 'school-insights',
@@ -135,14 +137,11 @@ export const ChecklistModule = ({
         const alreadyUnlocked = prevProgress.unlockedModules.includes(module.id);
         if (alreadyUnlocked) return prevProgress;
 
-        const updatedProgress = {
+        return {
           ...prevProgress,
           keys: prevProgress.keys - module.keysRequired,
-          unlockedModules: [...prevProgress.unlockedModules, module.id],
-          currentPage: pageMapping[module.id] || prevProgress.currentPage,
+          unlockedModules: [...prevProgress.unlockedModules, module.id]
         };
-        console.log('Updated progress with new page:', updatedProgress.currentPage);
-        return updatedProgress;
       });
 
       toast({
@@ -151,6 +150,11 @@ export const ChecklistModule = ({
         variant: "default",
       });
 
+      // After unlocking, navigate to the page
+      if (pageMapping[module.id]) {
+        console.log('Navigating to unlocked page:', pageMapping[module.id]);
+        setCurrentPage(pageMapping[module.id]);
+      }
       return;
     }
 
@@ -159,14 +163,10 @@ export const ChecklistModule = ({
       return;
     }
 
+    // Navigate to the mapped page directly using setCurrentPage
     if (pageMapping[module.id]) {
       console.log('Navigating to page:', pageMapping[module.id]);
-      // Navigate to the mapped page by updating userProgress
-      const newProgress = {
-        ...userProgress,
-        currentPage: pageMapping[module.id]
-      };
-      setUserProgress(newProgress);
+      setCurrentPage(pageMapping[module.id]);
       return;
     }
 

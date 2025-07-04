@@ -140,9 +140,6 @@ const Index = () => {
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
-    if (newProgress.currentPage && newProgress.currentPage !== currentPage) {
-      setCurrentPage(newProgress.currentPage);
-    }
   };
 
   const sidebarPages = ['qa', 'hub', 'news', 'affiliation', 'language', 'translate', 'contact', 'profile', 'notifications', 'integration', 'documents'];
@@ -161,6 +158,7 @@ const Index = () => {
       alert('You need at least 1 key to access this page. Complete modules to earn keys!');
       return;
     }
+    console.log('Navigating to page:', page);
     setCurrentPage(page);
   };
 
