@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ExternalLink, MapPin, BookOpen, Users, Award, Euro, Phone, Mail, Building, Instagram, Linkedin, Globe } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, BookOpen, Users, Award, Euro, Phone, Mail, Building, Instagram, Linkedin, Globe, Star, Trophy, GraduationCap } from 'lucide-react';
 import { useSchoolDetail } from '@/hooks/useSchools';
 
 interface School {
@@ -17,26 +17,6 @@ interface School {
 interface SchoolDetailRouterProps {
   school: School;
   onBack: () => void;
-}
-
-interface ContactInfo {
-  email?: string;
-  phone?: string;
-  linkedin?: string;
-  instagram?: string;
-  address?: string;
-}
-
-interface DetailedProgram {
-  name: string;
-  description?: string;
-  duration?: string;
-  type?: string;
-}
-
-interface RankingItem {
-  title: string;
-  description: string;
 }
 
 export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) => {
@@ -60,13 +40,39 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
   }
 
   const schoolData = detailedSchool || school;
-  const detailedPrograms = Array.isArray(detailedSchool?.detailed_programs) ? detailedSchool.detailed_programs as DetailedProgram[] : [];
-  const rankings = Array.isArray(detailedSchool?.rankings) ? detailedSchool.rankings as RankingItem[] : [];
-  const accreditations = Array.isArray(detailedSchool?.accreditations) ? detailedSchool.accreditations as RankingItem[] : [];
-  const recognition = Array.isArray(detailedSchool?.recognition) ? detailedSchool.recognition as RankingItem[] : [];
-  const specializations = Array.isArray(detailedSchool?.specializations) ? detailedSchool.specializations as RankingItem[] : [];
+  
+  // Safe type casting with proper checks
+  const detailedPrograms = Array.isArray(detailedSchool?.detailed_programs) 
+    ? (detailedSchool.detailed_programs as any[]) 
+    : [];
+  
+  const rankings = Array.isArray(detailedSchool?.rankings) 
+    ? (detailedSchool.rankings as any[]) 
+    : [];
+  
+  const accreditations = Array.isArray(detailedSchool?.accreditations) 
+    ? (detailedSchool.accreditations as any[]) 
+    : [];
+  
+  const recognition = Array.isArray(detailedSchool?.recognition) 
+    ? (detailedSchool.recognition as any[]) 
+    : [];
+  
+  const specializations = Array.isArray(detailedSchool?.specializations) 
+    ? (detailedSchool.specializations as any[]) 
+    : [];
+
+  const subjects = Array.isArray(detailedSchool?.subjects) 
+    ? detailedSchool.subjects 
+    : [];
+
+  const programs = Array.isArray(detailedSchool?.programs) 
+    ? detailedSchool.programs 
+    : school.programs || [];
+
   const tuitionFees = detailedSchool?.tuition_fees;
-  const contactInfo = detailedSchool?.contact_info as ContactInfo | null;
+  const contactInfo = detailedSchool?.contact_info as any;
+  const ranking = detailedSchool?.ranking;
 
   const formatTuitionDetails = (fees: any) => {
     if (!fees) return null;
@@ -90,7 +96,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     );
   };
 
-  const formatProgramDuration = (program: DetailedProgram) => {
+  const formatProgramDuration = (program: any) => {
     if (program.duration) {
       return `${program.duration} • ${program.type || 'Program'}`;
     }
@@ -108,10 +114,22 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
         
         <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
           <div className="flex items-center mb-4">
-            <div className="text-5xl mr-4">{detailedSchool?.emoji || "🎓"}</div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{schoolData.name}</h1>
-              <p className="text-lg text-gray-600 mb-2">{detailedSchool?.long_description || schoolData.description}</p>
+            <div className="text-5xl mr-4">
+              {detailedSchool?.emoji || schoolData.emoji || "🎓"}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-2">
+                <h1 className="text-3xl font-bold text-gray-900">{schoolData.name}</h1>
+                {ranking && (
+                  <div className="flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    <Star className="h-4 w-4 mr-1" />
+                    Rank #{ranking}
+                  </div>
+                )}
+              </div>
+              <p className="text-lg text-gray-600 mb-2">
+                {detailedSchool?.long_description || schoolData.description}
+              </p>
               <div className="flex items-center text-gray-500">
                 <MapPin className="h-4 w-4 mr-2" />
                 <span>{schoolData.city}, France</span>
@@ -122,17 +140,20 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Programs Card */}
-        {(detailedPrograms.length > 0 || (schoolData.programs && schoolData.programs.length > 0)) && (
-          <Card className="lg:col-span-2">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
-                Programs Offered
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {detailedPrograms.length > 0 ? (
-                  detailedPrograms.map((program, index) => (
+        {/* Programs & Subjects Combined Card */}
+        <Card className="lg:col-span-2">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
+              Academic Programs & Subjects
+            </h3>
+            
+            {/* Detailed Programs */}
+            {detailedPrograms.length > 0 && (
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-700 mb-3">Detailed Programs</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {detailedPrograms.map((program: any, index: number) => (
                     <div 
                       key={index}
                       className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:shadow-md transition-shadow"
@@ -149,21 +170,46 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                         {formatProgramDuration(program)}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  schoolData.programs?.map((program: string, index: number) => (
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Regular Programs */}
+            {programs.length > 0 && (
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-700 mb-3">Programs Offered</h4>
+                <div className="flex flex-wrap gap-2">
+                  {programs.map((program: string, index: number) => (
                     <div 
                       key={index}
-                      className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100"
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
                     >
-                      <div className="font-semibold text-blue-900">{program}</div>
+                      {program}
                     </div>
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+
+            {/* Subjects */}
+            {subjects.length > 0 && (
+              <div>
+                <h4 className="font-medium text-gray-700 mb-3">Subject Areas</h4>
+                <div className="flex flex-wrap gap-2">
+                  {subjects.map((subject: string, index: number) => (
+                    <div 
+                      key={index}
+                      className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                    >
+                      {subject}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Tuition Fees Card */}
         {tuitionFees && (
@@ -192,7 +238,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                 Rankings & Recognition
               </h3>
               <div className="space-y-3">
-                {allAchievements.map((item, index) => (
+                {allAchievements.map((item: any, index: number) => (
                   <div key={index} className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
                     <div className="font-semibold text-yellow-800">{item.title}</div>
                     <div className="text-sm text-yellow-700">{item.description}</div>

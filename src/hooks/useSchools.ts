@@ -19,9 +19,9 @@ export function useSchools() {
       console.log('Fetched schools:', data?.length, 'schools');
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: false, // Don't refetch on window focus
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (increased from 5)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (increased from 10)
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -46,8 +46,8 @@ export function useSchoolsByCity(cityName: string | null) {
       return data || [];
     },
     enabled: !!cityName,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
@@ -73,8 +73,8 @@ export function useSchoolSearch(searchTerm: string) {
       return data || [];
     },
     enabled: !!searchTerm.trim(),
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
@@ -90,18 +90,18 @@ export function useSchoolDetail(schoolId: string | null) {
         .from('schools')
         .select('*')
         .eq('id', schoolId)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle cases where no data is found
       
       if (error) {
         console.error('Error fetching school details:', error);
         throw error;
       }
-      console.log('Fetched school details for:', data?.name);
+      console.log('Fetched school details for:', data?.name || 'Unknown school');
       return data;
     },
     enabled: !!schoolId,
-    staleTime: 10 * 60 * 1000, // Cache detail pages longer
-    gcTime: 15 * 60 * 1000,
+    staleTime: 15 * 60 * 1000, // Cache detail pages longer (increased from 10)
+    gcTime: 45 * 60 * 1000, // Keep in cache longer (increased from 15)
     refetchOnWindowFocus: false,
   });
 }
