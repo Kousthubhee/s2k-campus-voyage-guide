@@ -86,7 +86,6 @@ export const ChecklistModule = ({
   onSchoolSelect,
   currentPage
 }: ChecklistModuleProps) => {
-  // <-- 🚩 MOVE PAGE MAPPING TO TOP SO IT'S ACCESSIBLE! 
   const pageMapping: { [key: string]: string } = {
     'school': 'school-insights',
     'pre-arrival-1': 'pre-arrival-1',
@@ -133,7 +132,7 @@ export const ChecklistModule = ({
 
       setUserProgress(prevProgress => {
         const alreadyUnlocked = prevProgress.unlockedModules.includes(module.id);
-        if (alreadyUnlocked) return prevProgress; // prevent double unlock
+        if (alreadyUnlocked) return prevProgress;
 
         const updatedProgress = {
           ...prevProgress,
@@ -150,7 +149,6 @@ export const ChecklistModule = ({
         variant: "default",
       });
 
-      // No need to open here, useEffect in parent will update currentPage and main router will open module.
       return;
     }
 
@@ -172,7 +170,7 @@ export const ChecklistModule = ({
     const newProgress = {
       ...userProgress,
       completedModules: [...userProgress.completedModules, moduleId],
-      keys: userProgress.keys + 1, // Earn 1 key per completed module
+      keys: userProgress.keys + 1,
     };
 
     setUserProgress(newProgress);
@@ -184,7 +182,6 @@ export const ChecklistModule = ({
     });
   };
 
-  // Central handler to show toast from child components if needed
   const handleToast = (options: { title: string; description?: string; variant?: "default" | "destructive" }) => {
     toast(options);
   };

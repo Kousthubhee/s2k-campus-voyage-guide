@@ -11,7 +11,8 @@ import {
   FileText,
   Bell,
   Menu,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 import {
   Sidebar,
@@ -75,6 +76,7 @@ export const AppSidebar = ({
     { id: 'affiliation', icon: Building2, label: 'Our Partners', tooltip: 'See our affiliations' },
     { id: 'language', icon: Languages, label: 'Learn French', tooltip: 'Practice French language skills' },
     { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Universal translator tool' },
+    { id: 'ask-me-anything', icon: MessageCircle, label: 'Ask Me Anything', tooltip: 'Chat with our AI assistant' },
     { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Get in touch with our support team' },
     { id: 'profile', icon: User, label: 'Profile', tooltip: 'Manage your profile settings' },
   ];

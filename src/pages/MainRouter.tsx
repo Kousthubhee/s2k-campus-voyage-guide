@@ -20,6 +20,7 @@ import { NotificationsPage } from './NotificationsPage';
 import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { AskMeAnythingPage } from './AskMeAnythingPage';
 
 interface MainRouterProps {
   currentPage: string;
@@ -68,7 +69,15 @@ const MainRouter = ({
       case 'home':
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
       case 'checklist':
-        return <ChecklistPage />;
+        return (
+          <ChecklistPage 
+            userProgress={userProgress}
+            setUserProgress={setUserProgress}
+            onSchoolSelect={setSelectedSchool}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        );
       case 'documents':
         return <DocumentsPage />;
       case 'hub':
@@ -86,6 +95,7 @@ const MainRouter = ({
       case 'profile':
         return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />;
       case 'school':
+      case 'school-insights':
         return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
       case 'admin':
         return <AdminDashboard />;
@@ -96,11 +106,14 @@ const MainRouter = ({
       case 'post-arrival':
         return <PostArrivalPage onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} />;
       case 'finance':
+      case 'finance-tracking':
         return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
       case 'notifications':
         return <NotificationsPage />;
       case 'qa':
         return <QAPage />;
+      case 'ask-me-anything':
+        return <AskMeAnythingPage />;
       case 'suggestions':
         return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
       default:
