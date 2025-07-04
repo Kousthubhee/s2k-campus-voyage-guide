@@ -199,10 +199,11 @@ export function SchoolInsightsPage({ onBack }: SchoolInsightsPageProps) {
             open={showCityInsights}
             onOpenChange={setShowCityInsights}
             cityName={cityDetails.name}
-            localInsights={Array.isArray(cityDetails.local_insights) ? cityDetails.local_insights.map(insight => ({
+            localInsights={Array.isArray(cityDetails.local_insights) ? (cityDetails.local_insights as any[]).map((insight, index) => ({
+              id: `insight-${index}`,
+              type: insight.type || 'general',
               title: insight.title || '',
-              description: insight.description || '',
-              tips: insight.tips || []
+              description: insight.description || ''
             })) : []}
             transport={cityDetails.transport || ""}
             famousPlaces={cityDetails.famous_places || ""}
