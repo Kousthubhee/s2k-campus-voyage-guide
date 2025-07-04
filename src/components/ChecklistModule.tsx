@@ -117,6 +117,7 @@ export const ChecklistModule = ({
   }, [modules, userProgress, setUserProgress]);
 
   const handleModuleClick = (module: Module) => {
+    console.log('Module clicked:', module.id);
     const isUnlocked = userProgress.unlockedModules.includes(module.id);
 
     // If module is locked and requires keys, check if user has enough keys
@@ -140,6 +141,7 @@ export const ChecklistModule = ({
           unlockedModules: [...prevProgress.unlockedModules, module.id],
           currentPage: pageMapping[module.id] || prevProgress.currentPage,
         };
+        console.log('Updated progress with new page:', updatedProgress.currentPage);
         return updatedProgress;
       });
 
@@ -152,21 +154,23 @@ export const ChecklistModule = ({
       return;
     }
 
-    if (!isUnlocked && !module.keysRequired) return;
+    if (!isUnlocked && !module.keysRequired) {
+      console.log('Module is locked and has no key requirement');
+      return;
+    }
 
     if (pageMapping[module.id]) {
-      // Navigate to the mapped page by calling the parent's navigation function
+      console.log('Navigating to page:', pageMapping[module.id]);
+      // Navigate to the mapped page by updating userProgress
       const newProgress = {
         ...userProgress,
         currentPage: pageMapping[module.id]
       };
       setUserProgress(newProgress);
-      
-      // Also trigger immediate navigation - we need to access the parent's setCurrentPage
-      // This will be handled by the parent component watching userProgress changes
       return;
     }
 
+    console.log('Setting selected module:', module.id);
     setSelectedModule(module);
   };
 

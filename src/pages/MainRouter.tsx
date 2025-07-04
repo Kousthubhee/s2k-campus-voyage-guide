@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
@@ -71,6 +72,8 @@ const MainRouter = ({
   }
 
   const renderCurrentPage = () => {
+    console.log('Current page in MainRouter:', currentPage);
+    
     switch (currentPage) {
       case 'home':
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
@@ -106,11 +109,31 @@ const MainRouter = ({
       case 'admin':
         return <AdminDashboard />;
       case 'pre-arrival-1':
-        return <PreArrival1Page onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} profile={profile} />;
+        return (
+          <PreArrival1Page 
+            onBack={() => setCurrentPage('checklist')} 
+            onComplete={() => {}} 
+            isCompleted={false} 
+            profile={profile} 
+          />
+        );
       case 'pre-arrival-2':
-        return <PreArrival2Page onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} profile={profile} />;
+        return (
+          <PreArrival2Page 
+            onBack={() => setCurrentPage('checklist')} 
+            onComplete={() => {}} 
+            isCompleted={false} 
+            profile={profile} 
+          />
+        );
       case 'post-arrival':
-        return <PostArrivalPage onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} />;
+        return (
+          <PostArrivalPage 
+            onBack={() => setCurrentPage('checklist')} 
+            onComplete={() => {}} 
+            isCompleted={false} 
+          />
+        );
       case 'finance':
       case 'finance-tracking':
         return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
@@ -123,6 +146,7 @@ const MainRouter = ({
       case 'suggestions':
         return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
       default:
+        console.log('Defaulting to home page for currentPage:', currentPage);
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
     }
   };
