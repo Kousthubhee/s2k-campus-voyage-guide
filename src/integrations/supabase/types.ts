@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_admin: boolean | null
+          is_document_reviewer: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean | null
+          is_document_reviewer?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_admin?: boolean | null
+          is_document_reviewer?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           created_at: string
@@ -53,6 +80,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      document_reviews: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_reviews_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "user_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
@@ -392,67 +460,88 @@ export type Database = {
       schools: {
         Row: {
           accreditations: Json | null
+          accreditations_text: string | null
           city: string
           contact_info: Json | null
+          contact_info_text: string | null
           created_at: string | null
           description: string | null
           detailed_programs: Json | null
+          detailed_programs_text: string | null
           emoji: string | null
           id: string
           image_url: string | null
           long_description: string | null
           name: string
           programs: string[] | null
-          ranking: number | null
+          ranking: string | null
           rankings: Json | null
+          rankings_text: string | null
           recognition: Json | null
+          recognition_text: string | null
           specializations: Json | null
+          specializations_text: string | null
           subjects: string[] | null
           tuition_fees: Json | null
+          tuition_fees_text: string | null
           updated_at: string | null
           website: string | null
         }
         Insert: {
           accreditations?: Json | null
+          accreditations_text?: string | null
           city: string
           contact_info?: Json | null
+          contact_info_text?: string | null
           created_at?: string | null
           description?: string | null
           detailed_programs?: Json | null
+          detailed_programs_text?: string | null
           emoji?: string | null
           id?: string
           image_url?: string | null
           long_description?: string | null
           name: string
           programs?: string[] | null
-          ranking?: number | null
+          ranking?: string | null
           rankings?: Json | null
+          rankings_text?: string | null
           recognition?: Json | null
+          recognition_text?: string | null
           specializations?: Json | null
+          specializations_text?: string | null
           subjects?: string[] | null
           tuition_fees?: Json | null
+          tuition_fees_text?: string | null
           updated_at?: string | null
           website?: string | null
         }
         Update: {
           accreditations?: Json | null
+          accreditations_text?: string | null
           city?: string
           contact_info?: Json | null
+          contact_info_text?: string | null
           created_at?: string | null
           description?: string | null
           detailed_programs?: Json | null
+          detailed_programs_text?: string | null
           emoji?: string | null
           id?: string
           image_url?: string | null
           long_description?: string | null
           name?: string
           programs?: string[] | null
-          ranking?: number | null
+          ranking?: string | null
           rankings?: Json | null
+          rankings_text?: string | null
           recognition?: Json | null
+          recognition_text?: string | null
           specializations?: Json | null
+          specializations_text?: string | null
           subjects?: string[] | null
           tuition_fees?: Json | null
+          tuition_fees_text?: string | null
           updated_at?: string | null
           website?: string | null
         }
@@ -470,11 +559,13 @@ export type Database = {
           notes: string | null
           notification_enabled: boolean | null
           renewal_process: string[] | null
+          requires_verification: boolean | null
           status: string | null
           submission_date: string | null
           type: string
           updated_at: string
           user_id: string
+          verification_status: string | null
         }
         Insert: {
           created_at?: string
@@ -487,11 +578,13 @@ export type Database = {
           notes?: string | null
           notification_enabled?: boolean | null
           renewal_process?: string[] | null
+          requires_verification?: boolean | null
           status?: string | null
           submission_date?: string | null
           type: string
           updated_at?: string
           user_id: string
+          verification_status?: string | null
         }
         Update: {
           created_at?: string
@@ -504,10 +597,39 @@ export type Database = {
           notes?: string | null
           notification_enabled?: boolean | null
           renewal_process?: string[] | null
+          requires_verification?: boolean | null
           status?: string | null
           submission_date?: string | null
           type?: string
           updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      user_plans: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          plan_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          plan_type?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          plan_type?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

@@ -1,11 +1,12 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Calendar, AlertTriangle, Edit, Trash2, Plus } from "lucide-react";
+import { FileText, Calendar, AlertTriangle, Edit, Trash2, Plus, Upload, Shield, Eye, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { useToast } from "@/hooks/use-toast";
 
 interface Document {
   id: string;
@@ -14,6 +15,8 @@ interface Document {
   submissionDate: string;
   expiryDate: string;
   status: "pending" | "submitted" | "approved" | "expired";
+  verification_status?: "not_submitted" | "pending" | "verified" | "rejected";
+  requires_verification?: boolean;
 }
 
 interface DocumentEditDialogProps {
@@ -196,7 +199,9 @@ const sampleDocuments: Document[] = [
     category: "Identity",
     submissionDate: "2024-01-15",
     expiryDate: "2029-01-15",
-    status: "approved"
+    status: "approved",
+    verification_status: "verified",
+    requires_verification: true
   },
   {
     id: "2",
@@ -204,7 +209,9 @@ const sampleDocuments: Document[] = [
     category: "Visa",
     submissionDate: "2024-02-20",
     expiryDate: "2025-02-20",
-    status: "approved"
+    status: "approved",
+    verification_status: "pending",
+    requires_verification: true
   },
   {
     id: "3",
@@ -212,16 +219,10 @@ const sampleDocuments: Document[] = [
     category: "Insurance",
     submissionDate: "2024-03-01",
     expiryDate: "2024-12-31",
-    status: "pending"
+    status: "pending",
+    verification_status: "not_submitted",
+    requires_verification: false
   },
-  {
-    id: "4",
-    name: "Academic Transcripts",
-    category: "Education",
-    submissionDate: "2024-01-10",
-    expiryDate: "2026-01-10",
-    status: "submitted"
-  }
 ];
 
 export const DocumentsPage = () => {
@@ -229,6 +230,8 @@ export const DocumentsPage = () => {
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [editFormData, setEditFormData] = useState({
     submissionDate: '',
     expiryDate: ''
@@ -241,6 +244,10 @@ export const DocumentsPage = () => {
     status: 'pending'
   });
 
+  const { data: userPlan } = useUserPlan();
+  const { toast } = useToast();
+  const isPaidUser = userPlan?.plan_type === 'paid';
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved": return "text-green-600 bg-green-50";
@@ -248,6 +255,24 @@ export const DocumentsPage = () => {
       case "pending": return "text-yellow-600 bg-yellow-50";
       case "expired": return "text-red-600 bg-red-50";
       default: return "text-gray-600 bg-gray-50";
+    }
+  };
+
+  const getVerificationStatusColor = (status: string) => {
+    switch (status) {
+      case "verified": return "text-green-600 bg-green-50";
+      case "pending": return "text-yellow-600 bg-yellow-50";
+      case "rejected": return "text-red-600 bg-red-50";
+      default: return "text-gray-600 bg-gray-50";
+    }
+  };
+
+  const getVerificationIcon = (status: string) => {
+    switch (status) {
+      case "verified": return <CheckCircle className="h-4 w-4" />;
+      case "pending": return <Clock className="h-4 w-4" />;
+      case "rejected": return <XCircle className="h-4 w-4" />;
+      default: return <AlertCircle className="h-4 w-4" />;
     }
   };
 
@@ -273,6 +298,36 @@ export const DocumentsPage = () => {
     const expiry = new Date(expiryDate);
     const now = new Date();
     return expiry < now;
+  };
+
+  const handleUploadDocument = (doc: Document) => {
+    if (!isPaidUser) {
+      toast({
+        title: "Upgrade Required",
+        description: "Document verification is available for paid users only.",
+        variant: "default",
+      });
+      return;
+    }
+    setSelectedDoc(doc);
+    setUploadDialogOpen(true);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && selectedDoc) {
+      // Simulate file upload
+      setDocuments(prev => prev.map(doc => 
+        doc.id === selectedDoc.id 
+          ? { ...doc, verification_status: 'pending' as const }
+          : doc
+      ));
+      setUploadDialogOpen(false);
+      toast({
+        title: "Document Uploaded",
+        description: "Your document has been submitted for verification.",
+      });
+    }
   };
 
   const handleEditDocument = (doc: Document) => {
@@ -331,7 +386,9 @@ export const DocumentsPage = () => {
       category: addFormData.category,
       submissionDate: addFormData.submissionDate,
       expiryDate: addFormData.expiryDate,
-      status: addFormData.status as Document['status']
+      status: addFormData.status as Document['status'],
+      verification_status: 'not_submitted',
+      requires_verification: false
     };
 
     setDocuments(prev => [...prev, newDocument]);
@@ -370,8 +427,25 @@ export const DocumentsPage = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Documents & Renewals</h1>
-        <p className="text-gray-600">Keep track of your important documents and renewal dates</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Documents & Renewals</h1>
+            <p className="text-gray-600">Keep track of your important documents and renewal dates</p>
+          </div>
+          {!isPaidUser && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-semibold text-blue-800">Upgrade to Pro</p>
+                    <p className="text-sm text-blue-600">Get document verification & expert review</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Alerts for upcoming renewals */}
@@ -437,6 +511,17 @@ export const DocumentsPage = () => {
                 </span>
               </div>
 
+              {/* Verification Status */}
+              {doc.requires_verification && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Verification</span>
+                  <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${getVerificationStatusColor(doc.verification_status || 'not_submitted')}`}>
+                    {getVerificationIcon(doc.verification_status || 'not_submitted')}
+                    {doc.verification_status || 'not_submitted'}
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Submitted</span>
                 <span className="text-sm">{new Date(doc.submissionDate).toLocaleDateString()}</span>
@@ -448,6 +533,19 @@ export const DocumentsPage = () => {
                   {new Date(doc.expiryDate).toLocaleDateString()}
                 </span>
               </div>
+
+              {/* Upload Button for Verification */}
+              {doc.requires_verification && doc.verification_status === 'not_submitted' && (
+                <Button
+                  onClick={() => handleUploadDocument(doc)}
+                  className="w-full mt-2"
+                  variant={isPaidUser ? "default" : "outline"}
+                  disabled={!isPaidUser}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {isPaidUser ? 'Upload for Verification' : 'Upgrade to Upload'}
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -481,7 +579,7 @@ export const DocumentsPage = () => {
                 const now = new Date();
                 const diffTime = expiry.getTime() - now.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 90; // Show renewals due in next 90 days
+                return diffDays <= 90;
               })
               .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
               .map(doc => (
@@ -514,7 +612,7 @@ export const DocumentsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
+      {/* Dialogs */}
       <DocumentEditDialog
         open={editDialogOpen}
         submissionDate={editFormData.submissionDate}
@@ -524,7 +622,6 @@ export const DocumentsPage = () => {
         onSubmit={handleSaveEdit}
       />
 
-      {/* Add Process Dialog */}
       <AddProcessDialog
         open={addDialogOpen}
         formData={addFormData}
@@ -532,6 +629,39 @@ export const DocumentsPage = () => {
         onCancel={handleCancelAdd}
         onSubmit={handleAddProcess}
       />
+
+      {/* Upload Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Document for Verification</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Upload your {selectedDoc?.name} for professional verification by our team.
+            </p>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Click to upload document
+              </label>
+              <p className="text-xs text-gray-500 mt-2">
+                Supported formats: PDF, JPG, PNG (Max 10MB)
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

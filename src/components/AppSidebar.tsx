@@ -9,7 +9,9 @@ import {
   User,
   Home,
   FileText,
-  Bell
+  Bell,
+  Menu,
+  X
 } from 'lucide-react';
 import {
   Sidebar,
@@ -22,9 +24,10 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarHeader,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { useSidebar } from '@/components/ui/sidebar';
+import { useState, useEffect } from 'react';
 
 interface AppSidebarProps {
   currentPage: string;
@@ -39,7 +42,24 @@ export const AppSidebar = ({
   userName,
   userAvatarUrl,
 }: AppSidebarProps) => {
-  const { state } = useSidebar();
+  const { state, setOpen } = useSidebar();
+  const [isFullyCollapsed, setIsFullyCollapsed] = useState(false);
+  
+  // Load sidebar state from localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-fully-collapsed');
+    if (savedState === 'true') {
+      setIsFullyCollapsed(true);
+    }
+  }, []);
+
+  // Save sidebar state to localStorage
+  const toggleFullCollapse = () => {
+    const newState = !isFullyCollapsed;
+    setIsFullyCollapsed(newState);
+    localStorage.setItem('sidebar-fully-collapsed', newState.toString());
+  };
+
   const isCollapsed = state === 'collapsed';
   
   // Cleaned logic: "Hello, Stranger!" if no name, else Hello, [Name]!
@@ -59,21 +79,46 @@ export const AppSidebar = ({
     { id: 'profile', icon: User, label: 'Profile', tooltip: 'Manage your profile settings' },
   ];
 
+  if (isFullyCollapsed) {
+    return (
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleFullCollapse}
+          className="bg-white shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <Menu className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <Sidebar collapsible="icon" className="border-r border-gray-200">
+    <Sidebar collapsible="icon" className="border-r border-gray-200 transition-all duration-300">
       <SidebarHeader className="border-b border-gray-100 pb-4">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">KS</span>
-          </div>
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <h2 className="font-semibold text-gray-900 truncate">
-                pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
-              </h2>
-              <p className="text-xs text-gray-500 truncate">Your guide to French education</p>
+        <div className="flex items-center justify-between px-3 py-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">KS</span>
             </div>
-          )}
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <h2 className="font-semibold text-gray-900 truncate">
+                  pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+                </h2>
+                <p className="text-xs text-gray-500 truncate">Your guide to French education</p>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullCollapse}
+            className="h-8 w-8 p-0 hover:bg-gray-100"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </SidebarHeader>
 

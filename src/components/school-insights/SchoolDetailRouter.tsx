@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ExternalLink, MapPin, BookOpen, Users, Award, Euro, Phone, Mail, Building, Instagram, Linkedin, Globe, Star, Trophy, GraduationCap, Image } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, BookOpen, Users, Award, Euro, Phone, Mail, Building, Instagram, Linkedin, Globe, Star, Trophy, GraduationCap, Image, Sparkles, Crown, Shield } from 'lucide-react';
 import { useSchoolDetail } from '@/hooks/useSchools';
 import { Tables } from '@/integrations/supabase/types';
 
@@ -23,7 +23,6 @@ interface SchoolDetailRouterProps {
 }
 
 export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) => {
-  // Fetch detailed school information from database
   const { data: detailedSchool, isLoading } = useSchoolDetail(school.id.toString());
 
   if (isLoading) {
@@ -33,10 +32,20 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Schools
         </Button>
-        <div className="text-center py-12">
-          <div className="inline-flex items-center gap-2 text-gray-600">
-            Loading school details...
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -59,35 +68,26 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     image_url: null
   };
   
-  // Safe type casting with proper checks
-  const detailedPrograms = Array.isArray(schoolData.detailed_programs) 
-    ? (schoolData.detailed_programs as any[]) 
-    : [];
-  
-  const rankings = Array.isArray(schoolData.rankings) 
-    ? (schoolData.rankings as any[]) 
-    : [];
-  
-  const accreditations = Array.isArray(schoolData.accreditations) 
-    ? (schoolData.accreditations as any[]) 
-    : [];
-  
-  const recognition = Array.isArray(schoolData.recognition) 
-    ? (schoolData.recognition as any[]) 
-    : [];
-  
-  const specializations = Array.isArray(schoolData.specializations) 
-    ? (schoolData.specializations as any[]) 
-    : [];
+  // Safe parsing with fallbacks
+  const parseJsonField = (field: any, fallback: any = []) => {
+    try {
+      if (typeof field === 'string') {
+        return JSON.parse(field);
+      }
+      return Array.isArray(field) ? field : fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
-  const subjects = Array.isArray(schoolData.subjects) 
-    ? schoolData.subjects 
-    : [];
-
-  const programs = Array.isArray(schoolData.programs) 
-    ? schoolData.programs 
-    : school.programs || [];
-
+  const detailedPrograms = parseJsonField(schoolData.detailed_programs, []);
+  const rankings = parseJsonField(schoolData.rankings, []);
+  const accreditations = parseJsonField(schoolData.accreditations, []);
+  const recognition = parseJsonField(schoolData.recognition, []);
+  const specializations = parseJsonField(schoolData.specializations, []);
+  const subjects = Array.isArray(schoolData.subjects) ? schoolData.subjects : [];
+  const programs = Array.isArray(schoolData.programs) ? schoolData.programs : school.programs || [];
+  
   const tuitionFees = schoolData.tuition_fees;
   const contactInfo = schoolData.contact_info as any;
   const ranking = schoolData.ranking;
@@ -98,7 +98,9 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     if (typeof fees === 'object') {
       return Object.entries(fees).map(([key, value]) => (
         <div key={key} className="flex justify-between items-center py-2 border-b border-green-200 last:border-b-0">
-          <span className="capitalize text-gray-700 font-medium">{key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}:</span>
+          <span className="capitalize text-gray-700 font-medium">
+            {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}:
+          </span>
           <span className="font-semibold text-green-800">
             {String(value).includes('€') ? String(value) : `€${String(value)}`}
           </span>
@@ -125,65 +127,81 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
   const allAchievements = [...rankings, ...accreditations, ...recognition];
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <Button variant="outline" onClick={onBack} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Schools
         </Button>
         
-        {/* School Header with Image */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+        {/* Enhanced School Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex items-start mb-4">
             {schoolData.image_url ? (
-              <div className="mr-4 flex-shrink-0">
+              <div className="mr-6 flex-shrink-0">
                 <img 
                   src={schoolData.image_url} 
                   alt={schoolData.name}
-                  className="w-16 h-16 rounded-lg object-cover"
+                  className="w-20 h-20 rounded-lg object-cover shadow-md"
                 />
               </div>
             ) : (
-              <div className="text-4xl mr-4 flex-shrink-0">
+              <div className="text-5xl mr-6 flex-shrink-0">
                 {schoolData.emoji || "🎓"}
               </div>
             )}
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">{schoolData.name}</h1>
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-3xl font-bold text-gray-900">{schoolData.name}</h1>
                 {ranking && (
                   <div className="flex items-center bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
-                    <Star className="h-4 w-4 mr-1" />
+                    <Crown className="h-4 w-4 mr-1" />
                     Rank #{ranking}
                   </div>
                 )}
               </div>
-              <p className="text-base text-gray-600 mb-2 leading-relaxed">
+              <p className="text-lg text-gray-700 mb-3 leading-relaxed">
                 {longDescription}
               </p>
-              <div className="flex items-center text-gray-500">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>{schoolData.city}, France</span>
+              <div className="flex items-center text-gray-600 mb-2">
+                <MapPin className="h-5 w-5 mr-2" />
+                <span className="text-lg">{schoolData.city}, France</span>
               </div>
+              {schoolData.website && (
+                <div className="flex items-center">
+                  <Globe className="h-4 w-4 mr-2 text-blue-600" />
+                  <a 
+                    href={schoolData.website}
+                    target="_blank"
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 hover:underline flex items-center font-medium"
+                  >
+                    Visit Website
+                    <ExternalLink className="h-4 w-4 ml-1" />
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Programs & Subjects Combined Card */}
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Academic Programs & Subjects */}
+        <Card className="lg:col-span-2 xl:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <BookOpen className="h-5 w-5 mr-2 text-blue-600" />
+            <CardTitle className="flex items-center text-xl">
+              <BookOpen className="h-6 w-6 mr-2 text-blue-600" />
               Academic Programs & Subjects
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4">
-            
+          <CardContent className="p-6">
             {/* Detailed Programs */}
             {detailedPrograms.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Detailed Programs</h4>
+                <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
+                  Detailed Programs
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {detailedPrograms.map((program: any, index: number) => (
                     <div 
@@ -215,7 +233,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   {programs.map((program: string, index: number) => (
                     <div 
                       key={index}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium text-sm"
+                      className="bg-blue-100 text-blue-800 px-3 py-2 rounded-full font-medium text-sm hover:bg-blue-200 transition-colors"
                     >
                       {program}
                     </div>
@@ -232,7 +250,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   {subjects.map((subject: string, index: number) => (
                     <div 
                       key={index}
-                      className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium text-sm"
+                      className="bg-green-100 text-green-800 px-3 py-2 rounded-full font-medium text-sm hover:bg-green-200 transition-colors"
                     >
                       {subject}
                     </div>
@@ -243,13 +261,13 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
           </CardContent>
         </Card>
 
-        {/* Tuition Fees Card */}
+        {/* Tuition Fees */}
         {tuitionFees && (
-          <Card>
+          <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
                 <Euro className="h-5 w-5 mr-2 text-green-600" />
-                Tuition Fees (Annual)
+                Tuition Fees
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -257,27 +275,30 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                 {formatTuitionDetails(tuitionFees)}
               </div>
               <p className="text-xs text-gray-500 mt-3 italic">
-                *Fees may vary based on program and nationality. Contact the school for the most current information.
+                *Fees may vary based on program and nationality. Contact the school for current information.
               </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Rankings & Recognition Card */}
+        {/* Rankings & Recognition */}
         {allAchievements.length > 0 && (
-          <Card>
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <Award className="h-5 w-5 mr-2 text-yellow-600" />
+                <Trophy className="h-5 w-5 mr-2 text-yellow-600" />
                 Rankings & Recognition
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {allAchievements.map((item: any, index: number) => (
-                  <div key={index} className="bg-yellow-50 border-2 border-yellow-200 p-3 rounded-lg">
-                    <div className="font-semibold text-yellow-900 text-sm mb-1">{item.title}</div>
-                    <div className="text-yellow-800 text-xs">{item.description}</div>
+                  <div key={index} className="bg-yellow-50 border-2 border-yellow-200 p-4 rounded-lg hover:shadow-md transition-shadow">
+                    <div className="font-semibold text-yellow-900 mb-1 flex items-center">
+                      <Award className="h-4 w-4 mr-2" />
+                      {item.title}
+                    </div>
+                    <div className="text-yellow-800 text-sm">{item.description}</div>
                   </div>
                 ))}
               </div>
@@ -285,21 +306,24 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
           </Card>
         )}
 
-        {/* Specializations Card */}
+        {/* Specializations */}
         {specializations.length > 0 && (
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <GraduationCap className="h-5 w-5 mr-2 text-purple-600" />
+                <Sparkles className="h-5 w-5 mr-2 text-purple-600" />
                 Specializations
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {specializations.map((spec: any, index: number) => (
-                  <div key={index} className="bg-purple-50 border-2 border-purple-200 p-3 rounded-lg">
-                    <div className="font-semibold text-purple-900 text-sm mb-1">{spec.title || spec.name}</div>
-                    <div className="text-purple-800 text-xs">{spec.description}</div>
+                  <div key={index} className="bg-purple-50 border-2 border-purple-200 p-4 rounded-lg hover:shadow-md transition-shadow">
+                    <div className="font-semibold text-purple-900 mb-1 flex items-center">
+                      <Star className="h-4 w-4 mr-2" />
+                      {spec.title || spec.name}
+                    </div>
+                    <div className="text-purple-800 text-sm">{spec.description}</div>
                   </div>
                 ))}
               </div>
@@ -307,34 +331,21 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
           </Card>
         )}
 
-        {/* Contact Information Card */}
-        <Card className="lg:col-span-2">
+        {/* Enhanced Contact Information */}
+        <Card className="lg:col-span-2 xl:col-span-3">
           <CardHeader>
             <CardTitle className="flex items-center text-lg">
               <Building className="h-5 w-5 mr-2 text-gray-600" />
               Contact Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                {schoolData.website && (
-                  <div className="flex items-center p-2 rounded-lg bg-gray-50">
-                    <Globe className="h-4 w-4 mr-3 text-gray-500" />
-                    <a 
-                      href={schoolData.website}
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="text-blue-600 hover:underline flex items-center font-medium"
-                    >
-                      {schoolData.website.replace('https://', '').replace('http://', '')}
-                      <ExternalLink className="h-3 w-3 ml-2" />
-                    </a>
-                  </div>
-                )}
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-4">
+                <h5 className="font-semibold text-gray-800 mb-3">General Contact</h5>
                 {contactInfo?.email && (
-                  <div className="flex items-center p-2 rounded-lg bg-gray-50">
-                    <Mail className="h-4 w-4 mr-3 text-gray-500" />
+                  <div className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <Mail className="h-5 w-5 mr-3 text-gray-500" />
                     <a 
                       href={`mailto:${contactInfo.email}`}
                       className="text-blue-600 hover:underline font-medium"
@@ -344,16 +355,18 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   </div>
                 )}
                 {contactInfo?.phone && (
-                  <div className="flex items-center p-2 rounded-lg bg-gray-50">
-                    <Phone className="h-4 w-4 mr-3 text-gray-500" />
+                  <div className="flex items-center p-3 rounded-lg bg-gray-50">
+                    <Phone className="h-5 w-5 mr-3 text-gray-500" />
                     <span className="text-gray-700 font-medium">{contactInfo.phone}</span>
                   </div>
                 )}
               </div>
-              <div className="space-y-3">
+              
+              <div className="space-y-4">
+                <h5 className="font-semibold text-gray-800 mb-3">Social Media</h5>
                 {contactInfo?.linkedin && (
-                  <div className="flex items-center p-2 rounded-lg bg-gray-50">
-                    <Linkedin className="h-4 w-4 mr-3 text-gray-500" />
+                  <div className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <Linkedin className="h-5 w-5 mr-3 text-gray-500" />
                     <a 
                       href={contactInfo.linkedin}
                       target="_blank"
@@ -365,8 +378,8 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   </div>
                 )}
                 {contactInfo?.instagram && (
-                  <div className="flex items-center p-2 rounded-lg bg-gray-50">
-                    <Instagram className="h-4 w-4 mr-3 text-gray-500" />
+                  <div className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <Instagram className="h-5 w-5 mr-3 text-gray-500" />
                     <a 
                       href={contactInfo.instagram}
                       target="_blank"
@@ -377,10 +390,16 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                     </a>
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="font-semibold text-gray-800 mb-3">Address</h5>
                 {contactInfo?.address && (
-                  <div className="flex items-start p-2 rounded-lg bg-gray-50">
-                    <Building className="h-4 w-4 mr-3 text-gray-500 mt-0.5" />
-                    <span className="text-gray-700 font-medium text-sm leading-relaxed">{contactInfo.address}</span>
+                  <div className="flex items-start p-3 rounded-lg bg-gray-50">
+                    <Building className="h-5 w-5 mr-3 text-gray-500 mt-0.5" />
+                    <span className="text-gray-700 font-medium text-sm leading-relaxed">
+                      {contactInfo.address}
+                    </span>
                   </div>
                 )}
               </div>

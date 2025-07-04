@@ -19,8 +19,8 @@ export function useSchools() {
       console.log('Fetched schools:', data?.length, 'schools');
       return data || [];
     },
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (increased from 5)
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (increased from 10)
+    staleTime: 15 * 60 * 1000, // Cache for 15 minutes (increased from 10)
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour (increased from 30)
     refetchOnWindowFocus: false,
   });
 }
@@ -46,8 +46,8 @@ export function useSchoolsByCity(cityName: string | null) {
       return data || [];
     },
     enabled: !!cityName,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 15 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
@@ -62,7 +62,7 @@ export function useSchoolSearch(searchTerm: string) {
       const { data, error } = await supabase
         .from('schools')
         .select('*')
-        .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
+        .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,long_description.ilike.%${searchTerm}%`)
         .order('name');
       
       if (error) {
@@ -73,8 +73,8 @@ export function useSchoolSearch(searchTerm: string) {
       return data || [];
     },
     enabled: !!searchTerm.trim(),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
@@ -90,7 +90,7 @@ export function useSchoolDetail(schoolId: string | null) {
         .from('schools')
         .select('*')
         .eq('id', schoolId)
-        .maybeSingle(); // Use maybeSingle instead of single to handle cases where no data is found
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching school details:', error);
@@ -100,8 +100,8 @@ export function useSchoolDetail(schoolId: string | null) {
       return data;
     },
     enabled: !!schoolId,
-    staleTime: 15 * 60 * 1000, // Cache detail pages longer (increased from 10)
-    gcTime: 45 * 60 * 1000, // Keep in cache longer (increased from 15)
+    staleTime: 30 * 60 * 1000, // Cache detail pages longer (increased from 15)
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours (increased from 45)
     refetchOnWindowFocus: false,
   });
 }

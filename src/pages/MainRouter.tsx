@@ -1,187 +1,94 @@
-import { ChecklistModule } from '@/components/ChecklistModule';
-import { HomePage } from '@/components/HomePage';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { HomePage } from './HomePage';
+import { ChecklistPage } from './ChecklistPage';
 import { DocumentsPage } from '@/components/DocumentsPage';
+import { HubPage } from './HubPage';
+import { NewsPage } from './NewsPage';
+import { AffiliationPage } from './AffiliationPage';
+import { LanguagePage } from './LanguagePage';
+import { TranslatePage } from './TranslatePage';
+import { ContactPage } from './ContactPage';
+import { ProfilePage } from './ProfilePage';
 import { SchoolInsightsPage } from './SchoolInsightsPage';
 import { PreArrival1Page } from './PreArrival1Page';
 import { PreArrival2Page } from './PreArrival2Page';
 import { PostArrivalPage } from './PostArrivalPage';
 import { FinanceTrackingPage } from './FinanceTrackingPage';
-import { SuggestionsPage } from './SuggestionsPage';
-import { QAPage } from './QAPage';
-import { HubPage } from './HubPage';
-import { NewsPage } from './NewsPage';
-import { AffiliationPage } from '@/components/AffiliationPage';
-import { LanguagePage } from './LanguagePage';
-import { TranslatePage } from './TranslatePage';
-import { ContactPage } from './ContactPage';
-import { ProfilePage } from './ProfilePage';
 import { NotificationsPage } from './NotificationsPage';
-import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
-import checklistModules from '@/constants/checklistModules';
+import { QAPage } from './QAPage';
+import { SuggestionsPage } from './SuggestionsPage';
+import { AdminDashboard } from "@/components/AdminDashboard";
 
-interface MainRouterProps {
-  currentPage: string;
-  setCurrentPage: (p: string) => void;
-  userProfile: any;
-  userProgress: any;
-  setUserProgress: (prog: any) => void;
-  selectedSchool: any;
-  setSelectedSchool: (school: any) => void;
-  handleProgressUpdate: (prog: any) => void;
-  profile: {
-    name: string;
-    email: string;
-    about: string;
-    memberSince: string;
-    photo: string;
-    age: string;
-    prevEducation: string;
-    workExperience: string;
-  };
-  setUserProfile: (profile: any) => void;
-}
+const MainRouter = () => {
+  const { user, loading } = useAuth();
+  const [currentPage, setCurrentPage] = useState('home');
 
-export function MainRouter({
-  currentPage,
-  setCurrentPage,
-  userProfile,
-  userProgress,
-  setUserProgress,
-  selectedSchool,
-  setSelectedSchool,
-  handleProgressUpdate,
-  profile,
-  setUserProfile,
-}: MainRouterProps) {
-  // DEBUG LOG
-  console.log("[MainRouter] Render props", {
-    currentPage,
-    userProfile,
-    userProgress,
-    profile,
-  });
+  useEffect(() => {
+    const storedPage = localStorage.getItem('currentPage');
+    if (storedPage) {
+      setCurrentPage(storedPage);
+    }
+  }, []);
 
-  // Note: selectedSchool logic was removed as it's now handled by SchoolInsightsPage
-  switch (currentPage) {
-    case 'home':
-      return (
-        <HomePage 
-          onGetStarted={() => setCurrentPage('checklist')}
-          onPageNavigation={setCurrentPage}
-        />
-      );
-    case 'checklist':
-      return (
-        <ChecklistModule 
-          modules={checklistModules}
-          userProgress={userProgress}
-          setUserProgress={handleProgressUpdate}
-          onSchoolSelect={setSelectedSchool}
-          currentPage={currentPage}
-        />
-      );
-    case 'school-insights':
-      return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
-    case 'pre-arrival-1':
-      return (
-        <PreArrival1Page 
-          onBack={() => setCurrentPage('checklist')} 
-          onComplete={() => {
-            const newProgress = {
-              ...userProgress,
-              completedModules: [...userProgress.completedModules, 'pre-arrival-1'],
-              keys: userProgress.keys + 1
-            };
-            handleProgressUpdate(newProgress);
-            setCurrentPage('checklist');
-          }}
-          isCompleted={userProgress.completedModules.includes('pre-arrival-1')}
-          profile={profile}
-        />
-      );
-    case 'pre-arrival-2':
-      return (
-        <PreArrival2Page 
-          onBack={() => setCurrentPage('checklist')} 
-          onComplete={() => {
-            const newProgress = {
-              ...userProgress,
-              completedModules: [...userProgress.completedModules, 'pre-arrival-2'],
-              keys: userProgress.keys + 1
-            };
-            handleProgressUpdate(newProgress);
-            setCurrentPage('checklist');
-          }}
-          isCompleted={userProgress.completedModules.includes('pre-arrival-2')}
-          profile={profile}
-        />
-      );
-    case 'post-arrival':
-      return (
-        <PostArrivalPage 
-          onBack={() => setCurrentPage('checklist')} 
-          onComplete={() => {
-            const newProgress = {
-              ...userProgress,
-              completedModules: [...userProgress.completedModules, 'post-arrival'],
-              keys: userProgress.keys + 1
-            };
-            handleProgressUpdate(newProgress);
-            setCurrentPage('checklist');
-          }}
-          isCompleted={userProgress.completedModules.includes('post-arrival')}
-        />
-      );
-    case 'finance-tracking':
-      return (
-        <FinanceTrackingPage 
-          onBack={() => setCurrentPage('checklist')}
-          onComplete={() => {
-            const newProgress = {
-              ...userProgress,
-              completedModules: [...userProgress.completedModules, 'finance-tracking'],
-              keys: userProgress.keys + 1
-            };
-            handleProgressUpdate(newProgress);
-            setCurrentPage('checklist');
-          }}
-          isCompleted={userProgress.completedModules.includes('finance-tracking')}
-        />
-      );
-    case 'hub':
-      return <HubPage />;
-    case 'news':
-      return <NewsPage />;
-    case 'affiliation':
-      return <AffiliationPage />;
-    case 'language':
-      return <LanguagePage />;
-    case 'translate':
-      return <TranslatePage />;
-    case 'contact':
-      return <ContactPage />;
-    case 'notifications':
-      return <NotificationsPage />;
-    case 'integration':
-      return <FrenchIntegrationPage />;
-    case 'documents':
-      return <DocumentsPage />;
-    case 'suggestions':
-      return (
-        <SuggestionsPage 
-          onBack={() => setCurrentPage('checklist')}
-        />
-      );
-    case 'qa':
-      return <QAPage />;
-    case 'profile':  
-      return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />;
-    default:
-      return (
-        <HomePage 
-          onGetStarted={() => setCurrentPage('checklist')}
-          onPageNavigation={setCurrentPage}
-        />
-      );
+  useEffect(() => {
+    localStorage.setItem('currentPage', currentPage);
+  }, [currentPage]);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
-}
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage />;
+      case 'checklist':
+        return <ChecklistPage />;
+      case 'documents':
+        return <DocumentsPage />;
+      case 'hub':
+        return <HubPage />;
+      case 'news':
+        return <NewsPage />;
+      case 'affiliation':
+        return <AffiliationPage />;
+      case 'language':
+        return <LanguagePage />;
+      case 'translate':
+        return <TranslatePage />;
+      case 'contact':
+        return <ContactPage />;
+      case 'profile':
+        return <ProfilePage />;
+      case 'school':
+        return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
+      case 'admin':
+        return <AdminDashboard />;
+      case 'pre-arrival-1':
+        return <PreArrival1Page />;
+      case 'pre-arrival-2':
+        return <PreArrival2Page />;
+      case 'post-arrival':
+        return <PostArrivalPage />;
+      case 'finance':
+        return <FinanceTrackingPage />;
+      case 'notifications':
+        return <NotificationsPage />;
+      case 'qa':
+        return <QAPage />;
+      case 'suggestions':
+        return <SuggestionsPage />;
+      default:
+        return <HomePage />;
+    }
+  };
+
+  return (
+    
+      {renderCurrentPage()}
+    
+  );
+};
+
+export default MainRouter;
