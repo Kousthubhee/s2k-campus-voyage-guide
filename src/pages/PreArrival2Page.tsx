@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle, Filter, ChefHat, Cloud, Users, CircleDot } from
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageTitle } from '@/components/PageTitle';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { DocumentUploadButton } from '@/components/DocumentUploadButton';
 import confetti from 'canvas-confetti';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from "@/components/ui/progress";
@@ -74,6 +75,7 @@ export const PreArrival2Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   const [justCompleted, setJustCompleted] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(false);
+  const [uploadedDocs, setUploadedDocs] = useState<{ [key: string]: boolean }>({});
 
   const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Rouen', 'Reims', 'Lille', 'Bordeaux', 'Grenoble'];
   const cityData = {
@@ -340,6 +342,10 @@ export const PreArrival2Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     }
   };
 
+  const handleDocumentUpload = (stepId: string, fileName: string) => {
+    setUploadedDocs(prev => ({ ...prev, [stepId]: true }));
+  };
+
   const renderCityInfo = () => {
     const cityInfo = cityData[selectedCity as keyof typeof cityData];
     if (!cityInfo) return null;
@@ -387,16 +393,24 @@ export const PreArrival2Page = ({ onBack, onComplete, isCompleted, profile }: Pr
               ].map((item, index) => {
                 const stepId = `food-${selectedCity}-${index}`;
                 const isCompleted = completedSteps.includes(stepId);
+                const isUploaded = uploadedDocs[stepId];
                 return (
                   <div key={index} className="flex items-center justify-between p-2 border rounded">
-                    <span className="text-sm">{item}</span>
-                    {!isCompleted ? (
-                      <Button size="sm" onClick={() => handleStepComplete(stepId)}>
-                        Complete
-                      </Button>
-                    ) : (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    )}
+                    <span className="text-sm flex-1">{item}</span>
+                    <div className="flex items-center gap-2">
+                      <DocumentUploadButton
+                        documentType={`Food prep: ${item}`}
+                        onUploadComplete={(fileName) => handleDocumentUpload(stepId, fileName)}
+                        isUploaded={isUploaded}
+                      />
+                      {!isCompleted ? (
+                        <Button size="sm" onClick={() => handleStepComplete(stepId)}>
+                          Complete
+                        </Button>
+                      ) : (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      )}
+                    </div>
                   </div>
                 );
               })}

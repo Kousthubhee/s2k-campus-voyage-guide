@@ -4,14 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, MessageCircle, Plus, X, Menu } from 'lucide-react';
+import { Send, MessageCircle, Plus, X, Menu, LogIn } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
 
 export const AskMeAnythingPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [showConversations, setShowConversations] = useState(false);
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const {
     conversations,
     currentConversation,
@@ -25,7 +25,7 @@ export const AskMeAnythingPage = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || !user) return;
 
     let conversationId = currentConversation;
     if (!conversationId) {
@@ -47,12 +47,41 @@ export const AskMeAnythingPage = () => {
     await deleteConversation(conversationId);
   };
 
+  const handleLogin = async () => {
+    await signInWithGoogle();
+  };
+
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <Card className="h-96">
-          <CardContent className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Please sign in to use the chat feature</p>
+      <div className="max-w-4xl mx-auto h-[calc(100vh-200px)]">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ask Me Anything</h1>
+          <p className="text-lg text-gray-600">
+            Your AI-powered assistant for studying in France
+          </p>
+        </div>
+
+        <Card className="h-full flex flex-col">
+          <CardHeader className="pb-3 shrink-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">AI Assistant</CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-500">Online</span>
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="flex-1 flex flex-col items-center justify-center p-8">
+            <MessageCircle className="h-16 w-16 mx-auto mb-6 opacity-50 text-gray-400" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">Sign in to start chatting</h3>
+            <p className="text-gray-500 mb-6 text-center max-w-md">
+              Please sign in to use the AI chat feature and get personalized assistance for studying in France.
+            </p>
+            <Button onClick={handleLogin} className="flex items-center gap-2">
+              <LogIn className="h-4 w-4" />
+              Sign in with Google
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -69,34 +98,34 @@ export const AskMeAnythingPage = () => {
       </div>
 
       <div className="flex h-full gap-4">
-        {/* Conversations Sidebar - Hidden on mobile, toggle button */}
-        <div className={`${showConversations ? 'block' : 'hidden'} md:block w-full md:w-80 shrink-0`}>
+        {/* Conversations Sidebar - Compact and hidden by default */}
+        <div className={`${showConversations ? 'block' : 'hidden'} w-64 shrink-0`}>
           <Card className="h-full">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Conversations</CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={startNewConversation}>
-                    <Plus className="h-4 w-4" />
+                <CardTitle className="text-sm">Conversations</CardTitle>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={startNewConversation} className="h-6 w-6 p-0">
+                    <Plus className="h-3 w-3" />
                   </Button>
                   <Button 
                     size="sm" 
                     variant="ghost"
-                    className="md:hidden"
                     onClick={() => setShowConversations(false)}
+                    className="h-6 w-6 p-0"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[calc(100%-80px)]">
-                <div className="p-3 space-y-2">
+              <ScrollArea className="h-[calc(100%-60px)]">
+                <div className="p-2 space-y-1">
                   {conversations.map((conversation) => (
                     <div
                       key={conversation.id}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                      className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors text-xs ${
                         currentConversation === conversation.id 
                           ? 'bg-blue-50 border border-blue-200' 
                           : 'hover:bg-gray-50'
@@ -106,23 +135,23 @@ export const AskMeAnythingPage = () => {
                         setShowConversations(false);
                       }}
                     >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <MessageCircle className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate text-sm">{conversation.title}</span>
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        <MessageCircle className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{conversation.title}</span>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => handleDeleteConversation(conversation.id, e)}
-                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100"
+                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-2 w-2" />
                       </Button>
                     </div>
                   ))}
                   {conversations.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      No conversations yet. Start your first chat!
+                    <p className="text-xs text-muted-foreground text-center py-4">
+                      No conversations yet
                     </p>
                   )}
                 </div>
@@ -131,7 +160,7 @@ export const AskMeAnythingPage = () => {
           </Card>
         </div>
 
-        {/* Chat Area */}
+        {/* Chat Area - Takes full width when sidebar is hidden */}
         <div className="flex-1 min-w-0">
           <Card className="h-full flex flex-col">
             <CardHeader className="pb-3 shrink-0">
@@ -140,8 +169,8 @@ export const AskMeAnythingPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="md:hidden"
-                    onClick={() => setShowConversations(true)}
+                    onClick={() => setShowConversations(!showConversations)}
+                    className="h-8 w-8 p-0"
                   >
                     <Menu className="h-4 w-4" />
                   </Button>

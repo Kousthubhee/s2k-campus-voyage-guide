@@ -8,6 +8,7 @@ import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
+import { DocumentUploadButton } from "@/components/DocumentUploadButton";
 import { useAuth } from '@/hooks/useAuth';
 
 interface ProfileType {
@@ -34,6 +35,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   const [reminders, setReminders] = useState<{ [id: string]: string }>({});
   const [appointments, setAppointments] = useState<{ [id: string]: { date: string; location: string } }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
+  const [uploadedDocs, setUploadedDocs] = useState<{ [key: string]: boolean }>({});
   const { user } = useAuth();
 
   const toggleSection = (sectionId: string) => {
@@ -234,6 +236,11 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     setDocumentChecks(prev => ({ ...prev, [key]: checked }));
   };
 
+  const handleDocumentUpload = (itemId: string, docIndex: number, fileName: string) => {
+    const key = `${itemId}-${docIndex}`;
+    setUploadedDocs(prev => ({ ...prev, [key]: true }));
+  };
+
   const handleStepComplete = (stepId: string) => {
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
@@ -342,18 +349,30 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                     <CollapsibleContent className="mt-4 space-y-4">
                       <div className="bg-blue-50 p-4 rounded-lg">
                         <h4 className="font-semibold text-blue-900 mb-3">📋 Required Documents:</h4>
-                        <div className="space-y-2">
-                          {item.documents.map((doc, docIndex) => (
-                            <CheckboxItem
-                              key={docIndex}
-                              id={`${item.id}-doc-${docIndex}`}
-                              checked={documentChecks[`${item.id}-${docIndex}`] || false}
-                              onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
-                              className="text-blue-800"
-                            >
-                              {doc}
-                            </CheckboxItem>
-                          ))}
+                        <div className="space-y-3">
+                          {item.documents.map((doc, docIndex) => {
+                            const docKey = `${item.id}-${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            return (
+                              <div key={docIndex} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                                <div className="flex items-center flex-1">
+                                  <CheckboxItem
+                                    id={`${item.id}-doc-${docIndex}`}
+                                    checked={documentChecks[docKey] || false}
+                                    onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
+                                    className="text-blue-800 mr-3"
+                                  >
+                                    {doc}
+                                  </CheckboxItem>
+                                </div>
+                                <DocumentUploadButton
+                                  documentType={doc}
+                                  onUploadComplete={(fileName) => handleDocumentUpload(item.id, docIndex, fileName)}
+                                  isUploaded={isUploaded}
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                       <div className="bg-green-50 p-4 rounded-lg">
