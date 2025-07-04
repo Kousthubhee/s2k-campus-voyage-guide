@@ -266,7 +266,7 @@ const Index = () => {
           </main>
           <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
             <div className="text-center text-gray-600">
-              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">pasS2Kampus </span> 
+              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> & <span className="text-cyan-600 font-semibold">Srivatsava CK</span> <span className="text-black-600 font-semibold">Manibalan</span>
             </div>
             <Button 
               variant="destructive"
