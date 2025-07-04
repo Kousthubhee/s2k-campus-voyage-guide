@@ -1,11 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { HomePage } from './HomePage';
+import { HomePage } from '@/components/HomePage';
 import { ChecklistPage } from './ChecklistPage';
 import { DocumentsPage } from '@/components/DocumentsPage';
 import { HubPage } from './HubPage';
 import { NewsPage } from './NewsPage';
-import { AffiliationPage } from './AffiliationPage';
+import { AffiliationPage } from '@/components/AffiliationPage';
 import { LanguagePage } from './LanguagePage';
 import { TranslatePage } from './TranslatePage';
 import { ContactPage } from './ContactPage';
@@ -20,16 +21,39 @@ import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { AdminDashboard } from "@/components/AdminDashboard";
 
-const MainRouter = () => {
+interface MainRouterProps {
+  currentPage: string;
+  setCurrentPage: (page: string) => void;
+  userProfile: any;
+  userProgress: any;
+  setUserProgress: (progress: any) => void;
+  selectedSchool: any;
+  setSelectedSchool: (school: any) => void;
+  handleProgressUpdate: (progress: any) => void;
+  profile: any;
+  setUserProfile: (profile: any) => void;
+}
+
+const MainRouter = ({
+  currentPage,
+  setCurrentPage,
+  userProfile,
+  userProgress,
+  setUserProgress,
+  selectedSchool,
+  setSelectedSchool,
+  handleProgressUpdate,
+  profile,
+  setUserProfile
+}: MainRouterProps) => {
   const { user, loading } = useAuth();
-  const [currentPage, setCurrentPage] = useState('home');
 
   useEffect(() => {
     const storedPage = localStorage.getItem('currentPage');
     if (storedPage) {
       setCurrentPage(storedPage);
     }
-  }, []);
+  }, [setCurrentPage]);
 
   useEffect(() => {
     localStorage.setItem('currentPage', currentPage);
@@ -42,7 +66,7 @@ const MainRouter = () => {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
       case 'checklist':
         return <ChecklistPage />;
       case 'documents':
@@ -60,34 +84,34 @@ const MainRouter = () => {
       case 'contact':
         return <ContactPage />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />;
       case 'school':
         return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
       case 'admin':
         return <AdminDashboard />;
       case 'pre-arrival-1':
-        return <PreArrival1Page />;
+        return <PreArrival1Page onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} profile={profile} />;
       case 'pre-arrival-2':
-        return <PreArrival2Page />;
+        return <PreArrival2Page onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} profile={profile} />;
       case 'post-arrival':
-        return <PostArrivalPage />;
+        return <PostArrivalPage onBack={() => setCurrentPage('checklist')} onComplete={() => {}} isCompleted={false} />;
       case 'finance':
-        return <FinanceTrackingPage />;
+        return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
       case 'notifications':
         return <NotificationsPage />;
       case 'qa':
         return <QAPage />;
       case 'suggestions':
-        return <SuggestionsPage />;
+        return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
       default:
-        return <HomePage />;
+        return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
     }
   };
 
   return (
-    
+    <>
       {renderCurrentPage()}
-    
+    </>
   );
 };
 

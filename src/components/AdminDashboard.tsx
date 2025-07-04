@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,10 +57,7 @@ const ReviewDialog: React.FC<ReviewDialogProps> = ({ open, onClose, document, on
                 <span className="font-medium">Type:</span> {document?.user_documents?.type || 'N/A'}
               </div>
               <div>
-                <span className="font-medium">User:</span> {document?.user_documents?.profiles?.name || 'N/A'}
-              </div>
-              <div>
-                <span className="font-medium">Email:</span> {document?.user_documents?.profiles?.email || 'N/A'}
+                <span className="font-medium">User ID:</span> {document?.user_documents?.user_id || 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Submitted:</span> {new Date(document?.created_at || '').toLocaleDateString()}
@@ -209,7 +205,7 @@ export const AdminDashboard = () => {
     const matchesFilter = filterStatus === 'all' || review.status === filterStatus;
     const matchesSearch = !searchTerm || 
       review.user_documents?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.user_documents?.profiles?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      review.user_documents?.user_id?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesFilter && matchesSearch;
   });
@@ -357,7 +353,7 @@ export const AdminDashboard = () => {
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
                           <User className="h-4 w-4" />
-                          {review.user_documents?.profiles?.name || 'Unknown User'}
+                          {review.user_documents?.user_id || 'Unknown User'}
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />

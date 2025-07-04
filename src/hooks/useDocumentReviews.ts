@@ -14,8 +14,7 @@ export function useDocumentReviews() {
             id,
             name,
             type,
-            user_id,
-            profiles (name, email)
+            user_id
           )
         `)
         .order('created_at', { ascending: false });
