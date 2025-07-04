@@ -1,107 +1,48 @@
-
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-
-export function useSchools() {
-  return useQuery({
-    queryKey: ['schools'],
-    queryFn: async () => {
-      console.log('Fetching all schools from database...');
-      const { data, error } = await supabase
-        .from('schools')
-        .select('*')
-        .order('name');
-      
-      if (error) {
-        console.error('Error fetching schools:', error);
-        throw error;
-      }
-      console.log('Fetched schools:', data?.length, 'schools');
-      return data || [];
-    },
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (increased from 5)
-    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes (increased from 10)
-    refetchOnWindowFocus: false,
-  });
-}
-
-export function useSchoolsByCity(cityName: string | null) {
-  return useQuery({
-    queryKey: ['schools', 'by-city', cityName],
-    queryFn: async () => {
-      if (!cityName) return [];
-      
-      console.log('Fetching schools for city:', cityName);
-      const { data, error } = await supabase
-        .from('schools')
-        .select('*')
-        .eq('city', cityName)
-        .order('name');
-      
-      if (error) {
-        console.error('Error fetching schools by city:', error);
-        throw error;
-      }
-      console.log('Fetched schools for', cityName, ':', data?.length, 'schools');
-      return data || [];
-    },
-    enabled: !!cityName,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
-
-export function useSchoolSearch(searchTerm: string) {
-  return useQuery({
-    queryKey: ['schools', 'search', searchTerm],
-    queryFn: async () => {
-      if (!searchTerm.trim()) return [];
-      
-      console.log('Searching schools with term:', searchTerm);
-      const { data, error } = await supabase
-        .from('schools')
-        .select('*')
-        .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
-        .order('name');
-      
-      if (error) {
-        console.error('Error searching schools:', error);
-        throw error;
-      }
-      console.log('Search results for', searchTerm, ':', data?.length, 'schools');
-      return data || [];
-    },
-    enabled: !!searchTerm.trim(),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
-
 export function useSchoolDetail(schoolId: string | null) {
   return useQuery({
     queryKey: ['schools', 'detail', schoolId],
     queryFn: async () => {
       if (!schoolId) return null;
-      
+
       console.log('Fetching school details for ID:', schoolId);
       const { data, error } = await supabase
         .from('schools')
         .select('*')
         .eq('id', schoolId)
-        .maybeSingle(); // Use maybeSingle instead of single to handle cases where no data is found
-      
+        .maybeSingle();
+
       if (error) {
         console.error('Error fetching school details:', error);
         throw error;
       }
-      console.log('Fetched school details for:', data?.name || 'Unknown school');
-      return data;
+
+      // Parse JSON fields if they come as strings
+      const parseJSON = (val: any) => {
+        if (typeof val === 'string') {
+          try {
+            return JSON.parse(val);
+          } catch {
+            return val;
+          }
+        }
+        return val;
+      };
+
+      return {
+        ...data,
+        tuition_fees: parseJSON(data?.tuition_fees),
+        contact_info: parseJSON(data?.contact_info),
+        detailed_programs: parseJSON(data?.detailed_programs),
+        rankings: parseJSON(data?.rankings),
+        accreditations: parseJSON(data?.accreditations),
+        recognition: parseJSON(data?.recognition),
+        specializations: parseJSON(data?.specializations),
+        subjects: parseJSON(data?.subjects),
+      };
     },
     enabled: !!schoolId,
-    staleTime: 15 * 60 * 1000, // Cache detail pages longer (increased from 10)
-    gcTime: 45 * 60 * 1000, // Keep in cache longer (increased from 15)
+    staleTime: 15 * 60 * 1000,
+    gcTime: 45 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 }
