@@ -85,7 +85,7 @@ const queryClient = new QueryClient();
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('home'); // Default to home page
   const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -99,6 +99,16 @@ const Index = () => {
       loadUserProfile();
     }
   }, [user]);
+
+  // Ensure home page loads first - remove any stored page navigation on initial load
+  useEffect(() => {
+    const storedPage = localStorage.getItem('currentPage');
+    if (storedPage && storedPage !== 'home') {
+      console.log('Clearing stored page, defaulting to home');
+      localStorage.removeItem('currentPage');
+      setCurrentPage('home');
+    }
+  }, []);
 
   const loadUserProfile = async () => {
     if (!user) return;
@@ -160,12 +170,14 @@ const Index = () => {
     }
     console.log('Navigating to page:', page);
     setCurrentPage(page);
+    localStorage.setItem('currentPage', page); // Store the page navigation
   };
 
   const handleResetProgress = () => {
     resetProgress();
     setShowConfirm(false);
-    setCurrentPage('home');
+    setCurrentPage('home'); // Reset to home page
+    localStorage.removeItem('currentPage');
     toast({
       title: "Progress Reset",
       description: "Your checklist progress has been reset.",
@@ -212,7 +224,7 @@ const Index = () => {
               <div className="flex flex-1 justify-between items-center">
                 <div 
                   className="text-2xl font-bold cursor-pointer"
-                  onClick={() => setCurrentPage('home')}
+                  onClick={() => handlePageNavigation('home')}
                 >
                   pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
                 </div>

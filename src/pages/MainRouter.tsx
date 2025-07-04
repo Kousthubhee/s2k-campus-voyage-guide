@@ -49,24 +49,6 @@ const MainRouter = ({
 }: MainRouterProps) => {
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const storedPage = localStorage.getItem('currentPage');
-    if (storedPage) {
-      setCurrentPage(storedPage);
-    }
-  }, [setCurrentPage]);
-
-  useEffect(() => {
-    localStorage.setItem('currentPage', currentPage);
-  }, [currentPage]);
-
-  // Watch for changes in userProgress.currentPage and update the current page accordingly
-  useEffect(() => {
-    if (userProgress.currentPage && userProgress.currentPage !== currentPage) {
-      setCurrentPage(userProgress.currentPage);
-    }
-  }, [userProgress.currentPage, currentPage, setCurrentPage]);
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -146,7 +128,7 @@ const MainRouter = ({
       case 'suggestions':
         return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
       default:
-        console.log('Defaulting to home page for currentPage:', currentPage);
+        console.log('Unknown page:', currentPage, '- defaulting to home');
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
     }
   };

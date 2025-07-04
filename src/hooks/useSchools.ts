@@ -19,8 +19,8 @@ export function useSchools() {
       console.log('Fetched schools:', data?.length, 'schools');
       return data || [];
     },
-    staleTime: 15 * 60 * 1000, // Cache for 15 minutes (increased from 10)
-    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour (increased from 30)
+    staleTime: 15 * 60 * 1000, // Cache for 15 minutes
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
     refetchOnWindowFocus: false,
   });
 }
@@ -96,12 +96,13 @@ export function useSchoolDetail(schoolId: string | null) {
         console.error('Error fetching school details:', error);
         throw error;
       }
-      console.log('Fetched school details for:', data?.name || 'Unknown school');
+      
+      console.log('Fetched school details:', data);
       return data;
     },
     enabled: !!schoolId,
-    staleTime: 30 * 60 * 1000, // Cache detail pages longer (increased from 15)
-    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours (increased from 45)
+    staleTime: 30 * 60 * 1000, // Cache detail pages longer
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
     refetchOnWindowFocus: false,
   });
 }

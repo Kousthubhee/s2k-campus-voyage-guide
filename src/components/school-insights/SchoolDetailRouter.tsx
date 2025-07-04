@@ -23,7 +23,9 @@ interface SchoolDetailRouterProps {
 }
 
 export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) => {
-  const { data: detailedSchool, isLoading } = useSchoolDetail(school.id.toString());
+  const { data: detailedSchool, isLoading, error } = useSchoolDetail(school.id.toString());
+
+  console.log('School detail fetch - ID:', school.id, 'Data:', detailedSchool, 'Error:', error);
 
   if (isLoading) {
     return (
@@ -51,8 +53,13 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     );
   }
 
+  // Use detailed school data if available, otherwise fallback to basic school data
   const schoolData = detailedSchool || {
-    ...school,
+    id: school.id.toString(),
+    name: school.name,
+    city: school.city,
+    description: school.description,
+    website: school.website,
     emoji: "🎓",
     long_description: school.description,
     ranking: null,
@@ -68,14 +75,24 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     image_url: null
   };
   
-  // Safe parsing with fallbacks
+  console.log('Using school data:', schoolData);
+  
+  // Safe parsing with fallbacks - handle both string and array/object types
   const parseJsonField = (field: any, fallback: any = []) => {
     try {
-      if (typeof field === 'string') {
-        return JSON.parse(field);
+      if (typeof field === 'string' && field.trim()) {
+        const parsed = JSON.parse(field);
+        return Array.isArray(parsed) ? parsed : fallback;
       }
-      return Array.isArray(field) ? field : fallback;
-    } catch {
+      if (Array.isArray(field)) {
+        return field;
+      }
+      if (typeof field === 'object' && field !== null) {
+        return field;
+      }
+      return fallback;
+    } catch (error) {
+      console.log('JSON parse error for field:', field, error);
       return fallback;
     }
   };
@@ -85,17 +102,45 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
   const accreditations = parseJsonField(schoolData.accreditations, []);
   const recognition = parseJsonField(schoolData.recognition, []);
   const specializations = parseJsonField(schoolData.specializations, []);
-  const subjects = Array.isArray(schoolData.subjects) ? schoolData.subjects : [];
+  const subjects = Array.isArray(schoolData.subjects) ? schoolData.subjects : school.programs || [];
   const programs = Array.isArray(schoolData.programs) ? schoolData.programs : school.programs || [];
   
-  const tuitionFees = schoolData.tuition_fees;
-  const contactInfo = schoolData.contact_info as any;
+  // Parse contact info safely
+  const contactInfo = (() => {
+    try {
+      if (typeof schoolData.contact_info === 'string' && schoolData.contact_info.trim()) {
+        return JSON.parse(schoolData.contact_info);
+      }
+      if (typeof schoolData.contact_info === 'object' && schoolData.contact_info !== null) {
+        return schoolData.contact_info;
+      }
+      return {};
+    } catch {
+      return {};
+    }
+  })();
+
+  // Parse tuition fees safely
+  const tuitionFees = (() => {
+    try {
+      if (typeof schoolData.tuition_fees === 'string' && schoolData.tuition_fees.trim()) {
+        return JSON.parse(schoolData.tuition_fees);
+      }
+      if (typeof schoolData.tuition_fees === 'object' && schoolData.tuition_fees !== null) {
+        return schoolData.tuition_fees;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  })();
+
   const ranking = schoolData.ranking;
   const longDescription = schoolData.long_description || schoolData.description || school.description;
 
   const formatTuitionDetails = (fees: any) => {
     if (!fees) return null;
-    if (typeof fees === 'object') {
+    if (typeof fees === 'object' && fees !== null) {
       return Object.entries(fees).map(([key, value]) => (
         <div key={key} className="flex justify-between items-center py-2 border-b border-green-200 last:border-b-0">
           <span className="capitalize text-gray-700 font-medium">
@@ -200,7 +245,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
               <div className="mb-6">
                 <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
                   <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
-                  Detailed Programs
+                  Detailed Programs ({detailedPrograms.length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {detailedPrograms.map((program: any, index: number) => (
@@ -209,7 +254,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                       className="p-4 rounded-lg border-2 bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 hover:shadow-md transition-all duration-300"
                     >
                       <div className="font-semibold text-blue-900 mb-2">
-                        {program.name}
+                        {program.name || program.title || `Program ${index + 1}`}
                       </div>
                       {program.description && (
                         <div className="text-blue-700 mb-2 text-sm leading-relaxed">
@@ -228,7 +273,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
             {/* Regular Programs */}
             {programs.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Programs Offered</h4>
+                <h4 className="font-semibold text-gray-800 mb-3">Programs Offered ({programs.length})</h4>
                 <div className="flex flex-wrap gap-2">
                   {programs.map((program: string, index: number) => (
                     <div 
@@ -245,7 +290,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
             {/* Subjects */}
             {subjects.length > 0 && (
               <div>
-                <h4 className="font-semibold text-gray-800 mb-3">Subject Areas</h4>
+                <h4 className="font-semibold text-gray-800 mb-3">Subject Areas ({subjects.length})</h4>
                 <div className="flex flex-wrap gap-2">
                   {subjects.map((subject: string, index: number) => (
                     <div 
@@ -256,6 +301,15 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Show debug info if no data */}
+            {detailedPrograms.length === 0 && programs.length === 0 && subjects.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>Program information is being updated...</p>
+                <p className="text-xs mt-2">School ID: {schoolData.id}</p>
               </div>
             )}
           </CardContent>
@@ -287,7 +341,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
                 <Trophy className="h-5 w-5 mr-2 text-yellow-600" />
-                Rankings & Recognition
+                Rankings & Recognition ({allAchievements.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -296,9 +350,9 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   <div key={index} className="bg-yellow-50 border-2 border-yellow-200 p-4 rounded-lg hover:shadow-md transition-shadow">
                     <div className="font-semibold text-yellow-900 mb-1 flex items-center">
                       <Award className="h-4 w-4 mr-2" />
-                      {item.title}
+                      {item.title || item.name || `Achievement ${index + 1}`}
                     </div>
-                    <div className="text-yellow-800 text-sm">{item.description}</div>
+                    <div className="text-yellow-800 text-sm">{item.description || 'Recognition details available upon request'}</div>
                   </div>
                 ))}
               </div>
@@ -312,7 +366,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
                 <Sparkles className="h-5 w-5 mr-2 text-purple-600" />
-                Specializations
+                Specializations ({specializations.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -321,9 +375,9 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                   <div key={index} className="bg-purple-50 border-2 border-purple-200 p-4 rounded-lg hover:shadow-md transition-shadow">
                     <div className="font-semibold text-purple-900 mb-1 flex items-center">
                       <Star className="h-4 w-4 mr-2" />
-                      {spec.title || spec.name}
+                      {spec.title || spec.name || `Specialization ${index + 1}`}
                     </div>
-                    <div className="text-purple-800 text-sm">{spec.description}</div>
+                    <div className="text-purple-800 text-sm">{spec.description || 'Specialization details available'}</div>
                   </div>
                 ))}
               </div>
@@ -360,6 +414,11 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                     <span className="text-gray-700 font-medium">{contactInfo.phone}</span>
                   </div>
                 )}
+                {!contactInfo?.email && !contactInfo?.phone && (
+                  <div className="text-sm text-gray-500 italic">
+                    Contact information available on school website
+                  </div>
+                )}
               </div>
               
               <div className="space-y-4">
@@ -390,6 +449,11 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                     </a>
                   </div>
                 )}
+                {!contactInfo?.linkedin && !contactInfo?.instagram && (
+                  <div className="text-sm text-gray-500 italic">
+                    Social media links available on request
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -402,8 +466,23 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                     </span>
                   </div>
                 )}
+                {!contactInfo?.address && (
+                  <div className="text-sm text-gray-500 italic">
+                    Located in {schoolData.city}, France
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Debug information for troubleshooting */}
+            {(!detailedSchool || error) && (
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> Some detailed information may not be available yet. 
+                  {error && ` (Error: ${error.message})`}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
