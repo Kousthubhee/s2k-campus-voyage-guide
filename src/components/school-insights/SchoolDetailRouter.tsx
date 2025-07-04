@@ -19,6 +19,26 @@ interface SchoolDetailRouterProps {
   onBack: () => void;
 }
 
+interface ContactInfo {
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  instagram?: string;
+  address?: string;
+}
+
+interface DetailedProgram {
+  name: string;
+  description?: string;
+  duration?: string;
+  type?: string;
+}
+
+interface RankingItem {
+  title: string;
+  description: string;
+}
+
 export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) => {
   // Fetch detailed school information from database
   const { data: detailedSchool, isLoading } = useSchoolDetail(school.id.toString());
@@ -40,13 +60,13 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
   }
 
   const schoolData = detailedSchool || school;
-  const detailedPrograms = detailedSchool?.detailed_programs || [];
-  const rankings = detailedSchool?.rankings || [];
-  const accreditations = detailedSchool?.accreditations || [];
-  const recognition = detailedSchool?.recognition || [];
-  const specializations = detailedSchool?.specializations || [];
+  const detailedPrograms = Array.isArray(detailedSchool?.detailed_programs) ? detailedSchool.detailed_programs as DetailedProgram[] : [];
+  const rankings = Array.isArray(detailedSchool?.rankings) ? detailedSchool.rankings as RankingItem[] : [];
+  const accreditations = Array.isArray(detailedSchool?.accreditations) ? detailedSchool.accreditations as RankingItem[] : [];
+  const recognition = Array.isArray(detailedSchool?.recognition) ? detailedSchool.recognition as RankingItem[] : [];
+  const specializations = Array.isArray(detailedSchool?.specializations) ? detailedSchool.specializations as RankingItem[] : [];
   const tuitionFees = detailedSchool?.tuition_fees;
-  const contactInfo = detailedSchool?.contact_info;
+  const contactInfo = detailedSchool?.contact_info as ContactInfo | null;
 
   const formatTuitionDetails = (fees: any) => {
     if (!fees) return null;
@@ -70,12 +90,14 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
     );
   };
 
-  const formatProgramDuration = (program: any) => {
+  const formatProgramDuration = (program: DetailedProgram) => {
     if (program.duration) {
       return `${program.duration} • ${program.type || 'Program'}`;
     }
     return program.type || 'Program';
   };
+
+  const allAchievements = [...rankings, ...accreditations, ...recognition, ...specializations];
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -101,7 +123,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Programs Card */}
-        {(detailedPrograms.length > 0 || schoolData.programs.length > 0) && (
+        {(detailedPrograms.length > 0 || (schoolData.programs && schoolData.programs.length > 0)) && (
           <Card className="lg:col-span-2">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -110,7 +132,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {detailedPrograms.length > 0 ? (
-                  detailedPrograms.map((program: any, index: number) => (
+                  detailedPrograms.map((program, index) => (
                     <div 
                       key={index}
                       className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:shadow-md transition-shadow"
@@ -118,16 +140,18 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                       <div className="font-semibold text-blue-900 mb-2">
                         {program.name}
                       </div>
-                      <div className="text-sm text-blue-700 mb-2">
-                        {program.description}
-                      </div>
+                      {program.description && (
+                        <div className="text-sm text-blue-700 mb-2">
+                          {program.description}
+                        </div>
+                      )}
                       <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full inline-block">
                         {formatProgramDuration(program)}
                       </div>
                     </div>
                   ))
                 ) : (
-                  schoolData.programs.map((program: string, index: number) => (
+                  schoolData.programs?.map((program: string, index: number) => (
                     <div 
                       key={index}
                       className="p-4 rounded-lg border bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100"
@@ -160,7 +184,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
         )}
 
         {/* Rankings & Recognition Card */}
-        {(rankings.length > 0 || accreditations.length > 0 || recognition.length > 0 || specializations.length > 0) && (
+        {allAchievements.length > 0 && (
           <Card>
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -168,7 +192,7 @@ export const SchoolDetailRouter = ({ school, onBack }: SchoolDetailRouterProps) 
                 Rankings & Recognition
               </h3>
               <div className="space-y-3">
-                {[...rankings, ...accreditations, ...recognition, ...specializations].map((item: any, index: number) => (
+                {allAchievements.map((item, index) => (
                   <div key={index} className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
                     <div className="font-semibold text-yellow-800">{item.title}</div>
                     <div className="text-sm text-yellow-700">{item.description}</div>

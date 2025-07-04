@@ -17,12 +17,11 @@ export function useSchools() {
         throw error;
       }
       console.log('Fetched schools:', data?.length, 'schools');
-      console.log('Sample school data:', data?.[0]);
       return data || [];
     },
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 }
 
@@ -44,13 +43,12 @@ export function useSchoolsByCity(cityName: string | null) {
         throw error;
       }
       console.log('Fetched schools for', cityName, ':', data?.length, 'schools');
-      console.log('Sample school data for city:', data?.[0]);
       return data || [];
     },
     enabled: !!cityName,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -75,8 +73,9 @@ export function useSchoolSearch(searchTerm: string) {
       return data || [];
     },
     enabled: !!searchTerm.trim(),
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -98,11 +97,11 @@ export function useSchoolDetail(schoolId: string | null) {
         throw error;
       }
       console.log('Fetched school details for:', data?.name);
-      console.log('Full school data:', data);
       return data;
     },
     enabled: !!schoolId,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    staleTime: 10 * 60 * 1000, // Cache detail pages longer
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
