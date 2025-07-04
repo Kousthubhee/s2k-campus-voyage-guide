@@ -87,7 +87,25 @@ export function useChat() {
     setConversations(updatedConversations);
     saveConversations(updatedConversations);
     setCurrentConversation(newConversation.id);
+    setMessages([]); // Clear messages for new conversation
     return newConversation.id;
+  };
+
+  const deleteConversation = async (conversationId: string) => {
+    if (!user) return;
+
+    const updatedConversations = conversations.filter(conv => conv.id !== conversationId);
+    setConversations(updatedConversations);
+    saveConversations(updatedConversations);
+    
+    // Remove messages for this conversation
+    localStorage.removeItem(`messages_${conversationId}`);
+    
+    // If we're deleting the current conversation, clear it
+    if (currentConversation === conversationId) {
+      setCurrentConversation(null);
+      setMessages([]);
+    }
   };
 
   const sendMessage = async (content: string) => {
@@ -106,6 +124,17 @@ export function useChat() {
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     saveMessages(currentConversation, updatedMessages);
+
+    // Update conversation title if it's the first message
+    if (messages.length === 0) {
+      const updatedConversations = conversations.map(conv => 
+        conv.id === currentConversation 
+          ? { ...conv, title: content.slice(0, 50) + (content.length > 50 ? '...' : '') }
+          : conv
+      );
+      setConversations(updatedConversations);
+      saveConversations(updatedConversations);
+    }
 
     // Generate AI response with French education focus
     const aiResponses = [
@@ -146,6 +175,7 @@ export function useChat() {
     messages,
     loading,
     createConversation,
-    sendMessage
+    sendMessage,
+    deleteConversation
   };
 }

@@ -19,7 +19,6 @@ import { FinanceTrackingPage } from './FinanceTrackingPage';
 import { NotificationsPage } from './NotificationsPage';
 import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
-import { AdminDashboard } from "@/components/AdminDashboard";
 import { AskMeAnythingPage } from './AskMeAnythingPage';
 
 interface MainRouterProps {
@@ -88,8 +87,6 @@ const MainRouter = ({
       case 'school':
       case 'school-insights':
         return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
-      case 'admin':
-        return <AdminDashboard />;
       case 'pre-arrival-1':
         return (
           <PreArrival1Page 

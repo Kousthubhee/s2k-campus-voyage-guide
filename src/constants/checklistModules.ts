@@ -9,15 +9,6 @@ const checklistModules = [
     type: 'navigation'
   },
   {
-    id: 'admin',
-    title: 'Admin Dashboard',
-    description: 'Document verification and user management for administrators.',
-    icon: '🛡️',
-    color: 'bg-purple-500',
-    type: 'navigation',
-    adminOnly: true
-  },
-  {
     id: 'pre-arrival-1',
     title: 'Pre-Arrival Setup 1',
     description: 'Essential documents, visa applications, and initial preparations for your journey.',
