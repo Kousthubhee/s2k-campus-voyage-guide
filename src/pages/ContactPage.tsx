@@ -258,30 +258,7 @@ export const ContactPage = () => {
               We're passionate about helping students navigate their journey to study in France. Our platform provides comprehensive guides, checklists, and support to make your French education dreams a reality.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">👩‍🎓</div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Kousthubhee Krishna</h3>
-                    <p className="text-blue-600">Co-Founder & Developer</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">Passionate about helping students navigate French education</p>
-              </div>
-              
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">👨‍💻</div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Srivatsava</h3>
-                    <p className="text-blue-600">Co-Founder & Content Creator</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">Passionate about helping students navigate French education</p>
-              </div>
-            </div>
-
+           
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Helping students navigate their journey to study in France</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
