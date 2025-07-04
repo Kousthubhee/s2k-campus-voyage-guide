@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
@@ -59,6 +58,13 @@ const MainRouter = ({
   useEffect(() => {
     localStorage.setItem('currentPage', currentPage);
   }, [currentPage]);
+
+  // Watch for changes in userProgress.currentPage and update the current page accordingly
+  useEffect(() => {
+    if (userProgress.currentPage && userProgress.currentPage !== currentPage) {
+      setCurrentPage(userProgress.currentPage);
+    }
+  }, [userProgress.currentPage, currentPage, setCurrentPage]);
 
   if (loading) {
     return <div>Loading...</div>;

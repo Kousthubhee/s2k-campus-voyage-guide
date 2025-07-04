@@ -155,10 +155,15 @@ export const ChecklistModule = ({
     if (!isUnlocked && !module.keysRequired) return;
 
     if (pageMapping[module.id]) {
-      setUserProgress({
+      // Navigate to the mapped page by calling the parent's navigation function
+      const newProgress = {
         ...userProgress,
         currentPage: pageMapping[module.id]
-      });
+      };
+      setUserProgress(newProgress);
+      
+      // Also trigger immediate navigation - we need to access the parent's setCurrentPage
+      // This will be handled by the parent component watching userProgress changes
       return;
     }
 

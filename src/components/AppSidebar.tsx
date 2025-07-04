@@ -12,7 +12,8 @@ import {
   Bell,
   Menu,
   X,
-  MessageCircle
+  MessageCircle,
+  Shield
 } from 'lucide-react';
 import {
   Sidebar,
@@ -77,6 +78,7 @@ export const AppSidebar = ({
     { id: 'language', icon: Languages, label: 'Learn French', tooltip: 'Practice French language skills' },
     { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Universal translator tool' },
     { id: 'ask-me-anything', icon: MessageCircle, label: 'Ask Me Anything', tooltip: 'Chat with our AI assistant' },
+    { id: 'admin', icon: Shield, label: 'Admin Dashboard', tooltip: 'Administrative controls' },
     { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Get in touch with our support team' },
     { id: 'profile', icon: User, label: 'Profile', tooltip: 'Manage your profile settings' },
   ];
