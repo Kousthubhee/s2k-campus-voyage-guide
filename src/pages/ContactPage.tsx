@@ -251,7 +251,7 @@ export const ContactPage = () => {
         <CardContent className="p-8 text-center">
           <div className="flex items-center justify-center mb-6">
             <Heart className="h-6 w-6 text-red-500 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">Creators: Kousthubhee Krishna & Srivatsava</h2>
+            <h2 className="text-2xl font-bold text-gray-900">We are a team of Indian Students, and this is created based on our experiences</h2>
           </div>
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-blue-600 mb-6">
