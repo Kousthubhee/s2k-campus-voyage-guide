@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2, LogIn } from 'lucide-react';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProfilePageProps {
   userProfile: {
@@ -82,9 +83,29 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
     { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
 
-  const handleSaveProfile = (updatedProfile: typeof profile) => {
-    setUserProfile(updatedProfile);
-    setIsEditing(false);
+  const handleSave = async (updatedProfile: typeof profile) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: updatedProfile.name,
+          email: updatedProfile.email,
+          about: updatedProfile.about,
+          age: updatedProfile.age,
+          photo_url: updatedProfile.photo
+        })
+        .eq('email', profile.email);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+      } else {
+        console.log('Profile updated successfully');
+        setUserProfile(updatedProfile);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
   };
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
@@ -276,7 +297,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         open={isEditing}
         onOpenChange={setIsEditing}
         profile={profile}
-        onSave={handleSaveProfile}
+        onSave={handleSave}
       />
     </div>
   );
