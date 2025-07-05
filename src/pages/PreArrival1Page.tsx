@@ -3,13 +3,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, CheckCircle, Calendar, ChevronDown, FileText, Clock, Info } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Calendar, ChevronDown, FileText, Clock, Info, Bell, Plus, X } from 'lucide-react';
 import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
 import { DocumentUploadButton } from "@/components/DocumentUploadButton";
 import { useAuth } from '@/hooks/useAuth';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 interface ProfileType {
   name: string;
@@ -29,13 +31,21 @@ interface PreArrival1PageProps {
   profile: ProfileType | null;
 }
 
+interface ReminderItem {
+  date: string;
+  note: string;
+}
+
 export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: PreArrival1PageProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [openSections, setOpenSections] = useState<string[]>([]);
-  const [reminders, setReminders] = useState<{ [id: string]: string }>({});
+  const [reminders, setReminders] = useState<{ [id: string]: ReminderItem[] }>({});
   const [appointments, setAppointments] = useState<{ [id: string]: { date: string; location: string } }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
   const [uploadedDocs, setUploadedDocs] = useState<{ [key: string]: boolean }>({});
+  const [showReminderDialog, setShowReminderDialog] = useState<string | null>(null);
+  const [newReminderDate, setNewReminderDate] = useState('');
+  const [newReminderNote, setNewReminderNote] = useState('');
   const { user } = useAuth();
 
   const toggleSection = (sectionId: string) => {
@@ -64,7 +74,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   };
   const personalizationAlerts = personalizedDocs(profile);
 
-  // Checklist items with comprehensive processes
+  // Checklist items with comprehensive processes (removed accommodation-note)
   const checklistItems = [
   {
     id: 'campus-france',
@@ -100,17 +110,6 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
       "Attend Campus France interview at nearest center",
       "Receive Campus France registration number and NOC (No Objection Certificate)"
     ]
-  },
-
-  {
-    id: 'accommodation-note',
-    title: "Important Note Before VFS Visa Application",
-    description: "It is highly recommended to **book accommodation and flight tickets** before applying for your visa. Avoid using platforms like Airbnb, as temporary bookings might lead to rejection or additional scrutiny.",
-    urgency: "high",
-    timeline: "Before VFS appointment",
-    documents: [],
-    process: [],
-    isNote: true
   },
 
   {
@@ -245,7 +244,6 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
   }
 ];
 
-
   const handleDocumentCheck = (itemId: string, docIndex: number, checked: boolean) => {
     const key = `${itemId}-${docIndex}`;
     setDocumentChecks(prev => ({ ...prev, [key]: checked }));
@@ -260,6 +258,25 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
     }
+  };
+
+  const handleAddReminder = (itemId: string) => {
+    if (newReminderDate && newReminderNote) {
+      setReminders(prev => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), { date: newReminderDate, note: newReminderNote }]
+      }));
+      setNewReminderDate('');
+      setNewReminderNote('');
+      setShowReminderDialog(null);
+    }
+  };
+
+  const handleDeleteReminder = (itemId: string, index: number) => {
+    setReminders(prev => ({
+      ...prev,
+      [itemId]: prev[itemId]?.filter((_, i) => i !== index) || []
+    }));
   };
 
   const allStepsCompleted = completedSteps.length === checklistItems.length;
@@ -311,130 +328,228 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
           const isStepCompleted = completedSteps.includes(item.id);
           const isOpen = openSections.includes(item.id);
           const isVisaStep = item.id === "vfs";
+          const itemReminders = reminders[item.id] || [];
 
           return (
-            <Card key={index} className={`border-l-4 border-l-blue-500 ${isStepCompleted ? 'ring-2 ring-green-500' : ''}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 mt-1 ${
-                      isStepCompleted 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-gray-200 text-gray-600'
+            <div key={index}>
+              {/* Important Note Before VFS - Static Info Block */}
+              {item.id === "vfs" && (
+                <Card className="mb-4 border-l-4 border-l-blue-500 bg-blue-50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start">
+                      <Info className="h-6 w-6 text-blue-600 mr-3 mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-blue-900 mb-2">
+                          Important Note Before VFS Visa Application
+                        </h4>
+                        <p className="text-blue-800">
+                          It is highly recommended to book accommodation and flight tickets before applying for your visa. 
+                          Avoid using platforms like Airbnb, as temporary bookings might lead to rejection or additional scrutiny.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className={`border-l-4 border-l-blue-500 ${isStepCompleted ? 'ring-2 ring-green-500' : ''}`}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 mt-1 ${
+                        isStepCompleted 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {isStepCompleted ? <CheckCircle className="h-4 w-4" /> : index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{item.title}</CardTitle>
+                        <p className="text-gray-600 mt-1">{item.description}</p>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      item.urgency === 'high' 
+                        ? 'bg-red-100 text-red-800' 
+                        : item.urgency === 'medium'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
                     }`}>
-                      {isStepCompleted ? <CheckCircle className="h-4 w-4" /> : index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{item.title}</CardTitle>
-                      <p className="text-gray-600 mt-1">{item.description}</p>
+                      {item.urgency} priority
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    item.urgency === 'high' 
-                      ? 'bg-red-100 text-red-800' 
-                      : item.urgency === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {item.urgency} priority
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Timeline: {item.timeline}
-                  </div>
-                  <Collapsible 
-                    open={isOpen} 
-                    onOpenChange={() => toggleSection(item.id)}
-                  >
-                    <CollapsibleTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full justify-between">
-                        <span className="flex items-center">
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Detailed Process & Documents
-                        </span>
-                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                      </Button>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent className="mt-4 space-y-4">
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-blue-900 mb-3">📋 Required Documents:</h4>
-                        <div className="space-y-3">
-                          {item.documents.map((doc, docIndex) => {
-                            const docKey = `${item.id}-${docIndex}`;
-                            const isUploaded = uploadedDocs[docKey];
-                            return (
-                              <div key={docIndex} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                                <div className="flex items-center flex-1">
-                                  <CheckboxItem
-                                    id={`${item.id}-doc-${docIndex}`}
-                                    checked={documentChecks[docKey] || false}
-                                    onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
-                                    className="text-blue-800 mr-3"
-                                  >
-                                    {doc}
-                                  </CheckboxItem>
-                                </div>
-                                <DocumentUploadButton
-                                  documentType={doc}
-                                  onUploadComplete={(fileName) => handleDocumentUpload(item.id, docIndex, fileName)}
-                                  isUploaded={isUploaded}
-                                />
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Timeline: {item.timeline}
+                    </div>
+
+                    {/* Reminders Section */}
+                    {itemReminders.length > 0 && (
+                      <div className="bg-yellow-50 p-3 rounded-lg">
+                        <h4 className="font-medium text-yellow-900 mb-2 flex items-center">
+                          <Bell className="h-4 w-4 mr-2" />
+                          Your Reminders
+                        </h4>
+                        <div className="space-y-2">
+                          {itemReminders.map((reminder, reminderIndex) => (
+                            <div key={reminderIndex} className="flex items-center justify-between bg-white p-2 rounded border">
+                              <div className="flex-1">
+                                <div className="text-sm font-medium">{reminder.date}</div>
+                                <div className="text-xs text-gray-600">{reminder.note}</div>
                               </div>
-                            );
-                          })}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteReminder(item.id, reminderIndex)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-green-900 mb-3">🔄 Step-by-Step Process:</h4>
-                        <ol className="space-y-2">
-                          {item.process.map((step, stepIndex) => (
-                            <li key={stepIndex} className="text-sm text-green-800 flex items-start">
-                              <span className="mr-3 font-bold text-green-600 bg-green-200 rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                                {stepIndex + 1}
-                              </span>
-                              <span>{step}</span>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                    )}
 
-                  <div className="flex flex-wrap items-center gap-3 pt-2">
-                    <ReminderButton
-                      date={reminders[item.id]}
-                      onSet={dt => setReminders(rem => ({ ...rem, [item.id]: dt }))}
-                    />
-                    {isVisaStep && (
-                      <VisaSchedulerDialog
-                        appointment={appointments[item.id] || null}
-                        onSet={val => setAppointments(a => ({ ...a, [item.id]: val }))}
-                      />
-                    )}
-                    {!isStepCompleted && (
-                      <Button 
+                    <Collapsible 
+                      open={isOpen} 
+                      onOpenChange={() => toggleSection(item.id)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full justify-between">
+                          <span className="flex items-center">
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Detailed Process & Documents
+                          </span>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        </Button>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent className="mt-4 space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-blue-900 mb-3">📋 Required Documents:</h4>
+                          <div className="space-y-3">
+                            {item.documents.map((doc, docIndex) => {
+                              const docKey = `${item.id}-${docIndex}`;
+                              const isUploaded = uploadedDocs[docKey];
+                              return (
+                                <div key={docIndex} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                                  <div className="flex items-center flex-1">
+                                    <CheckboxItem
+                                      id={`${item.id}-doc-${docIndex}`}
+                                      checked={documentChecks[docKey] || false}
+                                      onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
+                                      className="text-blue-800 mr-3"
+                                    >
+                                      {doc}
+                                    </CheckboxItem>
+                                  </div>
+                                  {/* Only show upload button if NOT preparation step */}
+                                  {item.id !== 'preparation' && (
+                                    <DocumentUploadButton
+                                      documentType={doc}
+                                      onUploadComplete={(fileName) => handleDocumentUpload(item.id, docIndex, fileName)}
+                                      isUploaded={isUploaded}
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-green-900 mb-3">🔄 Step-by-Step Process:</h4>
+                          <ol className="space-y-2">
+                            {item.process.map((step, stepIndex) => (
+                              <li key={stepIndex} className="text-sm text-green-800 flex items-start">
+                                <span className="mr-3 font-bold text-green-600 bg-green-200 rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                                  {stepIndex + 1}
+                                </span>
+                                <span>{step}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleStepComplete(item.id)}
+                        onClick={() => setShowReminderDialog(item.id)}
+                        className="flex items-center gap-1"
                       >
-                        Mark Complete
+                        <Plus className="h-4 w-4" />
+                        Add Reminder
                       </Button>
-                    )}
-                    {isStepCompleted && (
-                      <span className="text-green-600 text-sm font-medium">Completed ✓</span>
-                    )}
+                      {isVisaStep && (
+                        <VisaSchedulerDialog
+                          appointment={appointments[item.id] || null}
+                          onSet={val => setAppointments(a => ({ ...a, [item.id]: val }))}
+                        />
+                      )}
+                      {!isStepCompleted && (
+                        <Button 
+                          size="sm"
+                          onClick={() => handleStepComplete(item.id)}
+                        >
+                          Mark Complete
+                        </Button>
+                      )}
+                      {isStepCompleted && (
+                        <span className="text-green-600 text-sm font-medium">Completed ✓</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           );
         })}
       </div>
+
+      {/* Add Reminder Dialog */}
+      <Dialog open={showReminderDialog !== null} onOpenChange={() => setShowReminderDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Reminder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="reminder-date">Date</label>
+              <Input
+                id="reminder-date"
+                type="date"
+                value={newReminderDate}
+                onChange={e => setNewReminderDate(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="reminder-note">Note</label>
+              <Input
+                id="reminder-note"
+                type="text"
+                placeholder="Add a note for this reminder..."
+                value={newReminderNote}
+                onChange={e => setNewReminderNote(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => showReminderDialog && handleAddReminder(showReminderDialog)}
+              disabled={!newReminderDate || !newReminderNote}
+            >
+              Add Reminder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {allStepsCompleted && !isCompleted && (
         <Card className="mt-8 bg-green-50 border-green-200">
