@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,9 +93,11 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           email: updatedProfile.email,
           about: updatedProfile.about,
           age: updatedProfile.age,
-          photo_url: updatedProfile.photo
+          photo_url: updatedProfile.photo,
+          prev_education: updatedProfile.prevEducation,
+          work_experience: updatedProfile.workExperience
         })
-        .eq('email', profile.email);
+        .eq('email', updatedProfile.email);
 
       if (error) {
         console.error('Error updating profile:', error);
