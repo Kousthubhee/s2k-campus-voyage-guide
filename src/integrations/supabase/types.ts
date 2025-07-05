@@ -375,9 +375,11 @@ export type Database = {
           name: string
           nationality: string | null
           photo_url: string | null
+          prev_education: string | null
           target_city: string | null
           target_program: string | null
           updated_at: string | null
+          work_experience: string | null
         }
         Insert: {
           about?: string | null
@@ -395,9 +397,11 @@ export type Database = {
           name: string
           nationality?: string | null
           photo_url?: string | null
+          prev_education?: string | null
           target_city?: string | null
           target_program?: string | null
           updated_at?: string | null
+          work_experience?: string | null
         }
         Update: {
           about?: string | null
@@ -415,9 +419,11 @@ export type Database = {
           name?: string
           nationality?: string | null
           photo_url?: string | null
+          prev_education?: string | null
           target_city?: string | null
           target_program?: string | null
           updated_at?: string | null
+          work_experience?: string | null
         }
         Relationships: []
       }
