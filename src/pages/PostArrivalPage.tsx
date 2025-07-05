@@ -1,11 +1,14 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, CreditCard, Home, Shield, FileText, Info } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ArrowLeft, CheckCircle, Calendar, ChevronDown, FileText, Clock, Info, Bell, Plus, X } from 'lucide-react';
 import { ReminderButton } from "@/components/ReminderButton";
 import { PageTitle } from "@/components/PageTitle";
-import { PostArrivalTaskCards } from '@/components/PostArrivalTaskCards';
 import { CheckboxItem } from "@/components/CheckboxItem";
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 import confetti from "canvas-confetti";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +19,11 @@ interface PostArrivalPageProps {
   isCompleted: boolean;
 }
 
+interface ReminderItem {
+  date: string;
+  note: string;
+}
+
 const glossaryItems = [
   { term: "RIB", explanation: "Relevé d'Identité Bancaire – Your official French bank details, required for many payments." },
   { term: "Attestation de Séjour", explanation: "Proof of residence permit, usually your visa or OFII-stamped passport." },
@@ -24,26 +32,40 @@ const glossaryItems = [
   { term: "Assurance Maladie", explanation: "French public health insurance (Ameli.fr)." },
 ];
 
+const GlossaryPopover = ({
+  term,
+  explanation,
+}: {
+  term: string;
+  explanation: string;
+}) => (
+  <span className="relative group cursor-help underline decoration-dotted">
+    {term}
+    <span className="hidden group-hover:block absolute z-10 left-1/2 -translate-x-1/2 bg-white border border-gray-200 shadow-lg text-xs text-gray-900 px-3 py-1 rounded whitespace-pre w-60 mt-2">
+      {explanation}
+    </span>
+  </span>
+);
+
 const tasks = [
   {
     id: 'bank-account',
     title: "Open Bank Account",
     description: "Required for rent, CAF, and daily transactions",
-    icon: <span className="inline text-blue-700">📄</span>,
+    urgency: "high",
     timeline: "Within first week",
-    priority: "urgent" as const,
-    steps: [
-      { id: "bank-1", description: "Choose a French bank." },
-      { id: "bank-2", description: "Book an appointment (optional) or walk in with your documents." },
-      { id: "bank-3", description: "Provide proof of address and RIB for setup." },
-      { id: "bank-4", description: "Receive your RIB and set up online banking." },
-    ],
     documents: [
       "Passport",
       "Visa or Attestation de Séjour",
       "University acceptance letter",
       "Proof of accommodation",
       "RIB (for further processes)"
+    ],
+    process: [
+      "Choose a French bank.",
+      "Book an appointment (optional) or walk in with your documents.",
+      "Provide proof of address and RIB for setup.",
+      "Receive your RIB and set up online banking."
     ],
     faqs: [
       {
@@ -59,28 +81,26 @@ const tasks = [
       { label: "MaFrenchBank (easy for students)", url: "https://www.mafrenchbank.fr/" },
       { label: "BNP Paribas", url: "https://mabanque.bnpparibas/" },
       { label: "Societe Generale", url: "https://www.societegenerale.fr/" }
-    ],
-    glossary: glossaryItems,
+    ]
   },
   {
     id: 'social-security',
     title: "Apply for Social Security Number",
     description: "Essential for healthcare and official procedures",
-    icon: <span className="inline text-green-700">🆔</span>,
+    urgency: "high",
     timeline: "Within first 2 weeks",
-    priority: "urgent" as const,
-    steps: [
-      { id: "ssn-1", description: "Create Ameli account and register online." },
-      { id: "ssn-2", description: "Upload passport, visa, birth certificate (translated), and university attestation." },
-      { id: "ssn-3", description: "Wait for temporary number and documents approval." },
-      { id: "ssn-4", description: "Receive permanent Numéro de Sécurité Sociale." },
-    ],
     documents: [
       "Passport",
       "Visa/Attestation de Séjour",
       "Birth certificate (translated into French)",
       "University enrollment certificate",
       "Proof of accommodation"
+    ],
+    process: [
+      "Create Ameli account and register online.",
+      "Upload passport, visa, birth certificate (translated), and university attestation.",
+      "Wait for temporary number and documents approval.",
+      "Receive permanent Numéro de Sécurité Sociale."
     ],
     faqs: [
       {
@@ -94,26 +114,24 @@ const tasks = [
     ],
     links: [
       { label: "Ameli – Health Insurance (official)", url: "https://etudiant-etranger.ameli.fr/#/" }
-    ],
-    glossary: glossaryItems,
+    ]
   },
   {
     id: 'health-insurance',
     title: "Register for Health Insurance",
     description: "Student health insurance (LMDE, SMERRA, or public)",
-    icon: <span className="inline text-indigo-600">🛡️</span>,
+    urgency: "medium",
     timeline: "Within first month",
-    priority: "high" as const,
-    steps: [
-      { id: "ins-1", description: "Choose mutual/complémentaire health insurance (LMDE, SMERRA, etc.)" },
-      { id: "ins-2", description: "Register using your Numéro de Sécurité Sociale from Ameli." },
-      { id: "ins-3", description: "Upload proof of income or student status if necessary." },
-    ],
     documents: [
       "Social Security Number (from Ameli)",
       "Passport",
       "Proof of enrollment",
       "Bank account RIB"
+    ],
+    process: [
+      "Choose mutual/complémentaire health insurance (LMDE, SMERRA, etc.)",
+      "Register using your Numéro de Sécurité Sociale from Ameli.",
+      "Upload proof of income or student status if necessary."
     ],
     faqs: [
       {
@@ -128,29 +146,27 @@ const tasks = [
     links: [
       { label: "LMDE (student insurance)", url: "https://www.lmde.fr/" },
       { label: "SMERRA", url: "https://www.smerra.fr/" }
-    ],
-    glossary: glossaryItems,
+    ]
   },
   {
     id: 'caf',
     title: "Apply for CAF (Housing Allowance)",
     description: "Financial assistance for accommodation costs",
-    icon: <span className="inline text-orange-700">🏠</span>,
+    urgency: "medium",
     timeline: "After securing accommodation",
-    priority: "high" as const,
-    steps: [
-      { id: "caf-1", description: "Secure a rental contract." },
-      { id: "caf-2", description: "Collect your RIB from your French bank." },
-      { id: "caf-3", description: "Register for CAF on www.caf.fr with your housing and identity information." },
-      { id: "caf-4", description: "Upload all required paperwork." },
-      { id: "caf-5", description: "Wait for approval and payments to begin." },
-    ],
     documents: [
       "Rental contract or Attestation d'hébergement",
       "Proof of student status",
       "RIB (French bank account details)",
       "Passport",
       "Visa or Attestation de Séjour"
+    ],
+    process: [
+      "Secure a rental contract.",
+      "Collect your RIB from your French bank.",
+      "Register for CAF on www.caf.fr with your housing and identity information.",
+      "Upload all required paperwork.",
+      "Wait for approval and payments to begin."
     ],
     faqs: [
       {
@@ -164,8 +180,7 @@ const tasks = [
     ],
     links: [
       { label: "CAF Official Site", url: "https://www.caf.fr/" }
-    ],
-    glossary: glossaryItems,
+    ]
   }
 ];
 
@@ -178,9 +193,51 @@ const processOrder = [
 
 export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrivalPageProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [reminders, setReminders] = useState<{ [id: string]: string }>({});
+  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [reminders, setReminders] = useState<{ [id: string]: ReminderItem[] }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
+  const [showReminderDialog, setShowReminderDialog] = useState<string | null>(null);
+  const [newReminderDate, setNewReminderDate] = useState('');
+  const [newReminderNote, setNewReminderNote] = useState('');
   const { toast } = useToast();
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => 
+      prev.includes(sectionId) 
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const handleStepComplete = (stepId: string) => {
+    if (!completedSteps.includes(stepId)) {
+      setCompletedSteps([...completedSteps, stepId]);
+    }
+  };
+
+  const handleAddReminder = (itemId: string) => {
+    if (newReminderDate && newReminderNote) {
+      setReminders(prev => ({
+        ...prev,
+        [itemId]: [...(prev[itemId] || []), { date: newReminderDate, note: newReminderNote }]
+      }));
+      setNewReminderDate('');
+      setNewReminderNote('');
+      setShowReminderDialog(null);
+    }
+  };
+
+  const handleDeleteReminder = (itemId: string, index: number) => {
+    setReminders(prev => ({
+      ...prev,
+      [itemId]: prev[itemId]?.filter((_, i) => i !== index) || []
+    }));
+  };
+
+  const handleDocumentCheck = (taskId: string, docIndex: number, checked: boolean) => {
+    const key = `${taskId}-${docIndex}`;
+    setDocumentChecks(prev => ({ ...prev, [key]: checked }));
+  };
 
   // Confetti and toast when all are completed
   const allStepsCompleted = completedSteps.length >= tasks.length;
@@ -193,11 +250,6 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
       variant: "default",
     });
     onComplete();
-  };
-
-  const handleDocumentCheck = (taskId: string, docIndex: number, checked: boolean) => {
-    const key = `${taskId}-${docIndex}`;
-    setDocumentChecks(prev => ({ ...prev, [key]: checked }));
   };
 
   return (
@@ -250,19 +302,241 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
         </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">🚨 Urgent Official Processes</h2>
-        <div className="bg-blue-50 rounded-xl p-3 mb-4 text-gray-700 text-sm">
-          Complete the official steps below in order for a smooth start. Mark each process complete to track your progress!
-        </div>
-        <PostArrivalTaskCards
-          tasks={tasks}
-          completedSteps={completedSteps}
-          setCompletedSteps={setCompletedSteps}
-          reminders={reminders}
-          setReminders={setReminders}
-        />
+      <div className="space-y-4">
+        {tasks.map((task, index) => {
+          const isStepCompleted = completedSteps.includes(task.id);
+          const isOpen = openSections.includes(task.id);
+          const taskReminders = reminders[task.id] || [];
+
+          return (
+            <Card key={index} className={`border-l-4 border-l-blue-500 ${isStepCompleted ? 'ring-2 ring-green-500' : ''}`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 mt-1 ${
+                      isStepCompleted 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {isStepCompleted ? <CheckCircle className="h-4 w-4" /> : index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{task.title}</CardTitle>
+                      <p className="text-gray-600 mt-1">{task.description}</p>
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    task.urgency === 'high' 
+                      ? 'bg-red-100 text-red-800' 
+                      : task.urgency === 'medium'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {task.urgency} priority
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Timeline: {task.timeline}
+                  </div>
+
+                  {/* Reminders Section */}
+                  {taskReminders.length > 0 && (
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <h4 className="font-medium text-yellow-900 mb-2 flex items-center">
+                        <Bell className="h-4 w-4 mr-2" />
+                        Your Reminders
+                      </h4>
+                      <div className="space-y-2">
+                        {taskReminders.map((reminder, reminderIndex) => (
+                          <div key={reminderIndex} className="flex items-center justify-between bg-white p-2 rounded border">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{reminder.date}</div>
+                              <div className="text-xs text-gray-600">{reminder.note}</div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeleteReminder(task.id, reminderIndex)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Collapsible 
+                    open={isOpen} 
+                    onOpenChange={() => toggleSection(task.id)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full justify-between">
+                        <span className="flex items-center">
+                          <FileText className="h-4 w-4 mr-2" />
+                          View Detailed Process & Documents
+                        </span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </Button>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent className="mt-4 space-y-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-blue-900 mb-3">📋 Required Documents:</h4>
+                        <div className="space-y-3">
+                          {task.documents.map((doc, docIndex) => {
+                            const docKey = `${task.id}-${docIndex}`;
+                            return (
+                              <div key={docIndex} className="flex items-center p-3 border rounded-lg bg-white">
+                                <CheckboxItem
+                                  id={`${task.id}-doc-${docIndex}`}
+                                  checked={documentChecks[docKey] || false}
+                                  onCheckedChange={(checked) => handleDocumentCheck(task.id, docIndex, checked)}
+                                  className="text-blue-800 flex-1"
+                                >
+                                  {doc}
+                                </CheckboxItem>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-green-900 mb-3">🔄 Step-by-Step Process:</h4>
+                        <ol className="space-y-2">
+                          {task.process.map((step, stepIndex) => (
+                            <li key={stepIndex} className="text-sm text-green-800 flex items-start">
+                              <span className="mr-3 font-bold text-green-600 bg-green-200 rounded-full w-6 h-6 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                                {stepIndex + 1}
+                              </span>
+                              <span>
+                                {step}
+                                {glossaryItems
+                                  .filter((t) => step.includes(t.term))
+                                  .map((t) => (
+                                    <span key={t.term} className="ml-1">
+                                      <GlossaryPopover
+                                        term={t.term}
+                                        explanation={t.explanation}
+                                      />
+                                    </span>
+                                  ))}
+                              </span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+
+                      {/* FAQ Section */}
+                      {task.faqs.length > 0 && (
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-gray-900 mb-3">❓ FAQ:</h4>
+                          <div className="space-y-3">
+                            {task.faqs.map((faq, faqIndex) => (
+                              <div key={faqIndex} className="text-sm">
+                                <div className="font-medium text-gray-800 mb-1">{faq.q}</div>
+                                <div className="text-gray-600">{faq.a}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Links Section */}
+                      {task.links.length > 0 && (
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-purple-900 mb-3">🔗 Helpful Links:</h4>
+                          <div className="space-y-1">
+                            {task.links.map((link, linkIndex) => (
+                              <div key={linkIndex}>
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-700 hover:underline text-sm"
+                                >
+                                  {link.label}
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowReminderDialog(task.id)}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Reminder
+                    </Button>
+                    {!isStepCompleted && (
+                      <Button 
+                        size="sm"
+                        onClick={() => handleStepComplete(task.id)}
+                      >
+                        Mark Complete
+                      </Button>
+                    )}
+                    {isStepCompleted && (
+                      <span className="text-green-600 text-sm font-medium">Completed ✓</span>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
+
+      {/* Add Reminder Dialog */}
+      <Dialog open={showReminderDialog !== null} onOpenChange={() => setShowReminderDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Reminder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="reminder-date">Date</label>
+              <Input
+                id="reminder-date"
+                type="date"
+                value={newReminderDate}
+                onChange={e => setNewReminderDate(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1" htmlFor="reminder-note">Note</label>
+              <Input
+                id="reminder-note"
+                type="text"
+                placeholder="Add a note for this reminder..."
+                value={newReminderNote}
+                onChange={e => setNewReminderNote(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => showReminderDialog && handleAddReminder(showReminderDialog)}
+              disabled={!newReminderDate || !newReminderNote}
+            >
+              Add Reminder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {allStepsCompleted && !isCompleted && (
         <Card className="mt-8 bg-green-50 border-green-200">
@@ -284,40 +558,6 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="h-6 w-6 mr-3 text-green-600" />
-            All Required Official Documents
-            <Info className="h-4 w-4 ml-1 text-blue-400" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">
-            You will need these documents at various stages. Always keep both originals and copies!
-          </p>
-          <div className="space-y-2">
-            {[
-              ...new Set(
-                tasks
-                  .flatMap((task) => task.documents)
-                  .sort()
-              ),
-            ].map((doc, index) => (
-              <CheckboxItem
-                key={index}
-                id={`document-${index}`}
-                checked={documentChecks[`document-${index}`] || false}
-                onCheckedChange={(checked) => setDocumentChecks(prev => ({ ...prev, [`document-${index}`]: checked }))}
-                className="text-sm"
-              >
-                {doc}
-              </CheckboxItem>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <Card className="mt-6 bg-blue-50">
         <CardContent className="p-6">
           <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
@@ -327,7 +567,7 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
           <ul className="space-y-2 text-blue-800 text-sm">
             <li>• Always carry original documents + photocopies</li>
             <li>• Some processes may take several weeks - start early</li>
-            <li>• Ask your university’s international office for guidance</li>
+            <li>• Ask your university's international office for guidance</li>
             <li>• Keep receipts and confirmation numbers for all applications</li>
             <li>• If confused about a French term, hover over it for a quick explanation</li>
           </ul>
@@ -340,5 +580,3 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
     </div>
   );
 };
-
-// NOTE: This file is getting large (over 217 lines). Consider refactoring it into smaller, maintainable components for future updates.
