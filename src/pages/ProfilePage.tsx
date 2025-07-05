@@ -124,20 +124,23 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof profile) => {
+    console.log('Starting profile update...', updatedProfile);
+    
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
           name: updatedProfile.name,
-          email: updatedProfile.email,
           about: updatedProfile.about,
           age: updatedProfile.age,
           photo_url: updatedProfile.photo,
           prev_education: updatedProfile.prevEducation,
           work_experience: updatedProfile.workExperience
         })
-        .eq('email', updatedProfile.email);
+        .eq('email', user.email);
 
+      console.log('Profile update completed', { error });
+      
       if (error) {
         console.error('Error updating profile:', error);
       } else {
