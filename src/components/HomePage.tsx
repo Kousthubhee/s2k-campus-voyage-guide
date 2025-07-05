@@ -115,8 +115,8 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
-            From university search to onboarding — powered by real experience, not just advice.
+          <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto italic">
+            From university search to settling as a student in France, powered by real experience, not just advice.
           </p>
           
           <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto italic">
