@@ -14,7 +14,8 @@ import {
   Award,
   Clock,
   Shield,
-  Sparkles
+  Sparkles,
+  Heart
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -98,12 +99,13 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
         <div className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
+      
       {/* Hero Section */}
       <section className="px-4 py-16 md:py-24">
         <div className="max-w-6xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6 text-sm font-medium">
-            <Sparkles className="h-4 w-4 mr-2" />
-            Your Complete Guide to French Education
+            <Heart className="h-4 w-4 mr-2 text-red-500" />
+            Built by Indian Students, for Indian Students
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
@@ -113,8 +115,12 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Your all-in-one platform for navigating French higher education. From visa applications to university life, we've got you covered.
+          <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto">
+            From university search to onboarding — powered by real experience, not just advice.
+          </p>
+          
+          <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto italic">
+            "Everything here is based on what we wish we knew."
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -245,8 +251,6 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
           </Card>
         </div>
       </section>
-
-     
     </div>
   );
 };
