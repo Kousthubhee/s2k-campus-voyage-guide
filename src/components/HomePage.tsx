@@ -15,7 +15,13 @@ import {
   Clock,
   Shield,
   Sparkles,
-  Heart
+  Heart,
+  Brain,
+  Package,
+  Link,
+  Luggage,
+  Video,
+  GraduationCap
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -68,6 +74,47 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
     { number: "50+", label: "Cities", icon: Globe },
     { number: "24/7", label: "AI Support", icon: Clock },
     { number: "100%", label: "Secure", icon: Shield }
+  ];
+
+  const trustReasons = [
+    {
+      icon: Brain,
+      title: "Built by students who've lived it",
+      color: "text-blue-600"
+    },
+    {
+      icon: Package,
+      title: "Based on packing regrets, visa errors, and city-wise hacks",
+      color: "text-orange-600"
+    },
+    {
+      icon: MessageSquare,
+      title: "100+ Indian students shared input to help others avoid costly mistakes",
+      color: "text-green-600"
+    },
+    {
+      icon: Link,
+      title: "Free to use. No agents. No forms. Just smart guidance.",
+      color: "text-purple-600"
+    }
+  ];
+
+  const journeySnapshots = [
+    {
+      icon: Luggage,
+      title: "What I packed for Rouen — and wish I didn't",
+      color: "text-blue-600"
+    },
+    {
+      icon: Video,
+      title: "Finding housing in France: CROUS vs. private tips",
+      color: "text-green-600"
+    },
+    {
+      icon: GraduationCap,
+      title: "Applying for CAF without a French guarantor—my steps",
+      color: "text-purple-600"
+    }
   ];
 
   const testimonials = [
@@ -188,6 +235,64 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Students Trust Us Section */}
+      <section className="px-4 py-16 bg-white/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Students Trust Us</h2>
+            <p className="text-xl text-gray-600">
+              Real insights from students who've walked the path before you
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {trustReasons.map((reason, index) => {
+              const Icon = reason.icon;
+              return (
+                <div key={index} className="flex items-start space-x-4 p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className={`flex-shrink-0 w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center ${reason.color}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-medium text-gray-900">{reason.title}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Live Journey Snapshots Section */}
+      <section className="px-4 py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Journey Snapshots</h2>
+            <p className="text-xl text-gray-600">
+              Real stories and practical tips from students currently in France
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {journeySnapshots.map((snapshot, index) => {
+              const Icon = snapshot.icon;
+              return (
+                <Card key={index} className="hover:shadow-lg transition-shadow border-0 shadow-md cursor-pointer group">
+                  <CardContent className="p-6">
+                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gray-50 mb-4 ${snapshot.color} group-hover:scale-110 transition-transform`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <p className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                      "{snapshot.title}"
+                    </p>
                   </CardContent>
                 </Card>
               );
