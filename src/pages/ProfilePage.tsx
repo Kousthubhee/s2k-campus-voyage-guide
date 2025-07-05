@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +24,46 @@ interface ProfilePageProps {
 export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
+  
+  // Load profile data from Supabase when user is available
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user?.email) return;
+      
+      try {
+        const { data: fetchedProfile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', user.email)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+
+        if (fetchedProfile) {
+          // Map Supabase fields to component format
+          const profileData = {
+            name: fetchedProfile.name || user.email,
+            email: fetchedProfile.email,
+            about: fetchedProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
+            memberSince: fetchedProfile.created_at ? new Date(fetchedProfile.created_at).toLocaleDateString() : 'Recently joined',
+            photo: fetchedProfile.photo_url || '',
+            age: fetchedProfile.age || 'Not specified',
+            prevEducation: fetchedProfile.prev_education || 'Add your education background',
+            workExperience: fetchedProfile.work_experience || 'Add your work experience'
+          };
+          
+          setUserProfile(profileData);
+        }
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+      }
+    };
+
+    loadProfileData();
+  }, [user, setUserProfile]);
   
   // If user is not signed in, show sign-in prompt
   if (!user) {
