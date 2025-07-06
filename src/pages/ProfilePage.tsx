@@ -128,52 +128,40 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   console.log("📌 user.id:", user?.id);
 
   if (!user?.id) {
-    console.error("❌ No user ID available for profile update");
+    console.error('❌ No user ID available for profile update');
     return;
   }
 
-  // Build update payload, skipping undefined/nulls
-  const updatePayload: { [key: string]: any } = {
+  const updatePayload = {
     name: updatedProfile.name,
     about: updatedProfile.about,
     age: updatedProfile.age,
     photo_url: updatedProfile.photo,
     prev_education: updatedProfile.prevEducation,
-    work_experience: updatedProfile.workExperience
+    work_experience: updatedProfile.workExperience,
+    // Add more fields if needed
   };
 
-  // Filter out any fields with undefined or null values
-  Object.keys(updatePayload).forEach(key => {
-    if (
-      updatePayload[key] === undefined ||
-      updatePayload[key] === null ||
-      updatePayload[key] === ''
-    ) {
-      delete updatePayload[key];
-    }
-  });
-
-  console.log("🧪 Final payload being sent to Supabase:", updatePayload);
-
   try {
+    console.log("📌 Supabase update payload:", updatePayload);
+
     const { data, error } = await supabase
       .from('profiles')
       .update(updatePayload)
       .eq('id', user.id)
       .select()
-      .throwOnError(); // catch silent issues like RLS or bad data
+      .throwOnError(); // This will throw if there's any error
 
-    console.log('📌 Supabase update response:', { data, error });
+    console.log('✅ Supabase update success:', data);
 
-    if (error) {
-      console.error('❌ Error updating profile:', error);
-    } else {
-      console.log('✅ Profile updated successfully');
-      setUserProfile(updatedProfile);
-      setIsEditing(false);
-    }
+    setUserProfile({
+      ...updatedProfile,
+      id: user.id,
+    });
+
+    setIsEditing(false);
   } catch (err) {
-    console.error('❌ Caught error while updating profile:', err);
+    console.error('❌ Supabase update error:', err);
   }
 };
 
