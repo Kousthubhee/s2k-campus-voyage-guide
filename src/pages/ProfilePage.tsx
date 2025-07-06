@@ -6,6 +6,7 @@ import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfilePageProps {
   userProfile: {
@@ -25,16 +26,18 @@ interface ProfilePageProps {
 export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
   
   useEffect(() => {
     const loadProfileData = async () => {
-      if (!user?.email) return;
+      if (!user?.id) return;
       
       try {
+        console.log('Loading profile for user ID:', user.id);
         const { data: fetchedProfile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('email', user.email)
+          .eq('id', user.id)
           .single();
 
         if (error) {
@@ -55,6 +58,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
             workExperience: fetchedProfile.work_experience || 'Add your work experience'
           };
           
+          console.log('Loaded profile data:', profileData);
           setUserProfile(profileData);
         }
       } catch (error) {
@@ -72,10 +76,16 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
     if (!user?.id) {
       console.error('❌ No user ID available for profile update');
+      toast({
+        title: "Error",
+        description: "User not authenticated. Please sign in again.",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
+      console.log('📌 Attempting to update profile in Supabase...');
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -93,13 +103,28 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
       if (error) {
         console.error('❌ Error updating profile:', error);
+        toast({
+          title: "Error",
+          description: `Failed to update profile: ${error.message}`,
+          variant: "destructive",
+        });
       } else {
-        console.log('✅ Profile updated successfully');
+        console.log('✅ Profile updated successfully in Supabase');
         setUserProfile(updatedProfile);
         setIsEditing(false);
+        toast({
+          title: "Success",
+          description: "Profile updated successfully!",
+          variant: "default",
+        });
       }
     } catch (error) {
       console.error('❌ Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while saving your profile.",
+        variant: "destructive",
+      });
     }
   };
   
