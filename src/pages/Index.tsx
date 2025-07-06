@@ -1,4 +1,3 @@
-
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -54,6 +53,7 @@ import { FloatingChatbot } from '@/components/FloatingChatbot';
 console.log("App.tsx is rendering");
 
 interface UserProfile {
+  id: string;
   name: string;
   email: string;
   age: string;
@@ -122,6 +122,7 @@ const Index = () => {
 
       if (data) {
         const profile: UserProfile = {
+          id: data.id,
           name: data.name || user.email || '',
           email: data.email || user.email || '',
           age: data.age || '',
@@ -138,8 +139,8 @@ const Index = () => {
           about: data.about || '',
           memberSince: new Date(data.created_at).toLocaleDateString(),
           photo: data.photo_url || '',
-          prevEducation: '',
-          workExperience: ''
+          prevEducation: data.prev_education || '',
+          workExperience: data.work_experience || ''
         };
         setUserProfile(profile);
       }
