@@ -168,7 +168,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
               <Input
                 id="edit-email"
                 value={editingProfile.email}
-                readOnly // ✅ THIS IS THE FIX
+                readOnly
                 className="mt-1"
               />
             </div>
