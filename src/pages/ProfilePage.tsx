@@ -123,9 +123,9 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof profile) => {
-    console.log('📌 handleSave in ProfilePage.tsx triggered');
-    console.log('📌 updatedProfile:', updatedProfile);
-    console.log('📌 updatedProfile.id:', updatedProfile.id);
+    console.log("📌 handleSave in ProfilePage.tsx triggered");
+    console.log("📌 updatedProfile:", updatedProfile);
+    console.log("📌 user.id:", user?.id);
 
     try {
       const { data, error } = await supabase
