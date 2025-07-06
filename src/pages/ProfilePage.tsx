@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -121,8 +122,8 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
   const handleSave = async (updatedProfile: typeof profile) => {
     console.log('📌 handleSave in ProfilePage.tsx triggered');
-    console.log('📌 user.id:', user?.id);
     console.log('📌 updatedProfile:', updatedProfile);
+    console.log('📌 user.id:', user?.id);
 
     try {
       const { data, error } = await supabase
