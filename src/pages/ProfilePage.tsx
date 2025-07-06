@@ -25,7 +25,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   
-  // Load profile data from Supabase when user is available
   useEffect(() => {
     const loadProfileData = async () => {
       if (!user?.email) return;
@@ -43,7 +42,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         }
 
         if (fetchedProfile) {
-          // Map Supabase fields to component format
           const profileData = {
             name: fetchedProfile.name || user.email,
             email: fetchedProfile.email,
@@ -65,7 +63,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
     loadProfileData();
   }, [user, setUserProfile]);
   
-  // If user is not signed in, show sign-in prompt
   if (!user) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -87,7 +84,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
     );
   }
   
-  // Use the passed userProfile or fall back to placeholder data for signed-in users
   const profile = userProfile || {
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
@@ -124,36 +120,37 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof profile) => {
-  console.log('📌 user.id:', user?.id); // This must appear in console if wired correctly
+    console.log('📌 handleSave in ProfilePage.tsx triggered');
+    console.log('📌 user.id:', user?.id);
+    console.log('📌 updatedProfile:', updatedProfile);
 
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({
-        name: updatedProfile.name,
-        about: updatedProfile.about,
-        age: updatedProfile.age,
-        photo_url: updatedProfile.photo,
-        prev_education: updatedProfile.prevEducation,
-        work_experience: updatedProfile.workExperience
-      })
-      .eq('id', user.id)
-      .select(); // optional: view result
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          name: updatedProfile.name,
+          about: updatedProfile.about,
+          age: updatedProfile.age,
+          photo_url: updatedProfile.photo,
+          prev_education: updatedProfile.prevEducation,
+          work_experience: updatedProfile.workExperience
+        })
+        .eq('id', user.id)
+        .select();
 
-    console.log('📌 Supabase update response:', { data, error });
+      console.log('📌 Supabase update response:', { data, error });
 
-    if (error) {
-      console.error('❌ Error updating profile:', error);
-    } else {
-      setUserProfile(updatedProfile);
-      setIsEditing(false);
+      if (error) {
+        console.error('❌ Error updating profile:', error);
+      } else {
+        console.log('✅ Profile updated successfully');
+        setUserProfile(updatedProfile);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('❌ Error saving profile:', error);
     }
-  } catch (error) {
-    console.error('❌ Error saving profile:', error);
-  }
-};
-
-
+  };
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;
@@ -162,7 +159,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* Profile Header */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -227,9 +223,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Stats and Progress */}
         <div className="space-y-6">
-          {/* Progress Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -262,7 +256,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
@@ -285,7 +278,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           </Card>
         </div>
 
-        {/* Right Column - Achievements */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
@@ -324,7 +316,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
                 ))}
               </div>
 
-              {/* Welcome message for new users */}
               <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg text-center">
                 <h3 className="text-lg font-semibold mb-4">Welcome to pasS2Kampus! 🎓</h3>
                 <p className="text-gray-600 mb-4">
@@ -339,7 +330,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         </div>
       </div>
 
-      {/* Profile Edit Dialog */}
       <ProfileEditDialog
         open={isEditing}
         onOpenChange={setIsEditing}

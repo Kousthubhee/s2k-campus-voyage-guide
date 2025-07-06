@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -108,16 +107,15 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
   };
 
   const handleSave = () => {
-  console.log("📌 handleSave in ProfileEditDialog is triggered"); // <-- ADD THIS
-
-  onSave(editingProfile); // this calls the update in ProfilePage
-  onOpenChange(false); // closes dialog
-  toast({
-    title: "Profile updated",
-    description: "Your profile changes were saved.",
-    variant: "default",
-  });
-};
+    console.log("📌 handleSave in ProfileEditDialog is triggered");
+    onSave(editingProfile);
+    onOpenChange(false);
+    toast({
+      title: "Profile updated",
+      description: "Your profile changes were saved.",
+      variant: "default",
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -169,7 +167,8 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
                 id="edit-email"
                 value={editingProfile.email}
                 readOnly
-                className="mt-1"
+                className="mt-1 bg-gray-100 cursor-not-allowed"
+                disabled
               />
             </div>
           </div>
