@@ -137,21 +137,20 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         prev_education: updatedProfile.prevEducation,
         work_experience: updatedProfile.workExperience
       })
-      .eq('id', user.id); // ✅ Use ID, not email
-
-    console.log('Profile update result', { error });
+      .eq('id', user.id); // ✅ FIXED: use user.id, not email
 
     if (error) {
-      console.error('Error updating profile:', error);
+      console.error('❌ Error updating profile in Supabase:', error);
     } else {
-      console.log('Profile updated successfully');
+      console.log('✅ Profile updated successfully');
       setUserProfile(updatedProfile);
       setIsEditing(false);
     }
   } catch (error) {
-    console.error('Error saving profile:', error);
+    console.error('❌ Error saving profile:', error);
   }
 };
+
 
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
