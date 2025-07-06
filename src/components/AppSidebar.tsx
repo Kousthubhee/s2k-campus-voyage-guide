@@ -1,3 +1,4 @@
+
 import { 
   CheckSquare, 
   Users, 
@@ -11,7 +12,8 @@ import {
   Bell,
   Menu,
   X,
-  MessageCircle
+  MessageCircle,
+  Flag
 } from 'lucide-react';
 import {
   Sidebar,
@@ -74,6 +76,7 @@ export const AppSidebar = ({
     { id: 'news', icon: BookOpen, label: 'Stay Updated', tooltip: 'Latest campus and city news' },
     { id: 'affiliation', icon: Building2, label: 'Our Partners', tooltip: 'See our affiliations' },
     { id: 'language', icon: Languages, label: 'Learn French', tooltip: 'Practice French language skills' },
+    { id: 'integration', icon: Flag, label: 'French Integration', tooltip: 'French culture and integration guide' },
     { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Universal translator tool' },
     { id: 'ask-me-anything', icon: MessageCircle, label: 'Ask Me Anything', tooltip: 'Chat with our AI assistant' },
     { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Get in touch with our support team' },

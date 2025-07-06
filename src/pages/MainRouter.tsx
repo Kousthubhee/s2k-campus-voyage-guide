@@ -8,6 +8,7 @@ import { HubPage } from './HubPage';
 import { NewsPage } from './NewsPage';
 import { AffiliationPage } from '@/components/AffiliationPage';
 import { LanguagePage } from './LanguagePage';
+import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { TranslatePage } from './TranslatePage';
 import { ContactPage } from './ContactPage';
 import { ProfilePage } from './ProfilePage';
@@ -78,6 +79,8 @@ const MainRouter = ({
         return <AffiliationPage />;
       case 'language':
         return <LanguagePage />;
+      case 'integration':
+        return <FrenchIntegrationPage />;
       case 'translate':
         return <TranslatePage />;
       case 'contact':
