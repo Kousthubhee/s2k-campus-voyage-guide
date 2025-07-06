@@ -124,34 +124,35 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof profile) => {
-    console.log('Starting profile update...', updatedProfile);
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          name: updatedProfile.name,
-          about: updatedProfile.about,
-          age: updatedProfile.age,
-          photo_url: updatedProfile.photo,
-          prev_education: updatedProfile.prevEducation,
-          work_experience: updatedProfile.workExperience
-        })
-        .eq('email', user.email);
+  console.log('Starting profile update for user ID:', user.id);
 
-      console.log('Profile update completed', { error });
-      
-      if (error) {
-        console.error('Error updating profile:', error);
-      } else {
-        console.log('Profile updated successfully');
-        setUserProfile(updatedProfile);
-        setIsEditing(false);
-      }
-    } catch (error) {
-      console.error('Error saving profile:', error);
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        name: updatedProfile.name,
+        about: updatedProfile.about,
+        age: updatedProfile.age,
+        photo_url: updatedProfile.photo,
+        prev_education: updatedProfile.prevEducation,
+        work_experience: updatedProfile.workExperience
+      })
+      .eq('id', user.id); // ✅ Use ID, not email
+
+    console.log('Profile update result', { error });
+
+    if (error) {
+      console.error('Error updating profile:', error);
+    } else {
+      console.log('Profile updated successfully');
+      setUserProfile(updatedProfile);
+      setIsEditing(false);
     }
-  };
+  } catch (error) {
+    console.error('Error saving profile:', error);
+  }
+};
+
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;
