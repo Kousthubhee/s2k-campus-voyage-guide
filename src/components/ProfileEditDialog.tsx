@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -107,7 +108,10 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
   };
 
   const handleSave = () => {
-    console.log("📌 handleSave in ProfileEditDialog is triggered");
+    console.log("📌 ProfileEditDialog handleSave triggered");
+    console.log("📌 About to call onSave with profile:", editingProfile);
+    console.log("📌 onSave function type:", typeof onSave);
+    
     onSave(editingProfile);
     onOpenChange(false);
     toast({
