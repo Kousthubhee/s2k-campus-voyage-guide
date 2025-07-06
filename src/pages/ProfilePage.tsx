@@ -124,8 +124,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof profile) => {
-  console.log('📌 user.id:', user?.id); // <--- Add this line here
-  console.log('📌 updatedProfile:', updatedProfile); // (optional: logs data you're trying to save)
+  console.log('📌 user.id:', user?.id); // This must appear in console if wired correctly
 
   try {
     const { data, error } = await supabase
@@ -138,15 +137,14 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
         prev_education: updatedProfile.prevEducation,
         work_experience: updatedProfile.workExperience
       })
-      .eq('id', user.id) // ✅ make sure this stays as user.id
-      .select(); // 👈 add this for debug purposes
+      .eq('id', user.id)
+      .select(); // optional: view result
 
     console.log('📌 Supabase update response:', { data, error });
 
     if (error) {
       console.error('❌ Error updating profile:', error);
     } else {
-      console.log('✅ Profile updated successfully');
       setUserProfile(updatedProfile);
       setIsEditing(false);
     }
