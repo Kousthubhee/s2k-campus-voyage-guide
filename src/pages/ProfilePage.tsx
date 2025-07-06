@@ -6,7 +6,6 @@ import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface ProfilePageProps {
   userProfile: {
@@ -26,31 +25,26 @@ interface ProfilePageProps {
 export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
   
   useEffect(() => {
     const loadProfileData = async () => {
-      if (!user?.id) return;
+      if (!user?.email) return;
       
       try {
-        console.log('🔍 Loading profile for user ID:', user.id);
         const { data: fetchedProfile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('email', user.email)
           .single();
 
         if (error) {
-          console.error('❌ Error fetching profile:', error);
-          if (error.code === 'PGRST116') {
-            console.log('📝 Profile not found, will be created on next auth event');
-          }
+          console.error('Error fetching profile:', error);
           return;
         }
 
         if (fetchedProfile) {
           const profileData = {
-            id: fetchedProfile.id, // Ensure ID is from the database
+            id: fetchedProfile.id,
             name: fetchedProfile.name || user.email,
             email: fetchedProfile.email,
             about: fetchedProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
@@ -61,86 +55,15 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
             workExperience: fetchedProfile.work_experience || 'Add your work experience'
           };
           
-          console.log('✅ Loaded profile data:', profileData);
           setUserProfile(profileData);
         }
       } catch (error) {
-        console.error('❌ Error loading profile data:', error);
+        console.error('Error loading profile data:', error);
       }
     };
 
     loadProfileData();
   }, [user, setUserProfile]);
-
-  const handleSave = async (updatedProfile: typeof userProfile) => {
-    console.log("📌 handleSave in ProfilePage.tsx triggered");
-    console.log("📌 updatedProfile:", updatedProfile);
-    console.log("📌 user.id:", user?.id);
-
-    if (!user?.id) {
-      console.error('❌ No user ID available for profile update');
-      toast({
-        title: "Error",
-        description: "User not authenticated. Please sign in again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log('📌 Attempting to update profile in Supabase...');
-      console.log('📌 Using user.id for update:', user.id);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({
-          name: updatedProfile.name,
-          about: updatedProfile.about,
-          age: updatedProfile.age,
-          photo_url: updatedProfile.photo,
-          prev_education: updatedProfile.prevEducation,
-          work_experience: updatedProfile.workExperience
-        })
-        .eq('id', user.id) // Use authenticated user ID, not profile ID
-        .select();
-
-      console.log('📌 Supabase update response:', { data, error });
-
-      if (error) {
-        console.error('❌ Error updating profile:', error);
-        toast({
-          title: "Error",
-          description: `Failed to update profile: ${error.message}`,
-          variant: "destructive",
-        });
-      } else if (!data || data.length === 0) {
-        console.error('❌ No rows updated - possible RLS policy issue');
-        toast({
-          title: "Error",
-          description: "Profile update failed. Please check your permissions.",
-          variant: "destructive",
-        });
-      } else {
-        console.log('✅ Profile updated successfully in Supabase');
-        // Update the profile with the user's ID to ensure consistency
-        const updatedProfileWithId = { ...updatedProfile, id: user.id };
-        setUserProfile(updatedProfileWithId);
-        setIsEditing(false);
-        toast({
-          title: "Success",
-          description: "Profile updated successfully!",
-          variant: "default",
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error saving profile:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while saving your profile.",
-        variant: "destructive",
-      });
-    }
-  };
   
   if (!user) {
     return (
@@ -164,7 +87,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   }
   
   const profile = userProfile || {
-    id: user.id, // Ensure ID matches authenticated user
+    id: user.id || '',
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
     about: 'Complete your profile to personalize your experience and get better recommendations.',
@@ -198,6 +121,62 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
     { action: 'Joined pasS2Kampus', time: 'Recently', icon: CheckCircle2 },
     { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
+
+  const handleSave = async (updatedProfile: typeof userProfile) => {
+  console.log("📌 handleSave in ProfilePage.tsx triggered");
+  console.log("📌 updatedProfile:", updatedProfile);
+  console.log("📌 user.id:", user?.id);
+
+  if (!user?.id) {
+    console.error("❌ No user ID available for profile update");
+    return;
+  }
+
+  // Build update payload, skipping undefined/nulls
+  const updatePayload: { [key: string]: any } = {
+    name: updatedProfile.name,
+    about: updatedProfile.about,
+    age: updatedProfile.age,
+    photo_url: updatedProfile.photo,
+    prev_education: updatedProfile.prevEducation,
+    work_experience: updatedProfile.workExperience
+  };
+
+  // Filter out any fields with undefined or null values
+  Object.keys(updatePayload).forEach(key => {
+    if (
+      updatePayload[key] === undefined ||
+      updatePayload[key] === null ||
+      updatePayload[key] === ''
+    ) {
+      delete updatePayload[key];
+    }
+  });
+
+  console.log("🧪 Final payload being sent to Supabase:", updatePayload);
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updatePayload)
+      .eq('id', user.id)
+      .select()
+      .throwOnError(); // catch silent issues like RLS or bad data
+
+    console.log('📌 Supabase update response:', { data, error });
+
+    if (error) {
+      console.error('❌ Error updating profile:', error);
+    } else {
+      console.log('✅ Profile updated successfully');
+      setUserProfile(updatedProfile);
+      setIsEditing(false);
+    }
+  } catch (err) {
+    console.error('❌ Caught error while updating profile:', err);
+  }
+};
+
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;
