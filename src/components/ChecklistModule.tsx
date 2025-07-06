@@ -93,7 +93,7 @@ export const ChecklistModule = ({
     'pre-arrival-1': 'pre-arrival-1',
     'pre-arrival-2': 'pre-arrival-2',
     'post-arrival': 'post-arrival',
-    'integration': 'language',
+    'integration': 'integration',
     'finance': 'finance-tracking',
     'suggestions': 'suggestions',
   };
