@@ -168,11 +168,12 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
               <Input
                 id="edit-email"
                 value={editingProfile.email}
-                readOnly // ✅ THIS IS THE FIX
+                placeholder="Enter your email"
+                onChange={e => setEditingProfile({ ...editingProfile, email: e.target.value })}
                 className="mt-1"
               />
             </div>
-
+          </div>
           <div>
             <Label htmlFor="edit-about" className="font-semibold">About</Label>
             <Input
