@@ -38,28 +38,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(async () => {
             try {
-              const { data: existingProfile } = await supabase
+              console.log('🔍 Checking profile for user:', session.user.id);
+              const { data: existingProfile, error: fetchError } = await supabase
                 .from('profiles')
                 .select('id')
                 .eq('id', session.user.id)
                 .single();
 
-              if (!existingProfile) {
-                console.log('Creating profile for user:', session.user.id);
-                const { error } = await supabase
+              if (fetchError && fetchError.code === 'PGRST116') {
+                // Profile doesn't exist, create it
+                console.log('📝 Creating profile for user:', session.user.id);
+                const { error: insertError } = await supabase
                   .from('profiles')
                   .insert({
-                    id: session.user.id, // Explicitly set ID to match auth.uid()
-                    name: session.user.email || 'New User',
+                    id: session.user.id, // This is crucial - set ID to auth user ID
+                    name: session.user.user_metadata?.name || session.user.email || 'New User',
                     email: session.user.email || ''
                   });
                 
-                if (error) {
-                  console.error('Error creating profile:', error);
+                if (insertError) {
+                  console.error('❌ Error creating profile:', insertError);
+                } else {
+                  console.log('✅ Profile created successfully');
                 }
+              } else if (fetchError) {
+                console.error('❌ Error checking profile:', fetchError);
+              } else {
+                console.log('✅ Profile already exists for user:', session.user.id);
               }
             } catch (error) {
-              console.error('Error checking/creating profile:', error);
+              console.error('❌ Error in profile creation process:', error);
             }
           }, 100);
         }

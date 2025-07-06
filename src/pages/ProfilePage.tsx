@@ -33,7 +33,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
       if (!user?.id) return;
       
       try {
-        console.log('Loading profile for user ID:', user.id);
+        console.log('🔍 Loading profile for user ID:', user.id);
         const { data: fetchedProfile, error } = await supabase
           .from('profiles')
           .select('*')
@@ -41,13 +41,16 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           .single();
 
         if (error) {
-          console.error('Error fetching profile:', error);
+          console.error('❌ Error fetching profile:', error);
+          if (error.code === 'PGRST116') {
+            console.log('📝 Profile not found, will be created on next auth event');
+          }
           return;
         }
 
         if (fetchedProfile) {
           const profileData = {
-            id: fetchedProfile.id,
+            id: fetchedProfile.id, // Ensure ID is from the database
             name: fetchedProfile.name || user.email,
             email: fetchedProfile.email,
             about: fetchedProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
@@ -58,11 +61,11 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
             workExperience: fetchedProfile.work_experience || 'Add your work experience'
           };
           
-          console.log('Loaded profile data:', profileData);
+          console.log('✅ Loaded profile data:', profileData);
           setUserProfile(profileData);
         }
       } catch (error) {
-        console.error('Error loading profile data:', error);
+        console.error('❌ Error loading profile data:', error);
       }
     };
 
@@ -86,6 +89,8 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
     try {
       console.log('📌 Attempting to update profile in Supabase...');
+      console.log('📌 Using user.id for update:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -96,7 +101,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           prev_education: updatedProfile.prevEducation,
           work_experience: updatedProfile.workExperience
         })
-        .eq('id', user.id)
+        .eq('id', user.id) // Use authenticated user ID, not profile ID
         .select();
 
       console.log('📌 Supabase update response:', { data, error });
@@ -108,9 +113,18 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           description: `Failed to update profile: ${error.message}`,
           variant: "destructive",
         });
+      } else if (!data || data.length === 0) {
+        console.error('❌ No rows updated - possible RLS policy issue');
+        toast({
+          title: "Error",
+          description: "Profile update failed. Please check your permissions.",
+          variant: "destructive",
+        });
       } else {
         console.log('✅ Profile updated successfully in Supabase');
-        setUserProfile(updatedProfile);
+        // Update the profile with the user's ID to ensure consistency
+        const updatedProfileWithId = { ...updatedProfile, id: user.id };
+        setUserProfile(updatedProfileWithId);
         setIsEditing(false);
         toast({
           title: "Success",
@@ -150,7 +164,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   }
   
   const profile = userProfile || {
-    id: user.id || '',
+    id: user.id, // Ensure ID matches authenticated user
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
     about: 'Complete your profile to personalize your experience and get better recommendations.',
