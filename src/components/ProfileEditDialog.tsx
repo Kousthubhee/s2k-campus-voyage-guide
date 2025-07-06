@@ -108,8 +108,10 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
   };
 
   const handleSave = () => {
-  onSave(editingProfile);
-  onOpenChange(false);
+  console.log("📌 handleSave in ProfileEditDialog is triggered"); // <-- ADD THIS
+
+  onSave(editingProfile); // this calls the update in ProfilePage
+  onOpenChange(false); // closes dialog
   toast({
     title: "Profile updated",
     description: "Your profile changes were saved.",
