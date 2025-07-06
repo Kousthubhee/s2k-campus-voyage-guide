@@ -29,9 +29,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Ensure profile exists with correct ID when user signs in
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(async () => {
+            try {
+              const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', session.user.id)
+                .single();
+
+              if (!existingProfile) {
+                console.log('Creating profile for user:', session.user.id);
+                const { error } = await supabase
+                  .from('profiles')
+                  .insert({
+                    id: session.user.id, // Explicitly set ID to match auth.uid()
+                    name: session.user.email || 'New User',
+                    email: session.user.email || ''
+                  });
+                
+                if (error) {
+                  console.error('Error creating profile:', error);
+                }
+              }
+            } catch (error) {
+              console.error('Error checking/creating profile:', error);
+            }
+          }, 100);
+        }
       }
     );
 
