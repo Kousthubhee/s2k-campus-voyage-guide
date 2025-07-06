@@ -112,6 +112,7 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
     console.log("📌 About to call onSave with profile:", editingProfile);
     console.log("📌 onSave function type:", typeof onSave);
     
+    // Call the onSave function passed from ProfilePage
     onSave(editingProfile);
     onOpenChange(false);
     toast({
