@@ -108,14 +108,14 @@ export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: Profi
   };
 
   const handleSave = () => {
-    onSave(editingProfile);
-    onOpenChange(false);
-    toast({
-      title: "Profile updated",
-      description: "Your profile changes were saved.",
-      variant: "default",
-    });
-  };
+  onSave(editingProfile);
+  onOpenChange(false);
+  toast({
+    title: "Profile updated",
+    description: "Your profile changes were saved.",
+    variant: "default",
+  });
+};
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
