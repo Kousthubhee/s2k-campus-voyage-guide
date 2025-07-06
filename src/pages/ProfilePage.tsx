@@ -64,6 +64,44 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
     loadProfileData();
   }, [user, setUserProfile]);
+
+  const handleSave = async (updatedProfile: typeof userProfile) => {
+    console.log("📌 handleSave in ProfilePage.tsx triggered");
+    console.log("📌 updatedProfile:", updatedProfile);
+    console.log("📌 user.id:", user?.id);
+
+    if (!user?.id) {
+      console.error('❌ No user ID available for profile update');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          name: updatedProfile.name,
+          about: updatedProfile.about,
+          age: updatedProfile.age,
+          photo_url: updatedProfile.photo,
+          prev_education: updatedProfile.prevEducation,
+          work_experience: updatedProfile.workExperience
+        })
+        .eq('id', user.id)
+        .select();
+
+      console.log('📌 Supabase update response:', { data, error });
+
+      if (error) {
+        console.error('❌ Error updating profile:', error);
+      } else {
+        console.log('✅ Profile updated successfully');
+        setUserProfile(updatedProfile);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('❌ Error saving profile:', error);
+    }
+  };
   
   if (!user) {
     return (
@@ -121,39 +159,6 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
     { action: 'Joined pasS2Kampus', time: 'Recently', icon: CheckCircle2 },
     { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
-
-  const handleSave = async (updatedProfile: typeof profile) => {
-    console.log("📌 handleSave in ProfilePage.tsx triggered");
-    console.log("📌 updatedProfile:", updatedProfile);
-    console.log("📌 user.id:", user?.id);
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({
-          name: updatedProfile.name,
-          about: updatedProfile.about,
-          age: updatedProfile.age,
-          photo_url: updatedProfile.photo,
-          prev_education: updatedProfile.prevEducation,
-          work_experience: updatedProfile.workExperience
-        })
-        .eq('id', updatedProfile.id)
-        .select();
-
-      console.log('📌 Supabase update response:', { data, error });
-
-      if (error) {
-        console.error('❌ Error updating profile:', error);
-      } else {
-        console.log('✅ Profile updated successfully');
-        setUserProfile(updatedProfile);
-        setIsEditing(false);
-      }
-    } catch (error) {
-      console.error('❌ Error saving profile:', error);
-    }
-  };
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;
