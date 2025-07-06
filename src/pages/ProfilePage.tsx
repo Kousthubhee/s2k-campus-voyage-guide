@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface ProfilePageProps {
   userProfile: {
+    id: string;
     name: string;
     email: string;
     about: string;
@@ -43,6 +44,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
 
         if (fetchedProfile) {
           const profileData = {
+            id: fetchedProfile.id,
             name: fetchedProfile.name || user.email,
             email: fetchedProfile.email,
             about: fetchedProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
@@ -85,6 +87,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   }
   
   const profile = userProfile || {
+    id: user.id || '',
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
     about: 'Complete your profile to personalize your experience and get better recommendations.',
@@ -122,7 +125,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   const handleSave = async (updatedProfile: typeof profile) => {
     console.log('📌 handleSave in ProfilePage.tsx triggered');
     console.log('📌 updatedProfile:', updatedProfile);
-    console.log('📌 user.id:', user?.id);
+    console.log('📌 updatedProfile.id:', updatedProfile.id);
 
     try {
       const { data, error } = await supabase
@@ -135,7 +138,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
           prev_education: updatedProfile.prevEducation,
           work_experience: updatedProfile.workExperience
         })
-        .eq('id', user.id)
+        .eq('id', updatedProfile.id)
         .select();
 
       console.log('📌 Supabase update response:', { data, error });

@@ -9,6 +9,7 @@ import { Image } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileType {
+  id: string;
   name: string;
   email: string;
   about: string;
@@ -75,6 +76,7 @@ const ProfileEditExtra = ({
 
 export function ProfileEditDialog({ open, onOpenChange, profile, onSave }: ProfileEditDialogProps) {
   const defaultProfile: ProfileType = {
+    id: '',
     name: '',
     email: '',
     about: '',
