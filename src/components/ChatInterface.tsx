@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, MessageCircle, Plus, History } from 'lucide-react';
+import { Send, MessageCircle, History } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useFAQ } from '@/hooks/useFAQ';
 import { supabase } from '@/integrations/supabase/client';
