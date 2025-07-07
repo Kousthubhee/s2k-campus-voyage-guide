@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
@@ -21,6 +20,7 @@ import { NotificationsPage } from './NotificationsPage';
 import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { AskMeAnythingPage } from './AskMeAnythingPage';
+import { ChatbotPage } from './ChatbotPage';
 
 interface MainRouterProps {
   currentPage: string;
@@ -127,6 +127,8 @@ const MainRouter = ({
         return <AskMeAnythingPage />;
       case 'suggestions':
         return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
+      case 'chatbot':
+        return <ChatbotPage />;
       default:
         console.log('Unknown page:', currentPage, '- defaulting to home');
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
