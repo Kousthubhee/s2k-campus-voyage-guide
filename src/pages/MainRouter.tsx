@@ -21,6 +21,7 @@ import { NotificationsPage } from './NotificationsPage';
 import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { AskMeAnythingPage } from './AskMeAnythingPage';
+import { ChatbotPage } from './ChatbotPage';
 
 interface MainRouterProps {
   currentPage: string;
@@ -83,6 +84,8 @@ const MainRouter = ({
         return <FrenchIntegrationPage />;
       case 'translate':
         return <TranslatePage />;
+      case 'chatbot':
+        return <ChatbotPage />;
       case 'contact':
         return <ContactPage />;
       case 'profile':
