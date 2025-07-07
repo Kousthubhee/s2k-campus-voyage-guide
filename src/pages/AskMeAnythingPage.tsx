@@ -7,13 +7,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, MessageCircle, Plus, X, Menu, LogIn } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
-import { useFAQ } from '@/hooks/useFAQ';
 
 export const AskMeAnythingPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [showConversations, setShowConversations] = useState(false);
-  const [isLoadingResponse, setIsLoadingResponse] = useState(false);
-  
   const { user, signInWithGoogle } = useAuth();
   const {
     conversations,
@@ -26,13 +23,9 @@ export const AskMeAnythingPage = () => {
     deleteConversation
   } = useChat();
 
-  const { searchFAQ, logChatMessage } = useFAQ();
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || !user) return;
-
-    setIsLoadingResponse(true);
 
     let conversationId = currentConversation;
     if (!conversationId) {
@@ -40,24 +33,8 @@ export const AskMeAnythingPage = () => {
       if (!conversationId) return;
     }
 
-    // Log user message
-    await logChatMessage(inputMessage, 'user');
-
-    // Search FAQ first, then use regular chat if no match
-    const faqAnswer = await searchFAQ(inputMessage);
-    
-    if (faqAnswer !== "Sorry, I couldn't find an answer to your question.") {
-      // If FAQ answer found, add it directly to chat
-      await sendMessage(inputMessage);
-      // Log bot response
-      await logChatMessage(faqAnswer, 'bot');
-    } else {
-      // Use regular chat flow
-      await sendMessage(inputMessage);
-    }
-
+    await sendMessage(inputMessage);
     setInputMessage('');
-    setIsLoadingResponse(false);
   };
 
   const startNewConversation = async () => {
@@ -213,7 +190,7 @@ export const AskMeAnythingPage = () => {
                     <div className="text-center text-muted-foreground py-12">
                       <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg mb-2">Start a conversation</p>
-                      <p className="text-sm">Ask about studying in France, visa requirements, or any questions you have</p>
+                      <p className="text-sm">Ask about studying in France, visa requirements, or living costs</p>
                     </div>
                   )}
                   {messages.map((message) => (
@@ -237,7 +214,7 @@ export const AskMeAnythingPage = () => {
                       </div>
                     </div>
                   ))}
-                  {(loading || isLoadingResponse) && (
+                  {loading && (
                     <div className="flex justify-start">
                       <div className="bg-gray-100 px-4 py-3 rounded-2xl">
                         <div className="flex space-x-1">
@@ -257,13 +234,10 @@ export const AskMeAnythingPage = () => {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Ask me anything about studying in France..."
-                    disabled={loading || isLoadingResponse}
+                    disabled={loading}
                     className="flex-1"
                   />
-                  <Button 
-                    type="submit" 
-                    disabled={loading || isLoadingResponse || !inputMessage.trim()}
-                  >
+                  <Button type="submit" disabled={loading || !inputMessage.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
