@@ -1,9 +1,9 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MessageCircle, X, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import { useFAQ } from '@/hooks/useFAQ';
 import { useAuth } from '@/hooks/useAuth';
@@ -129,7 +129,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
+      text: 'Hello! I\'m your pasS2Kampus AI assistant. You can ask me anything about studying in France!',
       isUser: false,
       timestamp: new Date()
     }
@@ -137,19 +137,11 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
   const [inputValue, setInputValue] = useState('');
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   const { user } = useAuth();
-  const { 
-    categories, 
-    faqs, 
-    loading: faqLoading, 
-    loadFAQsByCategory, 
-    searchFAQ, 
-    logChatMessage 
-  } = useFAQ();
+  const { searchFAQ, logChatMessage } = useFAQ();
 
   const currentQuestions = moduleQuestions[currentModule] || moduleQuestions['general'];
 
@@ -162,13 +154,6 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
       }
     }
   }, [messages]);
-
-  // Load FAQs when category is selected
-  useEffect(() => {
-    if (selectedFAQCategory) {
-      loadFAQsByCategory(selectedFAQCategory);
-    }
-  }, [selectedFAQCategory, loadFAQsByCategory]);
 
   const handleSendMessage = async () => {
     if (inputValue.trim() && user) {
@@ -183,7 +168,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
       
       setMessages(prev => [...prev, userMessage]);
       
-      // Log user message
+      // Log user message with correct role value
       await logChatMessage(inputValue, 'user');
       
       // Search FAQ first, then fallback to predefined answers
@@ -202,7 +187,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
         
         setMessages(prev => [...prev, botMessage]);
         
-        // Log bot response
+        // Log bot response with correct role value
         await logChatMessage(botResponse, 'bot');
         setIsLoadingResponse(false);
       }, 1000);
@@ -226,7 +211,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
     
     setMessages(prev => [...prev, userMessage]);
     
-    // Log user message
+    // Log user message with correct role value
     await logChatMessage(question, 'user');
     
     // Search FAQ first, then fallback to predefined answers
@@ -245,7 +230,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
       
       setMessages(prev => [...prev, botMessage]);
       
-      // Log bot response
+      // Log bot response with correct role value
       await logChatMessage(botResponse, 'bot');
       setIsLoadingResponse(false);
     }, 1000);
@@ -253,42 +238,17 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
     setShowCategories(false);
   };
 
-  const handleFAQQuestionClick = async (question: string, answer: string) => {
-    if (!user) return;
-    
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: question,
-      isUser: true,
-      timestamp: new Date()
-    };
-    
-    const botMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      text: answer,
-      isUser: false,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage, botMessage]);
-    
-    // Log both messages
-    await logChatMessage(question, 'user');
-    await logChatMessage(answer, 'bot');
-  };
-
   const resetChat = () => {
     setMessages([
       {
         id: '1',
-        text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
+        text: 'Hello! I\'m your pasS2Kampus AI assistant. You can ask me anything about studying in France!',
         isUser: false,
         timestamp: new Date()
       }
     ]);
     setShowCategories(true);
     setSelectedCategory(null);
-    setSelectedFAQCategory('');
   };
 
   if (!user) {
@@ -368,49 +328,8 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
           </CardHeader>
           
           <CardContent className="p-0 flex flex-col h-[calc(500px-80px)]">
-            {/* FAQ Category Selector */}
-            <div className="p-3 border-b bg-gray-50">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Select a Category
-              </label>
-              <Select value={selectedFAQCategory} onValueChange={setSelectedFAQCategory}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Browse FAQs by category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border shadow-lg z-[60]">
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
               <div className="space-y-3">
-                {/* FAQ Questions for Selected Category */}
-                {selectedFAQCategory && faqs.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-600 mb-2">
-                      {selectedFAQCategory} Questions:
-                    </h4>
-                    <div className="space-y-1">
-                      {faqs.map((faq) => (
-                        <Button
-                          key={faq.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleFAQQuestionClick(faq.question, faq.answer)}
-                          className="w-full justify-start text-left h-auto p-2 text-xs hover:bg-blue-50"
-                        >
-                          {faq.question}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {messages.map((message) => (
                   <div
                     key={message.id}

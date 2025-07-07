@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Send, MessageCircle, Plus, X, Menu, LogIn } from 'lucide-react';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +12,6 @@ import { useFAQ } from '@/hooks/useFAQ';
 export const AskMeAnythingPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [showConversations, setShowConversations] = useState(false);
-  const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   
   const { user, signInWithGoogle } = useAuth();
@@ -28,21 +26,7 @@ export const AskMeAnythingPage = () => {
     deleteConversation
   } = useChat();
 
-  const { 
-    categories, 
-    faqs, 
-    loading: faqLoading, 
-    loadFAQsByCategory, 
-    searchFAQ, 
-    logChatMessage 
-  } = useFAQ();
-
-  // Load FAQs when category is selected
-  React.useEffect(() => {
-    if (selectedFAQCategory) {
-      loadFAQsByCategory(selectedFAQCategory);
-    }
-  }, [selectedFAQCategory, loadFAQsByCategory]);
+  const { searchFAQ, logChatMessage } = useFAQ();
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,23 +58,6 @@ export const AskMeAnythingPage = () => {
 
     setInputMessage('');
     setIsLoadingResponse(false);
-  };
-
-  const handleFAQQuestionClick = async (question: string, answer: string) => {
-    if (!user) return;
-
-    let conversationId = currentConversation;
-    if (!conversationId) {
-      conversationId = await createConversation();
-      if (!conversationId) return;
-    }
-
-    // Add question as user message and answer as bot message
-    await sendMessage(question);
-    
-    // Log both messages
-    await logChatMessage(question, 'user');
-    await logChatMessage(answer, 'bot');
   };
 
   const startNewConversation = async () => {
@@ -238,56 +205,15 @@ export const AskMeAnythingPage = () => {
                 </div>
               </div>
             </CardHeader>
-
-            {/* FAQ Category Selector */}
-            <div className="px-4 pb-3 border-b bg-gray-50/50 shrink-0">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Select a Category
-              </label>
-              <Select value={selectedFAQCategory} onValueChange={setSelectedFAQCategory}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Browse FAQs by category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border shadow-lg z-[60]">
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             
             <CardContent className="flex-1 flex flex-col p-0 min-h-0">
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {/* FAQ Questions for Selected Category */}
-                  {selectedFAQCategory && faqs.length > 0 && (
-                    <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="text-sm font-medium text-blue-800 mb-3">
-                        📋 {selectedFAQCategory} - Frequently Asked Questions
-                      </h4>
-                      <div className="space-y-2">
-                        {faqs.map((faq) => (
-                          <Button
-                            key={faq.id}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleFAQQuestionClick(faq.question, faq.answer)}
-                            className="w-full justify-start text-left h-auto p-3 text-sm bg-white hover:bg-blue-100 border-blue-200"
-                          >
-                            ❓ {faq.question}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   {messages.length === 0 && (
                     <div className="text-center text-muted-foreground py-12">
                       <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                       <p className="text-lg mb-2">Start a conversation</p>
-                      <p className="text-sm">Ask about studying in France, visa requirements, or browse FAQs by category above</p>
+                      <p className="text-sm">Ask about studying in France, visa requirements, or any questions you have</p>
                     </div>
                   )}
                   {messages.map((message) => (
