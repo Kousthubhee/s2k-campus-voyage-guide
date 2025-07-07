@@ -311,6 +311,36 @@ export type Database = {
           },
         ]
       }
+      faq_logs: {
+        Row: {
+          category: string | null
+          clicked_suggestion: boolean | null
+          confidence_score: number | null
+          created_at: string
+          id: string
+          matched_question: string | null
+          user_query: string
+        }
+        Insert: {
+          category?: string | null
+          clicked_suggestion?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          matched_question?: string | null
+          user_query: string
+        }
+        Update: {
+          category?: string | null
+          clicked_suggestion?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          matched_question?: string | null
+          user_query?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string | null
