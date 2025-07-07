@@ -16,9 +16,9 @@ export const useFAQs = () => {
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
-        console.log('Fetching FAQs from Supabase...');
+        console.log('Fetching FAQs from chatbotfaq table...');
         const { data, error } = await supabase
-          .from('faqs')
+          .from('chatbotfaq')
           .select('*')
           .order('category', { ascending: true });
 

@@ -29,12 +29,6 @@ export const ChatbotPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('FAQs in component:', faqs);
-    console.log('Loading state:', loading);
-  }, [faqs, loading]);
-
   // Scroll to bottom when new messages are added
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -44,7 +38,6 @@ export const ChatbotPage = () => {
 
   // Get unique categories from FAQ data
   const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category).filter(Boolean)))];
-  console.log('Available categories:', categories);
 
   // Get suggested questions
   const suggestedQuestions = [
@@ -59,8 +52,6 @@ export const ChatbotPage = () => {
   const categoryQuestions = selectedCategory === 'all' 
     ? faqs 
     : faqs.filter(faq => faq.category === selectedCategory);
-
-  console.log('Category questions for', selectedCategory, ':', categoryQuestions);
 
   const findAnswer = (question: string) => {
     const matchedFaq = faqs.find(faq => 
@@ -125,11 +116,6 @@ export const ChatbotPage = () => {
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">FAQ Chatbot</h1>
         <p className="text-gray-600">Get instant answers to common questions about studying in France</p>
-      </div>
-
-      {/* Debug info */}
-      <div className="text-sm text-gray-500 p-2 bg-gray-50 rounded">
-        Debug: Found {faqs.length} FAQs, {categories.length - 1} categories
       </div>
 
       {/* Category Filter at the top */}

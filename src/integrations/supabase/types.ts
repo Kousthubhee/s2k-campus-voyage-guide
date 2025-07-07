@@ -65,6 +65,30 @@ export type Database = {
         }
         Relationships: []
       }
+      chatbotfaq: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          question: string
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string
+          id?: string
+          question: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          question?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           created_at: string
