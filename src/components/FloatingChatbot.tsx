@@ -1,10 +1,11 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MessageCircle, X, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageCircle, X, Send } from 'lucide-react';
 import { useFAQ } from '@/hooks/useFAQ';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,130 +16,17 @@ interface Message {
   timestamp: Date;
 }
 
-interface PredefinedQuestion {
-  category: string;
-  emoji: string;
-  questions: string[];
-}
-
-const moduleQuestions: Record<string, PredefinedQuestion[]> = {
-  'pre-arrival-1': [
-    {
-      category: "Pre-Arrival Part 1",
-      emoji: "✈️",
-      questions: [
-        "What documents do I need for university admission?",
-        "How do I apply for a student visa?",
-        "What is Campus France process?",
-        "How do I book VFS appointment?",
-        "What financial proof do I need?",
-        "How long does visa processing take?"
-      ]
-    }
-  ],
-  'pre-arrival-2': [
-    {
-      category: "Packing Assistant",
-      emoji: "🎒",
-      questions: [
-        "What clothes should I pack for France?",
-        "What food items can I bring?",
-        "What electronics should I pack?",
-        "How to prepare culturally for France?",
-        "What medicines can I bring?",
-        "What books and study materials to pack?"
-      ]
-    }
-  ],
-  'post-arrival': [
-    {
-      category: "Post-Arrival",
-      emoji: "🏠",
-      questions: [
-        "How do I open a French bank account?",
-        "What is SSN and how to apply?",
-        "How do I get health insurance?",
-        "What is CAF and how to apply?",
-        "How do I get a French phone number?",
-        "How do I register for university?"
-      ]
-    }
-  ],
-  'documents': [
-    {
-      category: "Documents & Renewals",
-      emoji: "📑",
-      questions: [
-        "What documents are needed for visa renewal?",
-        "How do I renew my residence permit?",
-        "What paperwork is required for CAF applications?",
-        "How do I get my documents translated?",
-        "When should I start renewal process?",
-        "How to track document expiry dates?"
-      ]
-    }
-  ],
-  'general': [
-    {
-      category: "General Help",
-      emoji: "💬",
-      questions: [
-        "What should I prepare before coming to France?",
-        "How can I connect with other students?",
-        "Where can I find French language resources?",
-        "How do I find accommodation in France?",
-        "What are the visa requirements?",
-        "How do I adapt to French culture?"
-      ]
-    }
-  ]
-};
-
-const generateAnswer = (question: string, currentModule?: string): string => {
-  const lowerQuestion = question.toLowerCase();
-  
-  if (lowerQuestion.includes('prepare before coming') || lowerQuestion.includes('pre-arrival')) {
-    return "Before coming to France, you should: 1) Secure your student visa through Campus France, 2) Find accommodation (CROUS or private), 3) Arrange health insurance, 4) Open a French bank account, 5) Learn basic French, and 6) prepare financial proof (€615/month). Our checklist module guides you through each step!";
-  }
-  
-  if (lowerQuestion.includes('documents') && lowerQuestion.includes('admission')) {
-    return "For university admission, you typically need: Academic transcripts, diploma certificates, language proficiency tests (DELF/DALF or IELTS/TOEFL), motivation letter, CV, passport copy, and financial proof. Requirements vary by program and university.";
-  }
-  
-  if (lowerQuestion.includes('student visa')) {
-    return "To apply for a student visa: 1) Get accepted by a French institution, 2) Register on Campus France, 3) Gather required documents (passport, photos, financial proof, health insurance, acceptance letter), 4) Schedule visa appointment, 5) Pay fees. Processing takes 2-4 weeks.";
-  }
-  
-  if (lowerQuestion.includes('accommodation')) {
-    return "Accommodation options include: CROUS university housing (cheapest, €150-400/month), private apartments (€400-800/month), homestays, and student residences. Apply early as demand is high, especially in Paris!";
-  }
-  
-  if (lowerQuestion.includes('bank account')) {
-    return "To open a bank account: Bring passport, residence proof, student card, and initial deposit (€10-300). Popular banks: BNP Paribas, Société Générale, LCL. Many offer student packages with reduced fees.";
-  }
-
-  return "I don't have that information currently. Please check with our expert on WhatsApp for personalized assistance!";
-};
-
 interface FloatingChatbotProps {
   currentModule?: string;
 }
 
 export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
-      isUser: false,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [showCategories, setShowCategories] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
+  const [hasShownGreeting, setHasShownGreeting] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   const { user } = useAuth();
@@ -151,7 +39,19 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
     logChatMessage 
   } = useFAQ();
 
-  const currentQuestions = moduleQuestions[currentModule] || moduleQuestions['general'];
+  // Show initial greeting when chatbot opens
+  useEffect(() => {
+    if (isOpen && user && !hasShownGreeting) {
+      const greetingMessage: Message = {
+        id: '1',
+        text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages([greetingMessage]);
+      setHasShownGreeting(true);
+    }
+  }, [isOpen, user, hasShownGreeting]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -186,11 +86,11 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
       // Log user message
       await logChatMessage(inputValue, 'user');
       
-      // Search FAQ first, then fallback to predefined answers
+      // Search FAQ first, then fallback to default response
       const faqAnswer = await searchFAQ(inputValue);
       const botResponse = faqAnswer !== "Sorry, I couldn't find an answer to your question." 
         ? faqAnswer 
-        : generateAnswer(inputValue, currentModule);
+        : "I'm here to help you with questions about studying in France. You can browse FAQs by category above or ask me specific questions!";
       
       setTimeout(async () => {
         const botMessage: Message = {
@@ -208,49 +108,7 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
       }, 1000);
       
       setInputValue('');
-      setShowCategories(false);
     }
-  };
-
-  const handlePredefinedQuestion = async (question: string) => {
-    if (!user) return;
-    
-    setIsLoadingResponse(true);
-    
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: question,
-      isUser: true,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    
-    // Log user message
-    await logChatMessage(question, 'user');
-    
-    // Search FAQ first, then fallback to predefined answers
-    const faqAnswer = await searchFAQ(question);
-    const botResponse = faqAnswer !== "Sorry, I couldn't find an answer to your question." 
-      ? faqAnswer 
-      : generateAnswer(question, currentModule);
-    
-    setTimeout(async () => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botResponse,
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      
-      // Log bot response
-      await logChatMessage(botResponse, 'bot');
-      setIsLoadingResponse(false);
-    }, 1000);
-    
-    setShowCategories(false);
   };
 
   const handleFAQQuestionClick = async (question: string, answer: string) => {
@@ -278,16 +136,13 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
   };
 
   const resetChat = () => {
-    setMessages([
-      {
-        id: '1',
-        text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
-        isUser: false,
-        timestamp: new Date()
-      }
-    ]);
-    setShowCategories(true);
-    setSelectedCategory(null);
+    const greetingMessage: Message = {
+      id: '1',
+      text: 'Hello! I\'m your pasS2Kampus AI assistant. You can browse FAQs by category or ask me anything about studying in France!',
+      isUser: false,
+      timestamp: new Date()
+    };
+    setMessages([greetingMessage]);
     setSelectedFAQCategory('');
   };
 
@@ -437,51 +292,6 @@ export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotPr
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                       </div>
                     </div>
-                  </div>
-                )}
-                
-                {showCategories && (
-                  <div className="space-y-2 mt-4">
-                    <div className="text-sm font-medium text-gray-600 mb-3">
-                      {currentModule !== 'general' ? `${currentModule.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} Questions:` : 'Choose a category:'}
-                    </div>
-                    {currentQuestions.map((category) => (
-                      <div key={category.category} className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedCategory(
-                            selectedCategory === category.category ? null : category.category
-                          )}
-                          className="w-full justify-between text-left h-auto p-2"
-                        >
-                          <span className="flex items-center gap-2">
-                            <span>{category.emoji}</span>
-                            <span className="font-medium">{category.category}</span>
-                          </span>
-                          {selectedCategory === category.category ? 
-                            <ChevronUp className="h-4 w-4" /> : 
-                            <ChevronDown className="h-4 w-4" />
-                          }
-                        </Button>
-                        
-                        {selectedCategory === category.category && (
-                          <div className="space-y-1 ml-4">
-                            {category.questions.map((question, index) => (
-                              <Button
-                                key={index}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handlePredefinedQuestion(question)}
-                                className="w-full justify-start text-left h-auto p-2 text-xs hover:bg-blue-50"
-                              >
-                                {question}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
                   </div>
                 )}
               </div>
