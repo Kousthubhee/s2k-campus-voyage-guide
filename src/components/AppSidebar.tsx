@@ -13,8 +13,7 @@ import {
   Menu,
   X,
   MessageCircle,
-  Flag,
-  Bot
+  Flag
 } from 'lucide-react';
 import {
   Sidebar,
@@ -79,7 +78,6 @@ export const AppSidebar = ({
     { id: 'language', icon: Languages, label: 'Learn French', tooltip: 'Practice French language skills' },
     { id: 'integration', icon: Flag, label: 'French Integration', tooltip: 'French culture and integration guide' },
     { id: 'translate', icon: Languages, label: 'Translate', tooltip: 'Universal translator tool' },
-    { id: 'chatbot', icon: Bot, label: 'FAQ Chatbot', tooltip: 'Get instant answers to common questions' },
     { id: 'ask-me-anything', icon: MessageCircle, label: 'Ask Me Anything', tooltip: 'Chat with our AI assistant' },
     { id: 'contact', icon: Phone, label: 'Contact Us', tooltip: 'Get in touch with our support team' },
     { id: 'profile', icon: User, label: 'Profile', tooltip: 'Manage your profile settings' },
