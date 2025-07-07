@@ -14,7 +14,6 @@ export function ChatInterface() {
   const [inputMessage, setInputMessage] = useState('');
   const [selectedFAQCategory, setSelectedFAQCategory] = useState<string>('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
-  const [hasShownGreeting, setHasShownGreeting] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const {
@@ -35,13 +34,6 @@ export function ChatInterface() {
     searchFAQ, 
     logChatMessage 
   } = useFAQ();
-
-  // Show initial greeting when component mounts and user is authenticated
-  useEffect(() => {
-    if (user && messages.length === 0 && !hasShownGreeting) {
-      setHasShownGreeting(true);
-    }
-  }, [user, messages.length, hasShownGreeting]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -207,8 +199,8 @@ export function ChatInterface() {
               {messages.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg mb-2">Hello! I'm your pasS2Kampus AI assistant.</p>
-                  <p className="text-sm">You can browse FAQs by category above or ask me anything about studying in France!</p>
+                  <p>Start a conversation with the AI assistant</p>
+                  <p className="text-sm mt-2">Ask about studying in France, visa requirements, or browse FAQs above</p>
                 </div>
               )}
               {messages.map((message) => (

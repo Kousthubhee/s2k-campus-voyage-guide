@@ -286,8 +286,8 @@ export const AskMeAnythingPage = () => {
                   {messages.length === 0 && (
                     <div className="text-center text-muted-foreground py-12">
                       <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg mb-2">Hello! I'm your pasS2Kampus AI assistant.</p>
-                      <p className="text-sm">You can browse FAQs by category above or ask me anything about studying in France!</p>
+                      <p className="text-lg mb-2">Start a conversation</p>
+                      <p className="text-sm">Ask about studying in France, visa requirements, or browse FAQs by category above</p>
                     </div>
                   )}
                   {messages.map((message) => (
