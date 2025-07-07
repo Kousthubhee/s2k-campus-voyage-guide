@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +39,7 @@ export function ChatInterface() {
     const addWelcomeMessage = async () => {
       if (messages.length === 0 && currentConversation && user) {
         const welcomeMessage = "Hello, I am your student support assistant. How can I help you today?";
-        await sendMessage(welcomeMessage, 'assistant');
+        await sendMessage(welcomeMessage);
         await logChatMessage(welcomeMessage, 'bot');
       }
     };
@@ -75,7 +74,7 @@ export function ChatInterface() {
     }
 
     // Add user message
-    await sendMessage(questionText, 'user');
+    await sendMessage(questionText);
     await logChatMessage(questionText, 'user');
 
     // Search for answer
@@ -85,7 +84,7 @@ export function ChatInterface() {
       : "Sorry, I don't have the answer right now. Please contact support.";
 
     // Add bot response
-    await sendMessage(botResponse, 'assistant');
+    await sendMessage(botResponse);
     await logChatMessage(botResponse, 'bot');
 
     setIsLoadingResponse(false);
@@ -113,14 +112,14 @@ export function ChatInterface() {
     
     if (faqAnswer !== "Sorry, I couldn't find an answer to your question.") {
       // If FAQ answer found, add it directly to chat
-      await sendMessage(inputMessage, 'user');
-      await sendMessage(faqAnswer, 'assistant');
+      await sendMessage(inputMessage);
+      await sendMessage(faqAnswer);
       // Log bot response
       await logChatMessage(faqAnswer, 'bot');
     } else {
       // Use regular chat flow with fallback message
-      await sendMessage(inputMessage, 'user');
-      await sendMessage("Sorry, I don't have the answer right now. Please contact support.", 'assistant');
+      await sendMessage(inputMessage);
+      await sendMessage("Sorry, I don't have the answer right now. Please contact support.");
       await logChatMessage("Sorry, I don't have the answer right now. Please contact support.", 'bot');
     }
 
