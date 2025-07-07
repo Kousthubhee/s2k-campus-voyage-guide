@@ -30,6 +30,14 @@ interface SchoolDetailPageProps {
   onProgramClick: (programName: string) => void;
 }
 
+interface ContactLinks {
+  website?: string;
+  linkedin?: string;
+  instagram?: string;
+  email?: string;
+  phone?: string;
+}
+
 export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailPageProps) => {
   const { data: school, isLoading, error } = useSchoolProfileBySlug(slug);
   const [openSections, setOpenSections] = useState<string[]>(['overview']);
@@ -85,10 +93,18 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
     );
   }
 
-  // Parse JSON fields safely
-  const contactLinks = typeof school.contact_links === 'object' ? school.contact_links : {};
-  const detailedPrograms = typeof school.detailed_programs === 'object' ? school.detailed_programs : {};
-  const brochures = typeof school.brochures === 'object' ? school.brochures : {};
+  // Parse JSON fields safely with proper typing
+  const contactLinks: ContactLinks = (typeof school.contact_links === 'object' && school.contact_links && !Array.isArray(school.contact_links)) 
+    ? school.contact_links as ContactLinks 
+    : {};
+  
+  const detailedPrograms = typeof school.detailed_programs === 'object' && school.detailed_programs && !Array.isArray(school.detailed_programs)
+    ? school.detailed_programs as Record<string, any>
+    : {};
+  
+  const brochures = typeof school.brochures === 'object' && school.brochures && !Array.isArray(school.brochures)
+    ? school.brochures as Record<string, string[]>
+    : {};
 
   const Section = ({ id, title, icon: Icon, children }: { 
     id: string; 

@@ -11,6 +11,20 @@ interface ProgramDetailPageProps {
   onBack: () => void;
 }
 
+interface ContactLinks {
+  website?: string;
+  linkedin?: string;
+  instagram?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface ProgramDetails {
+  description?: string;
+  duration?: string;
+  specializations?: string[];
+}
+
 export const ProgramDetailPage = ({ slug, programName, onBack }: ProgramDetailPageProps) => {
   const { data: school, isLoading, error } = useSchoolProfileBySlug(slug);
 
@@ -47,9 +61,18 @@ export const ProgramDetailPage = ({ slug, programName, onBack }: ProgramDetailPa
     );
   }
 
-  // Parse detailed programs
-  const detailedPrograms = typeof school.detailed_programs === 'object' ? school.detailed_programs : {};
-  const brochures = typeof school.brochures === 'object' ? school.brochures : {};
+  // Parse detailed programs and brochures with proper typing
+  const detailedPrograms = typeof school.detailed_programs === 'object' && school.detailed_programs && !Array.isArray(school.detailed_programs)
+    ? school.detailed_programs as Record<string, ProgramDetails>
+    : {};
+  
+  const brochures = typeof school.brochures === 'object' && school.brochures && !Array.isArray(school.brochures)
+    ? school.brochures as Record<string, string[]>
+    : {};
+  
+  const contactLinks: ContactLinks = (typeof school.contact_links === 'object' && school.contact_links && !Array.isArray(school.contact_links)) 
+    ? school.contact_links as ContactLinks 
+    : {};
   
   const programDetails = detailedPrograms[programName];
   const programBrochures = brochures[programName] || [];
@@ -207,12 +230,12 @@ export const ProgramDetailPage = ({ slug, programName, onBack }: ProgramDetailPa
               <p className="text-sm text-gray-600 mb-4">
                 Contact the admissions office for detailed program information and application guidance.
               </p>
-              {school.contact_links?.website && (
+              {contactLinks.website && (
                 <Button 
                   variant="outline" 
                   size="sm" 
                   className="w-full"
-                  onClick={() => window.open(school.contact_links.website, '_blank')}
+                  onClick={() => window.open(contactLinks.website, '_blank')}
                 >
                   Visit School Website
                 </Button>
