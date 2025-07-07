@@ -128,9 +128,9 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content - spans 2 columns */}
+        <div className="lg:col-span-2 space-y-6">
           {/* Academic Programs & Subjects */}
           <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -295,7 +295,7 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
           </Card>
         </div>
 
-        {/* Right Sidebar - 4 Cards in 2x2 Grid */}
+        {/* Right Sidebar - 1 column, stacked vertically */}
         <div className="space-y-6">
           {/* Key Information */}
           <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-shadow">
@@ -435,6 +435,30 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
                   <p className="text-sm text-gray-700">{school.indian_amenities}</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Student Support Services */}
+          <Card className="border-l-4 border-l-indigo-500 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50">
+              <CardTitle className="flex items-center gap-2 text-indigo-900">
+                <Calendar className="h-5 w-5" />
+                Student Support Services
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Academic Support</h4>
+                <p className="text-sm text-gray-700">Tutoring services, study groups, and academic counseling</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Career Services</h4>
+                <p className="text-sm text-gray-700">Job placement assistance, internship programs, and career guidance</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">International Support</h4>
+                <p className="text-sm text-gray-700">Visa assistance, orientation programs, and cultural integration support</p>
+              </div>
             </CardContent>
           </Card>
         </div>
