@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, MessageCircle, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
 import { useFAQ } from '@/hooks/useFAQ';
@@ -12,6 +13,8 @@ import { useFAQ } from '@/hooks/useFAQ';
 export function ChatInterface() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [categoryQuestions, setCategoryQuestions] = useState<Array<{id: string, question: string}>>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const {
@@ -24,13 +27,71 @@ export function ChatInterface() {
     sendMessage
   } = useChat();
 
-  const { searchFAQ, logChatMessage } = useFAQ();
+  const { categories, faqs, loadFAQsByCategory, searchFAQ, logChatMessage } = useFAQ();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Add welcome message when component loads and no messages exist
+  useEffect(() => {
+    const addWelcomeMessage = async () => {
+      if (messages.length === 0 && currentConversation && user) {
+        const welcomeMessage = "Hello, I am your student support assistant. How can I help you today?";
+        await sendMessage(welcomeMessage, 'assistant');
+        await logChatMessage(welcomeMessage, 'bot');
+      }
+    };
+
+    addWelcomeMessage();
+  }, [messages.length, currentConversation, user]);
+
+  // Handle category selection
+  const handleCategorySelect = async (category: string) => {
+    setSelectedCategory(category);
+    await loadFAQsByCategory(category);
+    
+    // Extract questions from loaded FAQs
+    const questions = faqs.map(faq => ({
+      id: faq.id,
+      question: faq.question || ''
+    })).filter(q => q.question);
+    
+    setCategoryQuestions(questions);
+  };
+
+  // Handle question bubble click
+  const handleQuestionClick = async (questionText: string) => {
+    if (!user) return;
+
+    setIsLoadingResponse(true);
+
+    let conversationId = currentConversation;
+    if (!conversationId) {
+      conversationId = await createConversation();
+      if (!conversationId) return;
+    }
+
+    // Add user message
+    await sendMessage(questionText, 'user');
+    await logChatMessage(questionText, 'user');
+
+    // Search for answer
+    const answer = await searchFAQ(questionText);
+    const botResponse = answer !== "Sorry, I couldn't find an answer to your question." 
+      ? answer 
+      : "Sorry, I don't have the answer right now. Please contact support.";
+
+    // Add bot response
+    await sendMessage(botResponse, 'assistant');
+    await logChatMessage(botResponse, 'bot');
+
+    setIsLoadingResponse(false);
+    setCategoryQuestions([]); // Clear questions after selecting one
+    setSelectedCategory(''); // Reset category
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +113,15 @@ export function ChatInterface() {
     
     if (faqAnswer !== "Sorry, I couldn't find an answer to your question.") {
       // If FAQ answer found, add it directly to chat
-      await sendMessage(inputMessage);
+      await sendMessage(inputMessage, 'user');
+      await sendMessage(faqAnswer, 'assistant');
       // Log bot response
       await logChatMessage(faqAnswer, 'bot');
     } else {
-      // Use regular chat flow
-      await sendMessage(inputMessage);
+      // Use regular chat flow with fallback message
+      await sendMessage(inputMessage, 'user');
+      await sendMessage("Sorry, I don't have the answer right now. Please contact support.", 'assistant');
+      await logChatMessage("Sorry, I don't have the answer right now. Please contact support.", 'bot');
     }
 
     setInputMessage('');
@@ -66,6 +130,8 @@ export function ChatInterface() {
 
   const startNewConversation = async () => {
     await createConversation();
+    setCategoryQuestions([]);
+    setSelectedCategory('');
   };
 
   if (!user) {
@@ -118,15 +184,51 @@ export function ChatInterface() {
       <Card className="flex-1">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">AI Assistant</CardTitle>
+          
+          {/* Category Dropdown */}
+          <div className="mt-2">
+            <Select value={selectedCategory} onValueChange={handleCategorySelect}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className="p-0 flex flex-col h-80">
           <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
-              {messages.length === 0 && (
+              {/* Category Questions as Bubbles */}
+              {categoryQuestions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Choose a question:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categoryQuestions.map((q) => (
+                      <Button
+                        key={q.id}
+                        variant="outline"
+                        size="sm"
+                        className="text-left h-auto p-2 text-xs"
+                        onClick={() => handleQuestionClick(q.question)}
+                      >
+                        {q.question}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {messages.length === 0 && categoryQuestions.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Start a conversation with the AI assistant</p>
-                  <p className="text-sm mt-2">Ask about studying in France, visa requirements, or any questions you have</p>
+                  <p className="text-sm mt-2">Select a category above or type your question below</p>
                 </div>
               )}
               {messages.map((message) => (
@@ -162,7 +264,7 @@ export function ChatInterface() {
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask me anything about studying in France..."
+                placeholder="Type your question here..."
                 disabled={loading || isLoadingResponse}
               />
               <Button 
