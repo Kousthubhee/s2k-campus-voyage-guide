@@ -203,6 +203,65 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
               )}
             </CardContent>
           </Card>
+          {/* Admission Requirements */}
+          <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50">
+              <CardTitle className="flex items-center gap-2 text-red-900">
+                <BookOpen className="h-5 w-5" />
+                Admission Requirements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              {school.admission_requirements && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">General Requirements</h4>
+                  <p className="text-sm text-gray-700">{school.admission_requirements}</p>
+                </div>
+              )}
+              {school.language_tests && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Language Tests</h4>
+                  <p className="text-sm text-gray-700">{school.language_tests}</p>
+                </div>
+              )}
+              {school.entrance_exams && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Entrance Exams</h4>
+                  <p className="text-sm text-gray-700">{school.entrance_exams}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Campus Life & Facilities */}
+          <Card className="border-l-4 border-l-teal-500 shadow-md hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50">
+              <CardTitle className="flex items-center gap-2 text-teal-900">
+                <Building className="h-5 w-5" />
+                Campus Life & Facilities
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-3">
+              {school.facilities && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Facilities</h4>
+                  <p className="text-sm text-gray-700">{school.facilities}</p>
+                </div>
+              )}
+              {school.housing && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Housing</h4>
+                  <p className="text-sm text-gray-700">{school.housing}</p>
+                </div>
+              )}
+              {school.student_services && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Student Services</h4>
+                  <p className="text-sm text-gray-700">{school.student_services}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Contact Information */}
           <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow">
@@ -348,65 +407,7 @@ export const SchoolDetailPage = ({ slug, onBack, onProgramClick }: SchoolDetailP
             </CardContent>
           </Card>
 
-          {/* Admission Requirements */}
-          <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50">
-              <CardTitle className="flex items-center gap-2 text-red-900">
-                <BookOpen className="h-5 w-5" />
-                Admission Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              {school.admission_requirements && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">General Requirements</h4>
-                  <p className="text-sm text-gray-700">{school.admission_requirements}</p>
-                </div>
-              )}
-              {school.language_tests && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Language Tests</h4>
-                  <p className="text-sm text-gray-700">{school.language_tests}</p>
-                </div>
-              )}
-              {school.entrance_exams && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Entrance Exams</h4>
-                  <p className="text-sm text-gray-700">{school.entrance_exams}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Campus Life & Facilities */}
-          <Card className="border-l-4 border-l-teal-500 shadow-md hover:shadow-lg transition-shadow">
-            <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50">
-              <CardTitle className="flex items-center gap-2 text-teal-900">
-                <Building className="h-5 w-5" />
-                Campus Life & Facilities
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              {school.facilities && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Facilities</h4>
-                  <p className="text-sm text-gray-700">{school.facilities}</p>
-                </div>
-              )}
-              {school.housing && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Housing</h4>
-                  <p className="text-sm text-gray-700">{school.housing}</p>
-                </div>
-              )}
-              {school.student_services && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Student Services</h4>
-                  <p className="text-sm text-gray-700">{school.student_services}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          
 
           {/* Indian Community */}
           <Card className="border-l-4 border-l-orange-500 shadow-md hover:shadow-lg transition-shadow">
