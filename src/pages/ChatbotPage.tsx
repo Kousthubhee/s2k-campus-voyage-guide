@@ -36,7 +36,7 @@ export const ChatbotPage = () => {
     }
   }, [messages]);
 
-  // Get unique categories
+  // Get unique categories from FAQ data
   const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category)))];
 
   // Get suggested questions
@@ -118,6 +118,50 @@ export const ChatbotPage = () => {
         <p className="text-gray-600">Get instant answers to common questions about studying in France</p>
       </div>
 
+      {/* Category Filter at the top */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Browse by Category</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category === 'all' ? 'All Categories' : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {categoryQuestions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">
+                  Questions in {selectedCategory === 'all' ? 'All Categories' : selectedCategory}:
+                </p>
+                <div className="grid gap-2">
+                  {categoryQuestions.slice(0, 10).map((faq) => (
+                    <Button
+                      key={faq.id}
+                      variant="ghost"
+                      onClick={() => handleSuggestedQuestion(faq.question)}
+                      className="justify-start text-left h-auto p-3 whitespace-normal"
+                    >
+                      <span className="text-sm">{faq.question}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Chat Interface */}
       <Card className="h-96">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -179,49 +223,6 @@ export const ChatbotPage = () => {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-
-      {/* Category Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Browse by Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {categoryQuestions.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Questions in {selectedCategory === 'all' ? 'All Categories' : selectedCategory}:
-                </p>
-                <div className="grid gap-2">
-                  {categoryQuestions.slice(0, 10).map((faq) => (
-                    <Button
-                      key={faq.id}
-                      variant="ghost"
-                      onClick={() => handleSuggestedQuestion(faq.question)}
-                      className="justify-start text-left h-auto p-3 whitespace-normal"
-                    >
-                      <span className="text-sm">{faq.question}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
