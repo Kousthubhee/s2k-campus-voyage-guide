@@ -29,6 +29,12 @@ export const ChatbotPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('FAQs in component:', faqs);
+    console.log('Loading state:', loading);
+  }, [faqs, loading]);
+
   // Scroll to bottom when new messages are added
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -37,7 +43,8 @@ export const ChatbotPage = () => {
   }, [messages]);
 
   // Get unique categories from FAQ data
-  const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category)))];
+  const categories = ['all', ...Array.from(new Set(faqs.map(faq => faq.category).filter(Boolean)))];
+  console.log('Available categories:', categories);
 
   // Get suggested questions
   const suggestedQuestions = [
@@ -53,10 +60,12 @@ export const ChatbotPage = () => {
     ? faqs 
     : faqs.filter(faq => faq.category === selectedCategory);
 
+  console.log('Category questions for', selectedCategory, ':', categoryQuestions);
+
   const findAnswer = (question: string) => {
     const matchedFaq = faqs.find(faq => 
-      faq.question.toLowerCase().includes(question.toLowerCase()) ||
-      question.toLowerCase().includes(faq.question.toLowerCase())
+      faq.question && faq.question.toLowerCase().includes(question.toLowerCase()) ||
+      question.toLowerCase().includes(faq.question && faq.question.toLowerCase())
     );
     
     return matchedFaq ? matchedFaq.answer : null;
@@ -118,6 +127,11 @@ export const ChatbotPage = () => {
         <p className="text-gray-600">Get instant answers to common questions about studying in France</p>
       </div>
 
+      {/* Debug info */}
+      <div className="text-sm text-gray-500 p-2 bg-gray-50 rounded">
+        Debug: Found {faqs.length} FAQs, {categories.length - 1} categories
+      </div>
+
       {/* Category Filter at the top */}
       <Card>
         <CardHeader>
@@ -141,7 +155,7 @@ export const ChatbotPage = () => {
             {categoryQuestions.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">
-                  Questions in {selectedCategory === 'all' ? 'All Categories' : selectedCategory}:
+                  Questions in {selectedCategory === 'all' ? 'All Categories' : selectedCategory} ({categoryQuestions.length}):
                 </p>
                 <div className="grid gap-2">
                   {categoryQuestions.slice(0, 10).map((faq) => (
