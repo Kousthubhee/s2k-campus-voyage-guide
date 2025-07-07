@@ -1,13 +1,15 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, MessageCircle, Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/hooks/useAuth';
 import { useFAQ } from '@/hooks/useFAQ';
+import { CategorySelector } from './chat/CategorySelector';
+import { QuestionBubbles } from './chat/QuestionBubbles';
+import { MessageList } from './chat/MessageList';
+import { ChatInput } from './chat/ChatInput';
+import { ConversationsSidebar } from './chat/ConversationsSidebar';
 
 export function ChatInterface() {
   const [inputMessage, setInputMessage] = useState('');
@@ -146,38 +148,12 @@ export function ChatInterface() {
   return (
     <div className="flex h-96 gap-4">
       {/* Conversations Sidebar */}
-      <Card className="w-1/3">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Conversations</CardTitle>
-            <Button size="sm" onClick={startNewConversation}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-80">
-            <div className="p-3 space-y-2">
-              {conversations.map((conversation) => (
-                <Button
-                  key={conversation.id}
-                  variant={currentConversation === conversation.id ? "default" : "ghost"}
-                  className="w-full justify-start text-left h-auto p-3"
-                  onClick={() => setCurrentConversation(conversation.id)}
-                >
-                  <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">{conversation.title}</span>
-                </Button>
-              ))}
-              {conversations.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No conversations yet
-                </p>
-              )}
-            </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+      <ConversationsSidebar
+        conversations={conversations}
+        currentConversation={currentConversation}
+        onConversationSelect={setCurrentConversation}
+        onNewConversation={startNewConversation}
+      />
 
       {/* Chat Area */}
       <Card className="flex-1">
@@ -185,95 +161,37 @@ export function ChatInterface() {
           <CardTitle className="text-lg">AI Assistant</CardTitle>
           
           {/* Category Dropdown */}
-          <div className="mt-2">
-            <Select value={selectedCategory} onValueChange={handleCategorySelect}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
         </CardHeader>
         <CardContent className="p-0 flex flex-col h-80">
           <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {/* Category Questions as Bubbles */}
-              {categoryQuestions.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Choose a question:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {categoryQuestions.map((q) => (
-                      <Button
-                        key={q.id}
-                        variant="outline"
-                        size="sm"
-                        className="text-left h-auto p-2 text-xs"
-                        onClick={() => handleQuestionClick(q.question)}
-                      >
-                        {q.question}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <QuestionBubbles
+                questions={categoryQuestions}
+                onQuestionClick={handleQuestionClick}
+              />
 
-              {messages.length === 0 && categoryQuestions.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Start a conversation with the AI assistant</p>
-                  <p className="text-sm mt-2">Select a category above or type your question below</p>
-                </div>
-              )}
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                  </div>
-                </div>
-              ))}
-              {(loading || isLoadingResponse) && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 px-4 py-2 rounded-lg">
-                    <p className="text-sm text-gray-600">AI is typing...</p>
-                  </div>
-                </div>
-              )}
+              <MessageList
+                messages={messages}
+                loading={loading}
+                isLoadingResponse={isLoadingResponse}
+                categoryQuestions={categoryQuestions}
+              />
             </div>
           </ScrollArea>
           
-          <form onSubmit={handleSendMessage} className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type your question here..."
-                disabled={loading || isLoadingResponse}
-              />
-              <Button 
-                type="submit" 
-                disabled={loading || isLoadingResponse || !inputMessage.trim()}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
+          <ChatInput
+            inputMessage={inputMessage}
+            setInputMessage={setInputMessage}
+            onSendMessage={handleSendMessage}
+            loading={loading}
+            isLoadingResponse={isLoadingResponse}
+          />
         </CardContent>
       </Card>
     </div>
