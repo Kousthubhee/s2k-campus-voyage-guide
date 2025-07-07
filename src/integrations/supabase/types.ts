@@ -570,6 +570,99 @@ export type Database = {
         }
         Relationships: []
       }
+      school_profiles: {
+        Row: {
+          admission_requirements: string | null
+          brochures: Json | null
+          city: string
+          contact_links: Json | null
+          created_at: string
+          cultural_societies: string | null
+          degrees: string[] | null
+          detailed_programs: Json | null
+          entrance_exams: string | null
+          facilities: string | null
+          fees: string | null
+          global_rankings: string | null
+          housing: string | null
+          id: string
+          indian_amenities: string | null
+          indian_community: string | null
+          language: string | null
+          language_tests: string | null
+          living_costs: string | null
+          name: string
+          overview: string | null
+          programs: string[] | null
+          recognitions: string | null
+          scholarships: string | null
+          slug: string
+          student_services: string | null
+          subjects: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          admission_requirements?: string | null
+          brochures?: Json | null
+          city: string
+          contact_links?: Json | null
+          created_at?: string
+          cultural_societies?: string | null
+          degrees?: string[] | null
+          detailed_programs?: Json | null
+          entrance_exams?: string | null
+          facilities?: string | null
+          fees?: string | null
+          global_rankings?: string | null
+          housing?: string | null
+          id?: string
+          indian_amenities?: string | null
+          indian_community?: string | null
+          language?: string | null
+          language_tests?: string | null
+          living_costs?: string | null
+          name: string
+          overview?: string | null
+          programs?: string[] | null
+          recognitions?: string | null
+          scholarships?: string | null
+          slug: string
+          student_services?: string | null
+          subjects?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          admission_requirements?: string | null
+          brochures?: Json | null
+          city?: string
+          contact_links?: Json | null
+          created_at?: string
+          cultural_societies?: string | null
+          degrees?: string[] | null
+          detailed_programs?: Json | null
+          entrance_exams?: string | null
+          facilities?: string | null
+          fees?: string | null
+          global_rankings?: string | null
+          housing?: string | null
+          id?: string
+          indian_amenities?: string | null
+          indian_community?: string | null
+          language?: string | null
+          language_tests?: string | null
+          living_costs?: string | null
+          name?: string
+          overview?: string | null
+          programs?: string[] | null
+          recognitions?: string | null
+          scholarships?: string | null
+          slug?: string
+          student_services?: string | null
+          subjects?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       schools: {
         Row: {
           accreditations: Json | null
