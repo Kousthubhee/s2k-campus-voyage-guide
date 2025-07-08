@@ -32,13 +32,15 @@ interface PackingItem {
   tooltip?: string;
   storeSuggestions?: string[];
   studentTip?: string;
+  storeInfo?: string;
+  priceRange?: string;
 }
 
 interface PackingAssistancePageProps {
   onBack: () => void;
 }
 
-export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) => {
+export const PreArrival2Page = ({ onBack }: PackingAssistancePageProps) => {
   const [selectedLocation, setSelectedLocation] = useState('Rouen');
   const [selectedCategory, setSelectedCategory] = useState('clothing');
   const [packingItems, setPackingItems] = useState<PackingItem[]>([]);
@@ -155,11 +157,15 @@ export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) =>
   if (kitchenData?.items) {
     if (kitchenData.items.mustBring) {
       kitchenData.items.mustBring.forEach((item, index) => {
+        const source: PackingItem['source'] = 
+          item.tag === 'Pack from India' ? 'Pack from India' :
+          item.tag === 'Buy in France' ? 'Buy in France' : 'Optional';
+        
         items.push({
           id: `kitchen-mustbring-${index}`,
           name: item.name,
           category: 'kitchen',
-          source: item.tag,
+          source,
           note: item.tooltip,
           isChecked: false,
           tooltip: item.tooltip,
@@ -170,11 +176,15 @@ export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) =>
     }
     if (kitchenData.items.optional) {
       kitchenData.items.optional.forEach((item, index) => {
+        const source: PackingItem['source'] = 
+          item.tag === 'Pack from India' ? 'Pack from India' :
+          item.tag === 'Buy in France' ? 'Buy in France' : 'Optional';
+        
         items.push({
           id: `kitchen-optional-${index}`,
           name: item.name,
           category: 'kitchen',
-          source: item.tag,
+          source,
           note: item.tooltip,
           isChecked: false,
           tooltip: item.tooltip,
@@ -185,11 +195,15 @@ export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) =>
     }
     if (kitchenData.items.buyInFrance) {
       kitchenData.items.buyInFrance.forEach((item, index) => {
+        const source: PackingItem['source'] = 
+          item.tag === 'Pack from India' ? 'Pack from India' :
+          item.tag === 'Buy in France' ? 'Buy in France' : 'Optional';
+        
         items.push({
           id: `kitchen-buyinfrance-${index}`,
           name: item.name,
           category: 'kitchen',
-          source: item.tag,
+          source,
           note: item.tooltip,
           isChecked: false,
           tooltip: item.tooltip,
@@ -579,13 +593,6 @@ export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) =>
                       </p>
                     )}
 
-                    {(item.storeInfo || item.priceRange) && (
-                      <div className="flex items-center text-xs text-gray-500 mb-1">
-                        <ShoppingBag className="h-3 w-3 mr-1" />
-                        {item.storeInfo && <span className="mr-2">{item.storeInfo}</span>}
-                        {item.priceRange && <span>{item.priceRange}</span>}
-                      </div>
-                    )}
                     {item.storeSuggestions && item.storeSuggestions.length > 0 && (
                       <div className="flex items-center text-xs text-gray-500 mb-1">
                         <ShoppingBag className="h-3 w-3 mr-1" />
@@ -677,3 +684,6 @@ export const PackingAssistancePage = ({ onBack }: PackingAssistancePageProps) =>
     </div>
   );
 };
+
+// Keep the legacy export for backward compatibility
+export const PackingAssistancePage = PreArrival2Page;
