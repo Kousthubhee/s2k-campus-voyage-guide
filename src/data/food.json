@@ -1,0 +1,76 @@
+{
+  "category": "Food & Groceries",
+  "insight": "Indian students in Rouen should bring small quantities of essential spices and mixes for the first few weeks. Avoid overpacking masalas and rice — most items are available at local stores like Lidl, Carrefour, and Triangle.",
+  "toggleHidePackedItems": true,
+  "items": {
+    "mustBring": [
+      {
+        "name": "Basic Indian Spice Kit",
+        "tag": "Pack from India",
+        "tooltip": "Bring turmeric, chili powder, mustard seeds, cumin, garam masala, etc., in small airtight packets.",
+        "storeSuggestions": ["Triangle (€2–4/spice)", "Carrefour (€1.50–3)"],
+        "studentTip": "Jay and Meghana overpacked spices; just 5–6 are enough for a month."
+      },
+      {
+        "name": "Tamarind Paste / Rice Mixes",
+        "tag": "Pack from India",
+        "tooltip": "Not available in France. Bring enough for your needs.",
+        "storeSuggestions": [],
+        "studentTip": "Hari used them when he was tired after classes."
+      },
+      {
+        "name": "Pickle (leak-proof jar)",
+        "tag": "Pack from India",
+        "tooltip": "Long shelf life and adds flavor to simple meals.",
+        "storeSuggestions": ["Triangle (₹500+ locally)"],
+        "studentTip": "Meghana used pickle regularly when skipping cooking."
+      },
+      {
+        "name": "Ready-to-Eat Meals (2–3 packs)",
+        "tag": "Pack from India",
+        "tooltip": "Useful during travel, airport transitions, or tired days.",
+        "storeSuggestions": [],
+        "studentTip": "Jay used these during the first week before grocery shopping."
+      }
+    ],
+    "optional": [
+      {
+        "name": "Small Dal & Rice Starter Pack",
+        "tag": "Optional",
+        "tooltip": "Not necessary, but helpful for first 1–2 meals.",
+        "storeSuggestions": ["Lidl (€1.20–2/kg)", "Carrefour", "Triangle"],
+        "studentTip": "Aslam brought a small packet to avoid grocery stress."
+      },
+      {
+        "name": "Homemade Snacks / Namkeen",
+        "tag": "Optional",
+        "tooltip": "Good for emotional comfort in early days.",
+        "storeSuggestions": [],
+        "studentTip": "Meghana packed some homemade sweets and savories."
+      }
+    ],
+    "buyInFrance": [
+      {
+        "name": "Dal, Rice, Oil, Sugar, Salt",
+        "tag": "Buy in France",
+        "tooltip": "All are widely available at Lidl, Super U, and Carrefour.",
+        "storeSuggestions": ["Lidl (€1–2/kg rice)", "Carrefour", "Super U"],
+        "studentTip": "Most students regretted packing bulk basics. Local prices are reasonable."
+      },
+      {
+        "name": "Indian Spices (bulk refill)",
+        "tag": "Buy in France",
+        "tooltip": "After you settle, you can restock from Triangle or Indian stores.",
+        "storeSuggestions": ["Triangle (€2–4/spice)", "Other ethnic stores"],
+        "studentTip": "Aslam switched to Triangle after paying more at specialty stores."
+      },
+      {
+        "name": "Curry Leaves, Amla, Shallots",
+        "tag": "Buy in France",
+        "tooltip": "❌ Rarely available in Rouen. Bring dried/frozen from India if needed.",
+        "storeSuggestions": [],
+        "studentTip": "Some students coordinated with Paris friends to source these."
+      }
+    ]
+  }
+}

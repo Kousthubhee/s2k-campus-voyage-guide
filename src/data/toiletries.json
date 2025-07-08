@@ -1,0 +1,150 @@
+[
+  {
+    "item": "Toothbrush & Toothpaste",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Pack enough for the first month. You can restock later at Carrefour or Action.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€2–3" },
+      { "store": "Action", "approxPrice": "€1–2" }
+    ]
+  },
+  {
+    "item": "Soap / Body Wash",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Carry 1–2 bars or a travel-size bottle for arrival days.",
+    "storeSuggestions": [
+      { "store": "Normal", "approxPrice": "€1.50–3" },
+      { "store": "Action", "approxPrice": "€1–2" }
+    ]
+  },
+  {
+    "item": "Shampoo & Conditioner",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Bring sachets or small bottles for the first few days.",
+    "storeSuggestions": [
+      { "store": "Normal", "approxPrice": "€2–4" },
+      { "store": "Carrefour", "approxPrice": "€3–6" }
+    ]
+  },
+  {
+    "item": "Hair Oil",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Indian brands are not easily available in France.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Moisturizer",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Carry your preferred brand for the first few weeks.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€3–5" },
+      { "store": "Normal", "approxPrice": "€2–4" }
+    ]
+  },
+  {
+    "item": "Razor / Trimmer",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Trimmers are expensive in France; bring a good one from India.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€25–50" }
+    ]
+  },
+  {
+    "item": "Nail Cutter",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Often overlooked — pack at least one.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Toilet Mug / Flush Bottle",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Strongly recommended for everyone. Not available in French stores.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Detergent Sachets (2–3)",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Use these for laundry until you shop locally.",
+    "storeSuggestions": [
+      { "store": "Lidl", "approxPrice": "€2–4 for liquid/pods" }
+    ]
+  },
+  {
+    "item": "Towel & Hand Towel",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Quick-dry microfiber towels are most useful in CROUS housing.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€5–10" },
+      { "store": "Action", "approxPrice": "€3–6" }
+    ]
+  },
+  {
+    "item": "Comb / Hair Brush",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Carry a compact version.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Lip Balm",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "optional",
+    "studentTips": "Can be bought easily in Rouen pharmacies.",
+    "storeSuggestions": [
+      { "store": "Pharmacies", "approxPrice": "€1–2" }
+    ]
+  },
+  {
+    "item": "Sunscreen",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Needed for outdoor travel in fall and spring.",
+    "storeSuggestions": [
+      { "store": "Normal", "approxPrice": "€4–7" }
+    ]
+  },
+  {
+    "item": "Perfume / Deodorant",
+    "category": "Toiletries & Personal Care",
+    "gender": "all",
+    "recommendation": "optional",
+    "studentTips": "Only bring if you prefer a specific brand.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€5–15" }
+    ]
+  },
+  {
+    "item": "Sanitary Products (if applicable)",
+    "category": "Toiletries & Personal Care",
+    "gender": "female",
+    "recommendation": "must-bring",
+    "studentTips": "Carry your preferred products; local options may differ in comfort.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€2–5" },
+      { "store": "Pharmacies", "approxPrice": "€3–6" }
+    ]
+  }
+]

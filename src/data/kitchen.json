@@ -1,0 +1,69 @@
+{
+  "category": "Kitchen Essentials",
+  "insight": "CROUS residences do not provide any utensils, so students must bring or buy their own. Private apartments may have partial setups, but it's best to confirm with your landlord.",
+  "toggleHidePackedItems": true,
+  "items": {
+    "mustBring": [
+      {
+        "name": "Pressure Cooker",
+        "tag": "Pack from India",
+        "tooltip": "Not provided in CROUS or most private housing. Essential for Indian meals.",
+        "storeSuggestions": ["Temu (€15–25)", "Amazon France (€30+)"],
+        "studentTip": "Jay brought two — only needed one. Carry small/medium size only."
+      },
+      {
+        "name": "Spatula, Spoon, Knife",
+        "tag": "Pack from India",
+        "tooltip": "Essential items not included in CROUS housing.",
+        "storeSuggestions": ["Action (€1–3/item)", "Normal"],
+        "studentTip": "Hari had to borrow a knife before buying a €3 set from Action."
+      },
+      {
+        "name": "Plate, Bowl, Cup, Cutlery Set",
+        "tag": "Pack from India",
+        "tooltip": "Can be bought locally too, but you’ll need them immediately.",
+        "storeSuggestions": ["Action (€1–3/item)", "Carrefour (€5–10/set)"],
+        "studentTip": "Aslam found it easier to buy these locally after arrival."
+      },
+      {
+        "name": "Lunchbox / Storage Containers",
+        "tag": "Pack from India",
+        "tooltip": "Helpful for storing food or packing lunch during travel/classes.",
+        "storeSuggestions": ["Temu (€2–6)", "Action (€2–5)"],
+        "studentTip": "Meghana used one for storing leftover dal in the shared fridge."
+      }
+    ],
+    "optional": [
+      {
+        "name": "Cutting Board & Peeler",
+        "tag": "Optional",
+        "tooltip": "Can be packed or purchased locally.",
+        "storeSuggestions": ["Temu (€2–5)", "Action", "Normal"],
+        "studentTip": "Temu had a bundle for €5 with peeler and cutting board."
+      },
+      {
+        "name": "Masala Dabba / Indian Spice Box",
+        "tag": "Optional",
+        "tooltip": "Useful if you cook regularly; not easily available in France.",
+        "storeSuggestions": ["Temu (€5–10)", "Amazon"],
+        "studentTip": "Jay bought a local container instead — Indian ones work better."
+      }
+    ],
+    "buyInFrance": [
+      {
+        "name": "Cooking Pan / Frying Pan",
+        "tag": "Buy in France",
+        "tooltip": "Available at Carrefour, Lidl, and Action.",
+        "storeSuggestions": ["Carrefour (€10–20)", "Lidl (€8–15)", "Action (€5–12)"],
+        "studentTip": "Students in CROUS say one pan is enough for most daily cooking."
+      },
+      {
+        "name": "Plates, Cups, Spoons (Extra)",
+        "tag": "Buy in France",
+        "tooltip": "Affordable at Action and Normal. No need to carry full set from India.",
+        "storeSuggestions": ["Action (€1–3/item)", "Normal"],
+        "studentTip": "Many students bought cheap items in bulk after arrival."
+      }
+    ]
+  }
+}

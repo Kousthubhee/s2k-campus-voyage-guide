@@ -1,0 +1,95 @@
+[
+  {
+    "item": "Bedsheet (Single Size)",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "CROUS does not provide bedding. Private housing varies — always bring your own sheet for comfort and hygiene.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€7–15" },
+      { "store": "Action", "approxPrice": "€5–10" }
+    ]
+  },
+  {
+    "item": "Flush Bottle / Toilet Mug",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Not available in French supermarkets. Strongly recommended regardless of housing type.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Towel",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Carry one large quick-dry towel for personal use — laundry cycles are weekly in CROUS.",
+    "storeSuggestions": [
+      { "store": "Action", "approxPrice": "€3–6" },
+      { "store": "Carrefour", "approxPrice": "€5–10" }
+    ]
+  },
+  {
+    "item": "Toiletries Starter Kit",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Include basics like soap, shampoo, toothbrush, and nail cutter for the first week.",
+    "storeSuggestions": []
+  },
+  {
+    "item": "Laundry Bag",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Helps organize clothes and makes laundry trips easier.",
+    "storeSuggestions": [
+      { "store": "Action", "approxPrice": "€2–5" }
+    ]
+  },
+  {
+    "item": "Detergent (Starter Sachet)",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Pack 2–3 sachets from India for early laundry needs. Buy locally after that.",
+    "storeSuggestions": [
+      { "store": "Lidl", "approxPrice": "€2–4" },
+      { "store": "Carrefour", "approxPrice": "€3–6" }
+    ]
+  },
+  {
+    "item": "Pillow & Duvet",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "buy-there",
+    "studentTips": "CROUS does not provide bedding. Buy a single duvet and pillow after arrival.",
+    "storeSuggestions": [
+      { "store": "Leclerc", "approxPrice": "€10–30" },
+      { "store": "Carrefour", "approxPrice": "€15–35" },
+      { "store": "Action", "approxPrice": "€10–20" }
+    ]
+  },
+  {
+    "item": "Storage Items (Bins, Hangers)",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "buy-there",
+    "studentTips": "Useful for organizing limited space in CROUS or private housing.",
+    "storeSuggestions": [
+      { "store": "Normal", "approxPrice": "€2–5" },
+      { "store": "Action", "approxPrice": "€1–3/item" }
+    ]
+  },
+  {
+    "item": "Cleaning Supplies (Soap, Sponge, Mop)",
+    "category": "Accommodation Essentials",
+    "gender": "all",
+    "recommendation": "buy-there",
+    "studentTips": "Not provided in CROUS. Buy dish soap, sponge, or floor mop locally.",
+    "storeSuggestions": [
+      { "store": "Lidl", "approxPrice": "€1–3/item" },
+      { "store": "Carrefour", "approxPrice": "€1–5/item" }
+    ]
+  }
+]

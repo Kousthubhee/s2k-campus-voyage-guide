@@ -1,0 +1,111 @@
+[
+  {
+    "item": "Laptop",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Laptops in France are expensive and come with AZERTY keyboard layout, which can be uncomfortable for Indian students. Aslam and Shravan advised buying one in India.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€500–700+" },
+      { "store": "Darty", "approxPrice": "€550+" }
+    ]
+  },
+  {
+    "item": "Mobile Phone (Smartphone)",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Bring your current phone. Hari recommends carrying a secondary phone as a backup in case of loss or technical failure.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€200–500+" },
+      { "store": "Darty", "approxPrice": "€250+" }
+    ]
+  },
+  {
+    "item": "Power Bank",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Jay’s phone died during airport transit — a power bank is useful during long travel and city trips.",
+    "storeSuggestions": [
+      { "store": "Action", "approxPrice": "€10–20" },
+      { "store": "Carrefour", "approxPrice": "€15–25" }
+    ]
+  },
+  {
+    "item": "External Hard Drive / USB Drive",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "optional",
+    "studentTips": "Shravan and Meghana found these useful for backing up academic work and storing documents.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€30–60" },
+      { "store": "Amazon.fr", "approxPrice": "€25–50" }
+    ]
+  },
+  {
+    "item": "Universal Plug Adapter (Type C/E/F)",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "A must-have since Indian plugs are incompatible with French sockets. Students who forgot these struggled early on.",
+    "storeSuggestions": [
+      { "store": "Amazon.in", "approxPrice": "₹400–700" },
+      { "store": "Carrefour", "approxPrice": "€5–15" }
+    ]
+  },
+  {
+    "item": "Earphones / Headphones",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Useful for lectures, calls, and travel. Jay and Meghana noted local options are costly for good quality.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€20–60" },
+      { "store": "Action", "approxPrice": "€8–15" }
+    ]
+  },
+  {
+    "item": "Portable Extension Board (EU plug or with adapter)",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Multiple students regretted not bringing this. Great for charging laptop, phone, etc. from one adapter.",
+    "storeSuggestions": [
+      { "store": "Amazon.in", "approxPrice": "₹600–1,200" },
+      { "store": "Action", "approxPrice": "€7–12" }
+    ]
+  },
+  {
+    "item": "Charging Cables (USB-C / Lightning)",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "must-bring",
+    "studentTips": "Cables wear out and local prices are higher. Always bring a few extra from India.",
+    "storeSuggestions": [
+      { "store": "Amazon.in", "approxPrice": "₹200–600" },
+      { "store": "Carrefour", "approxPrice": "€5–10" }
+    ]
+  },
+  {
+    "item": "External Keyboard (Optional)",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "optional",
+    "studentTips": "Helpful for those struggling with French keyboard layout. Only if you're particular.",
+    "storeSuggestions": [
+      { "store": "FNAC", "approxPrice": "€20–40" }
+    ]
+  },
+  {
+    "item": "Wireless Mouse",
+    "category": "Electronics",
+    "gender": "all",
+    "recommendation": "optional",
+    "studentTips": "Improves laptop usability. Not essential but useful.",
+    "storeSuggestions": [
+      { "store": "Carrefour", "approxPrice": "€10–25" },
+      { "store": "FNAC", "approxPrice": "€15–30" }
+    ]
+  }
+]

@@ -1,0 +1,119 @@
+{
+  "category": "Clothing",
+  "gender": "Male",
+  "insight": "Rouen’s weather is cold, wet, and unpredictable. Layering is more effective than heavy coats. Bring thermals, basic wear, shoes, and undergarments from India. Shop for outerwear locally during seasonal sales.",
+  "toggleHidePackedItems": true,
+  "items": {
+    "mustBring": [
+      {
+        "name": "Jeans / Trousers",
+        "tag": "Pack from India",
+        "tooltip": "Jeans are expensive in France (€30–€60) and tailoring is uncommon.",
+        "storeSuggestions": [],
+        "studentTip": "Multiple students (Jay, Shravan) stressed jeans are costly and ill-fitting in France."
+      },
+      {
+        "name": "Thermal Innerwear (Top & Bottom)",
+        "tag": "Pack from India",
+        "tooltip": "Local thermals start at €7–14. Indian thermals are cheaper and effective.",
+        "storeSuggestions": ["Decathlon (€7–14)", "Primark (€8–15)"],
+        "studentTip": "Raam and Hari found Indian thermals better in value than Primark ones."
+      },
+      {
+        "name": "Underwear & Socks",
+        "tag": "Pack from India",
+        "tooltip": "Undergarments cost €10–20 per set in France. Bring enough from India.",
+        "storeSuggestions": [],
+        "studentTip": "Shravan brought 10+ to reduce laundry stress in winter."
+      },
+      {
+        "name": "Walking Shoes / Sneakers",
+        "tag": "Pack from India",
+        "tooltip": "Good shoes cost €30–60 locally (Decathlon, H&M).",
+        "storeSuggestions": ["Decathlon (€30–60)", "H&M (€40–70)"],
+        "studentTip": "Jay and Shravan regretted not packing proper walking shoes from India."
+      },
+      {
+        "name": "Flip-Flops / Slippers",
+        "tag": "Pack from India",
+        "tooltip": "Primark flip-flops start at €2. Carrefour sells better ones at €10–13.",
+        "storeSuggestions": ["Primark (€2)", "Carrefour (€10–13)"],
+        "studentTip": "Bring from India unless you want to pay €13 for slippers."
+      },
+      {
+        "name": "Light Jacket (Windbreaker/Travel)",
+        "tag": "Pack from India",
+        "tooltip": "Great for layering. Local options cost €20–30.",
+        "storeSuggestions": ["H&M (€25–35)", "Primark (€20–30)"],
+        "studentTip": "Jay wore his light jacket through autumn before buying a winter coat."
+      },
+      {
+        "name": "Umbrella / Rain Hood",
+        "tag": "Pack from India",
+        "tooltip": "Rouen has unpredictable rain. A basic umbrella costs €5–15 locally.",
+        "storeSuggestions": ["Primark (€5–10)", "Action (€3–8)"],
+        "studentTip": "Meghana and Raam emphasized this is essential from Day 1."
+      }
+    ],
+    "optional": [
+      {
+        "name": "Hoodies / Sweatshirts",
+        "tag": "Optional",
+        "tooltip": "Hoodies cost €12–25 at Primark and €20–35 at H&M.",
+        "storeSuggestions": ["Primark (€12–25)", "H&M (€20–35)"],
+        "studentTip": "Jay bought one for €15 during Black Friday."
+      },
+      {
+        "name": "Formal Shirt & Pants",
+        "tag": "Optional",
+        "tooltip": "Not usually worn at NEOMA. Local formals start at €20–40 per set.",
+        "storeSuggestions": ["H&M (€25–45)"],
+        "studentTip": "Jay used it once for a resume-building session."
+      },
+      {
+        "name": "Track Pants / Pajamas",
+        "tag": "Optional",
+        "tooltip": "Available on Temu for €8–12 or Decathlon for €12–25.",
+        "storeSuggestions": ["Temu (€8–12)", "Decathlon (€12–25)"],
+        "studentTip": "Shravan ordered after arrival; long delivery times."
+      },
+      {
+        "name": "Shorts",
+        "tag": "Optional",
+        "tooltip": "Temu has €5–8 shorts. Local stores are more expensive.",
+        "storeSuggestions": ["Temu (€5–8)", "Primark (€10–15)"],
+        "studentTip": "Jay advised bringing at least 2 for summer/gym use."
+      },
+      {
+        "name": "Gloves, Cap, Woolen Scarf",
+        "tag": "Optional",
+        "tooltip": "Primark sells these for €3–10. Must-have in winter.",
+        "storeSuggestions": ["Primark (€3–10)", "Saint Marc Market (€1–5 used)"],
+        "studentTip": "Hari had trouble without gloves while carrying bags in winter."
+      }
+    ],
+    "buyInFrance": [
+      {
+        "name": "Heavy Winter Jacket / Coat",
+        "tag": "Buy in France",
+        "tooltip": "Best quality found locally. Jackets cost €30–60 in Primark/H&M.",
+        "storeSuggestions": ["Primark (€30–50)", "H&M (€40–60)", "Decathlon (€50–70)"],
+        "studentTip": "Jay had to replace his Indian jacket with a €40 one from Primark."
+      },
+      {
+        "name": "Scarf / Stylish Layers",
+        "tag": "Buy in France",
+        "tooltip": "Helps blend in with local culture. Available affordably in Saint Marc Market.",
+        "storeSuggestions": ["Saint Marc Market (€1–10)", "Primark (€5–12)", "H&M (€10–20)"],
+        "studentTip": "Style-conscious students like Meghana and Hari preferred local scarves."
+      },
+      {
+        "name": "Boots",
+        "tag": "Buy in France",
+        "tooltip": "Not mandatory in Rouen, but available from €25–60.",
+        "storeSuggestions": ["Decathlon (€30–60)", "H&M (€25–50)"],
+        "studentTip": "Jay and Shravan used grippy sneakers instead."
+      }
+    ]
+  }
+}
