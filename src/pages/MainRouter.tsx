@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
@@ -103,7 +104,6 @@ const MainRouter = ({
         return (
           <PreArrival2Page 
             onBack={() => setCurrentPage('checklist')} 
-            profile={profile} 
           />
         );
       case 'post-arrival':
