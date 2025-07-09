@@ -28,8 +28,32 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
 
   const handleShowInsights = (city: any, event: React.MouseEvent) => {
     event.stopPropagation();
+    console.log('City local_insights:', city.local_insights);
     setSelectedCity(city);
     setShowInsightsDialog(true);
+  };
+
+  // Helper function to safely get local insights as array
+  const getLocalInsights = (city: any): LocalInsight[] => {
+    if (!city.local_insights) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(city.local_insights)) {
+      return city.local_insights as LocalInsight[];
+    }
+    
+    // If it's a string, try to parse it
+    if (typeof city.local_insights === 'string') {
+      try {
+        const parsed = JSON.parse(city.local_insights);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.error('Error parsing local_insights:', e);
+        return [];
+      }
+    }
+    
+    return [];
   };
 
   if (isLoading) {
@@ -64,46 +88,51 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cities?.map((city) => (
-          <Card 
-            key={city.id} 
-            className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1"
-            onClick={() => handleCitySelect(city.name)}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{city.emoji}</span>
-                  <h3 className="text-xl font-bold text-gray-900">{city.name}</h3>
-                </div>
-                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-              </div>
-              
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                {city.description}
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                    {city.schools_count || 0} Schools
+        {cities?.map((city) => {
+          const localInsights = getLocalInsights(city);
+          console.log(`${city.name} insights:`, localInsights);
+          
+          return (
+            <Card 
+              key={city.id} 
+              className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1"
+              onClick={() => handleCitySelect(city.name)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{city.emoji}</span>
+                    <h3 className="text-xl font-bold text-gray-900">{city.name}</h3>
                   </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
                 </div>
-                {city.local_insights && city.local_insights.length > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                    onClick={(e) => handleShowInsights(city, e)}
-                  >
-                    <Sparkles className="h-4 w-4 mr-1" />
-                    Local Tips
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                  {city.description}
+                </p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                      {city.schools_count || 0} Schools
+                    </div>
+                  </div>
+                  {localInsights.length > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                      onClick={(e) => handleShowInsights(city, e)}
+                    >
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Local Tips
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {selectedCity && (
@@ -111,7 +140,7 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
           open={showInsightsDialog}
           onOpenChange={setShowInsightsDialog}
           cityName={selectedCity.name}
-          localInsights={selectedCity.local_insights || []}
+          localInsights={getLocalInsights(selectedCity)}
           transport={selectedCity.transport || ''}
           famousPlaces={selectedCity.famous_places || ''}
           sportsFacilities={selectedCity.sports_facilities || ''}
