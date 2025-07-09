@@ -18,6 +18,10 @@ import {
   frenchEvents
 } from "./french-integration/fiData";
 
+interface FrenchIntegrationPageProps {
+  onBack?: () => void;
+}
+
 interface FrenchIntegrationModuleCardProps {
   moduleKey: string;
   icon: React.ComponentType<any>;
@@ -159,12 +163,18 @@ const ModuleDetailView = ({ moduleKey, onBack }: { moduleKey: string; onBack: ()
   );
 };
 
-export const FrenchIntegrationPage = () => {
+export const FrenchIntegrationPage = ({ onBack }: FrenchIntegrationPageProps) => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
 
   const handleModuleClick = (moduleKey: string) => {
     console.log(`Starting module ${moduleKey}`);
     setSelectedModule(moduleKey);
+  };
+
+  const handleBackToChecklist = () => {
+    if (onBack) {
+      onBack();
+    }
   };
 
   if (selectedModule) {
@@ -184,10 +194,10 @@ export const FrenchIntegrationPage = () => {
           <Button
             variant="ghost"
             className="mb-4"
-            onClick={() => window.history.back()}
+            onClick={handleBackToChecklist}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Checklist
           </Button>
           
           <div className="text-center">

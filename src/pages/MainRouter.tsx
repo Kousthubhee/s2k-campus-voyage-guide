@@ -80,7 +80,7 @@ const MainRouter = ({
       case 'language':
         return <LanguagePage />;
       case 'integration':
-        return <FrenchIntegrationPage />;
+        return <FrenchIntegrationPage onBack={() => setCurrentPage('checklist')} />;
       case 'translate':
         return <TranslatePage />;
       case 'contact':
@@ -103,8 +103,6 @@ const MainRouter = ({
         return (
           <PreArrival2Page 
             onBack={() => setCurrentPage('checklist')} 
-            onComplete={() => {}} 
-            isCompleted={false} 
             profile={profile} 
           />
         );
