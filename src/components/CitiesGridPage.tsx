@@ -28,17 +28,25 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
 
   const handleShowInsights = (city: any, event: React.MouseEvent) => {
     event.stopPropagation();
-    console.log('City local_insights:', city.local_insights);
+    console.log('Showing insights for city:', city.name);
+    console.log('City local_insights raw:', city.local_insights);
+    console.log('City local_insights type:', typeof city.local_insights);
     setSelectedCity(city);
     setShowInsightsDialog(true);
   };
 
   // Helper function to safely get local insights as array
   const getLocalInsights = (city: any): LocalInsight[] => {
-    if (!city.local_insights) return [];
+    console.log(`Processing insights for ${city.name}:`, city.local_insights);
+    
+    if (!city.local_insights) {
+      console.log(`No local_insights for ${city.name}`);
+      return [];
+    }
     
     // If it's already an array, return it
     if (Array.isArray(city.local_insights)) {
+      console.log(`${city.name} has array insights:`, city.local_insights);
       return city.local_insights as LocalInsight[];
     }
     
@@ -46,13 +54,15 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
     if (typeof city.local_insights === 'string') {
       try {
         const parsed = JSON.parse(city.local_insights);
+        console.log(`${city.name} parsed insights:`, parsed);
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
-        console.error('Error parsing local_insights:', e);
+        console.error(`Error parsing local_insights for ${city.name}:`, e);
         return [];
       }
     }
     
+    console.log(`${city.name} insights type not recognized:`, typeof city.local_insights);
     return [];
   };
 
@@ -78,6 +88,8 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
     );
   }
 
+  console.log('All cities data:', cities);
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-8">
@@ -90,7 +102,7 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cities?.map((city) => {
           const localInsights = getLocalInsights(city);
-          console.log(`${city.name} insights:`, localInsights);
+          console.log(`Rendering ${city.name} with ${localInsights.length} insights`);
           
           return (
             <Card 
@@ -117,17 +129,15 @@ export const CitiesGridPage: React.FC<CitiesGridPageProps> = ({ onCitySelect }) 
                       {city.schools_count || 0} Schools
                     </div>
                   </div>
-                  {localInsights.length > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                      onClick={(e) => handleShowInsights(city, e)}
-                    >
-                      <Sparkles className="h-4 w-4 mr-1" />
-                      Local Tips
-                    </Button>
-                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                    onClick={(e) => handleShowInsights(city, e)}
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    Local Tips ({localInsights.length})
+                  </Button>
                 </div>
               </CardContent>
             </Card>
