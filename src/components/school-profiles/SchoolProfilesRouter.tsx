@@ -4,21 +4,33 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, School, MapPin } from 'lucide-react';
 import { useSchoolProfiles, useSchoolProfilesByCity } from '@/hooks/useSchoolProfiles';
+import { useCityByName } from '@/hooks/useCities';
 import { SchoolDetailPage } from './SchoolDetailPage';
 import { ProgramDetailPage } from './ProgramDetailPage';
+import { CityInsightsCard } from '@/components/school-insights/CityInsightsCard';
+import { InsightsDialog } from '@/components/school-insights/InsightsDialog';
 
 interface SchoolProfilesRouterProps {
   selectedCity?: string | null;
   onBack: () => void;
 }
 
+interface LocalInsight {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+}
+
 export const SchoolProfilesRouter = ({ selectedCity, onBack }: SchoolProfilesRouterProps) => {
   const [currentView, setCurrentView] = useState<'list' | 'detail' | 'program'>('list');
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [showInsightsDialog, setShowInsightsDialog] = useState(false);
 
   const { data: allSchools = [], isLoading: allLoading } = useSchoolProfiles();
   const { data: citySchools = [], isLoading: cityLoading } = useSchoolProfilesByCity(selectedCity);
+  const { data: cityDetails, isLoading: cityDetailsLoading } = useCityByName(selectedCity);
 
   const schools = selectedCity ? citySchools : allSchools;
   const isLoading = selectedCity ? cityLoading : allLoading;
@@ -42,6 +54,44 @@ export const SchoolProfilesRouter = ({ selectedCity, onBack }: SchoolProfilesRou
   const handleBackToDetail = () => {
     setCurrentView('detail');
     setSelectedProgram(null);
+  };
+
+  const handleShowAllInsights = () => {
+    setShowInsightsDialog(true);
+  };
+
+  // Helper function to safely get local insights as array
+  const getLocalInsights = (cityData: any): LocalInsight[] => {
+    if (!cityData?.local_insights) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(cityData.local_insights)) {
+      return cityData.local_insights.map((insight: any, index: number) => ({
+        id: insight.id || `insight-${index}`,
+        type: insight.type || 'general',
+        title: insight.title || '',
+        description: insight.description || ''
+      }));
+    }
+    
+    // If it's a string, try to parse it
+    if (typeof cityData.local_insights === 'string') {
+      try {
+        const parsed = JSON.parse(cityData.local_insights);
+        if (Array.isArray(parsed)) {
+          return parsed.map((insight: any, index: number) => ({
+            id: insight.id || `insight-${index}`,
+            type: insight.type || 'general',
+            title: insight.title || '',
+            description: insight.description || ''
+          }));
+        }
+      } catch (e) {
+        console.error('Error parsing local_insights:', e);
+      }
+    }
+    
+    return [];
   };
 
   if (currentView === 'program' && selectedSchool && selectedProgram) {
@@ -76,6 +126,20 @@ export const SchoolProfilesRouter = ({ selectedCity, onBack }: SchoolProfilesRou
           {selectedCity ? `Schools in ${selectedCity}` : 'All Schools'}
         </h1>
       </div>
+
+      {/* Show City Insights Card when viewing a specific city */}
+      {selectedCity && cityDetails && !cityDetailsLoading && (
+        <div className="mb-8">
+          <CityInsightsCard
+            cityName={cityDetails.name}
+            transport={cityDetails.transport || ""}
+            famousPlaces={cityDetails.famous_places || ""}
+            sportsFacilities={cityDetails.sports_facilities || ""}
+            studentLife={cityDetails.student_life || ""}
+            onShowAll={handleShowAllInsights}
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -148,6 +212,20 @@ export const SchoolProfilesRouter = ({ selectedCity, onBack }: SchoolProfilesRou
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Insights Dialog */}
+      {selectedCity && cityDetails && (
+        <InsightsDialog
+          open={showInsightsDialog}
+          onOpenChange={setShowInsightsDialog}
+          cityName={cityDetails.name}
+          localInsights={getLocalInsights(cityDetails)}
+          transport={cityDetails.transport || ""}
+          famousPlaces={cityDetails.famous_places || ""}
+          sportsFacilities={cityDetails.sports_facilities || ""}
+          studentLife={cityDetails.student_life || ""}
+        />
       )}
     </div>
   );
