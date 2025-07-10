@@ -1,4 +1,3 @@
-
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -36,7 +35,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-import { FirebaseAuthProvider } from '@/hooks/useFirebaseAuth';
+import { AuthProvider } from '@/hooks/useAuth';
 
 const queryClient = new QueryClient();
 
@@ -46,7 +45,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
-        <FirebaseAuthProvider>
+        <AuthProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -57,7 +56,7 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
-        </FirebaseAuthProvider>
+        </AuthProvider>
       </NotificationProvider>
     </QueryClientProvider>
   </ErrorBoundary>
