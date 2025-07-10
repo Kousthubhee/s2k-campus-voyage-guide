@@ -34,16 +34,14 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-import { AuthProvider } from '@/hooks/useAuth';
 import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { ProfilePage } from "./ProfilePage";
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { AuthPage } from '@/components/AuthPage';
 import { ChatInterface } from '@/components/ChatInterface';
 import { FileUpload } from '@/components/FileUpload';
-import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
@@ -91,12 +89,33 @@ const Index = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const { toast } = useToast();
-  const { user, loading } = useAuth();
+  const { user, loading } = useFirebaseAuth();
 
-  // Load user profile when user is available
+  // Create user profile from Firebase user
   useEffect(() => {
     if (user && !userProfile) {
-      loadUserProfile();
+      const profile: UserProfile = {
+        id: user.uid,
+        name: user.displayName || user.email || 'User',
+        email: user.email || '',
+        age: '',
+        nationality: '',
+        educationLevel: '',
+        hasWorkExperience: false,
+        hasGapYear: false,
+        gapYearDuration: 0,
+        targetCity: '',
+        targetProgram: '',
+        hasHealthIssues: false,
+        isMarried: false,
+        hasChildren: false,
+        about: '',
+        memberSince: new Date().toLocaleDateString(),
+        photo: user.photoURL || '',
+        prevEducation: '',
+        workExperience: ''
+      };
+      setUserProfile(profile);
     }
   }, [user]);
 
@@ -109,45 +128,6 @@ const Index = () => {
       setCurrentPage('home');
     }
   }, []);
-
-  const loadUserProfile = async () => {
-    if (!user) return;
-    
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (data) {
-        const profile: UserProfile = {
-          id: data.id,
-          name: data.name || user.email || '',
-          email: data.email || user.email || '',
-          age: data.age || '',
-          nationality: data.nationality || '',
-          educationLevel: data.education_level || '',
-          hasWorkExperience: data.has_work_experience || false,
-          hasGapYear: data.has_gap_year || false,
-          gapYearDuration: data.gap_year_duration || 0,
-          targetCity: data.target_city || '',
-          targetProgram: data.target_program || '',
-          hasHealthIssues: data.has_health_issues || false,
-          isMarried: data.is_married || false,
-          hasChildren: data.has_children || false,
-          about: data.about || '',
-          memberSince: new Date(data.created_at).toLocaleDateString(),
-          photo: data.photo_url || '',
-          prevEducation: data.prev_education || '',
-          workExperience: data.work_experience || ''
-        };
-        setUserProfile(profile);
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    }
-  };
 
   const handleProgressUpdate = (newProgress: UserProgress) => {
     setUserProgress(newProgress);
@@ -216,7 +196,7 @@ const Index = () => {
           currentPage={currentPage}
           setCurrentPage={handlePageNavigation}
           userName={userProfile?.name || user?.email || 'Guest'}
-          userAvatarUrl=""
+          userAvatarUrl={user?.photoURL || ""}
         />
         <SidebarInset>
           <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">

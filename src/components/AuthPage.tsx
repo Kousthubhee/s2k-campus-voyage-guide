@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 
@@ -19,7 +18,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -28,31 +27,16 @@ export function AuthPage({ onBack }: AuthPageProps) {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+        await signInWithEmail(email, password);
         toast({ title: "Welcome back!", description: "You've been signed in successfully." });
-        if (onBack) onBack();
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              name: username
-            }
-          }
-        });
-        if (error) throw error;
+        await signUpWithEmail(email, password, username);
         toast({ 
           title: "Account created!", 
           description: "Welcome to pasS2Kampus! You can now start using the platform." 
         });
-        if (onBack) onBack();
       }
+      if (onBack) onBack();
     } catch (error: any) {
       toast({
         title: "Authentication Error",
@@ -66,7 +50,12 @@ export function AuthPage({ onBack }: AuthPageProps) {
 
   const handleGoogleAuth = async () => {
     try {
+      setLoading(true);
       await signInWithGoogle();
+      toast({
+        title: "Welcome!",
+        description: "You've been signed in with Google successfully."
+      });
       if (onBack) onBack();
     } catch (error: any) {
       toast({
@@ -74,6 +63,8 @@ export function AuthPage({ onBack }: AuthPageProps) {
         description: error.message,
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +94,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
             variant="outline"
             className="w-full"
             type="button"
+            disabled={loading}
           >
             Continue with Google
           </Button>
