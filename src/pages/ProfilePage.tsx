@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2, LogIn } from 'lucide-react';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProfilePageProps {
@@ -24,7 +24,7 @@ interface ProfilePageProps {
 
 export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   
   useEffect(() => {
     const loadProfileData = async () => {
@@ -87,12 +87,12 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   }
   
   const profile = userProfile || {
-    id: user.id || '',
-    name: user.email || 'New User',
+    id: user.uid || '',
+    name: user.displayName || user.email || 'New User',
     email: user.email || 'user@example.com',
     about: 'Complete your profile to personalize your experience and get better recommendations.',
     memberSince: 'Recently joined',
-    photo: '',
+    photo: user.photoURL || '',
     age: 'Not specified',
     prevEducation: 'Add your education background',
     workExperience: 'Add your work experience'
@@ -123,48 +123,46 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof userProfile) => {
-  console.log("📌 handleSave in ProfilePage.tsx triggered");
-  console.log("📌 updatedProfile:", updatedProfile);
-  console.log("📌 user.id:", user?.id);
+    console.log("📌 handleSave in ProfilePage.tsx triggered");
+    console.log("📌 updatedProfile:", updatedProfile);
+    console.log("📌 user.uid:", user?.uid);
 
-  if (!user?.id) {
-    console.error('❌ No user ID available for profile update');
-    return;
-  }
+    if (!user?.uid) {
+      console.error('❌ No user ID available for profile update');
+      return;
+    }
 
-  const updatePayload = {
-    name: updatedProfile.name,
-    about: updatedProfile.about,
-    age: updatedProfile.age,
-    photo_url: updatedProfile.photo,
-    prev_education: updatedProfile.prevEducation,
-    work_experience: updatedProfile.workExperience,
-    // Add more fields if needed
+    const updatePayload = {
+      name: updatedProfile.name,
+      about: updatedProfile.about,
+      age: updatedProfile.age,
+      photo_url: updatedProfile.photo,
+      prev_education: updatedProfile.prevEducation,
+      work_experience: updatedProfile.workExperience,
+    };
+
+    try {
+      console.log("📌 Supabase update payload:", updatePayload);
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updatePayload)
+        .eq('id', user.uid)
+        .select()
+        .throwOnError();
+
+      console.log('✅ Supabase update success:', data);
+
+      setUserProfile({
+        ...updatedProfile,
+        id: user.uid,
+      });
+
+      setIsEditing(false);
+    } catch (err) {
+      console.error('❌ Supabase update error:', err);
+    }
   };
-
-  try {
-    console.log("📌 Supabase update payload:", updatePayload);
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updatePayload)
-      .eq('id', user.id)
-      .select()
-      .throwOnError(); // This will throw if there's any error
-
-    console.log('✅ Supabase update success:', data);
-
-    setUserProfile({
-      ...updatedProfile,
-      id: user.id,
-    });
-
-    setIsEditing(false);
-  } catch (err) {
-    console.error('❌ Supabase update error:', err);
-  }
-};
-
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;

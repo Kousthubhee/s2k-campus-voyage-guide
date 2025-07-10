@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { HomePage } from '@/components/HomePage';
 import { ChecklistPage } from './ChecklistPage';
 import { DocumentsPage } from '@/components/DocumentsPage';
@@ -48,7 +48,7 @@ const MainRouter = ({
   profile,
   setUserProfile
 }: MainRouterProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useFirebaseAuth();
 
   if (loading) {
     return <div>Loading...</div>;
