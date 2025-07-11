@@ -69,8 +69,16 @@ export function AuthPage({ onBack }: AuthPageProps) {
 
   const handleGoogleAuth = async () => {
     try {
-      await signInWithGoogle();
-      if (onBack) onBack();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Don't call onBack here - let the auth state change handle the redirect
     } catch (error: any) {
       toast({
         title: "Google Sign In Error",
@@ -94,7 +102,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
     setResetLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/`,
       });
       
       if (error) throw error;

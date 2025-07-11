@@ -1,3 +1,4 @@
+
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -49,6 +50,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import MainRouter from './MainRouter';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
+import { ResetPasswordPage } from '@/components/ResetPasswordPage';
 
 console.log("App.tsx is rendering");
 
@@ -107,6 +109,19 @@ const Index = () => {
       console.log('Clearing stored page, defaulting to home');
       localStorage.removeItem('currentPage');
       setCurrentPage('home');
+    }
+  }, []);
+
+  // Check for reset password token on load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const type = urlParams.get('type');
+    
+    if (accessToken && type === 'recovery') {
+      setCurrentPage('reset-password');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
@@ -209,6 +224,10 @@ const Index = () => {
     return <AuthPage onBack={() => setShowAuth(false)} />;
   }
 
+  if (currentPage === 'reset-password') {
+    return <ResetPasswordPage onBack={() => setCurrentPage('home')} />;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
@@ -243,7 +262,11 @@ const Index = () => {
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
-                <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />
+                <ProfilePage 
+                  userProfile={userProfile} 
+                  setUserProfile={setUserProfile} 
+                  setCurrentPage={setCurrentPage}
+                />
               ) : currentPage === "qa" ? (
                 <div className="space-y-6">
                   <h1 className="text-3xl font-bold">AI Assistant</h1>
