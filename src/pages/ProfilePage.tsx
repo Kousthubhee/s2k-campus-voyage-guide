@@ -20,9 +20,10 @@ interface ProfilePageProps {
     workExperience: string;
   } | null;
   setUserProfile: (profile: any) => void;
+  setCurrentPage: (page: string) => void;
 }
 
-export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) => {
+export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   
@@ -77,7 +78,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
             <p className="text-gray-600 mb-6">
               Please sign in to view and manage your profile, track your progress, and unlock all features.
             </p>
-            <Button onClick={() => window.location.href = '/auth'}>
+            <Button onClick={() => setCurrentPage('auth')}>
               Sign In to Continue
             </Button>
           </CardContent>
@@ -123,48 +124,46 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
   ];
 
   const handleSave = async (updatedProfile: typeof userProfile) => {
-  console.log("📌 handleSave in ProfilePage.tsx triggered");
-  console.log("📌 updatedProfile:", updatedProfile);
-  console.log("📌 user.id:", user?.id);
+    console.log("📌 handleSave in ProfilePage.tsx triggered");
+    console.log("📌 updatedProfile:", updatedProfile);
+    console.log("📌 user.id:", user?.id);
 
-  if (!user?.id) {
-    console.error('❌ No user ID available for profile update');
-    return;
-  }
+    if (!user?.id) {
+      console.error('❌ No user ID available for profile update');
+      return;
+    }
 
-  const updatePayload = {
-    name: updatedProfile.name,
-    about: updatedProfile.about,
-    age: updatedProfile.age,
-    photo_url: updatedProfile.photo,
-    prev_education: updatedProfile.prevEducation,
-    work_experience: updatedProfile.workExperience,
-    // Add more fields if needed
+    const updatePayload = {
+      name: updatedProfile.name,
+      about: updatedProfile.about,
+      age: updatedProfile.age,
+      photo_url: updatedProfile.photo,
+      prev_education: updatedProfile.prevEducation,
+      work_experience: updatedProfile.workExperience,
+    };
+
+    try {
+      console.log("📌 Supabase update payload:", updatePayload);
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updatePayload)
+        .eq('id', user.id)
+        .select()
+        .throwOnError();
+
+      console.log('✅ Supabase update success:', data);
+
+      setUserProfile({
+        ...updatedProfile,
+        id: user.id,
+      });
+
+      setIsEditing(false);
+    } catch (err) {
+      console.error('❌ Supabase update error:', err);
+    }
   };
-
-  try {
-    console.log("📌 Supabase update payload:", updatePayload);
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updatePayload)
-      .eq('id', user.id)
-      .select()
-      .throwOnError(); // This will throw if there's any error
-
-    console.log('✅ Supabase update success:', data);
-
-    setUserProfile({
-      ...updatedProfile,
-      id: user.id,
-    });
-
-    setIsEditing(false);
-  } catch (err) {
-    console.error('❌ Supabase update error:', err);
-  }
-};
-
 
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0);
   const completedModules = 0;
@@ -335,7 +334,7 @@ export const ProfilePage = ({ userProfile, setUserProfile }: ProfilePageProps) =
                 <p className="text-gray-600 mb-4">
                   Complete modules, organize documents, and engage with the community to earn more achievements and unlock features.
                 </p>
-                <Button onClick={() => window.location.href = '/checklist'}>
+                <Button onClick={() => setCurrentPage('checklist')}>
                   Start Your Journey
                 </Button>
               </div>

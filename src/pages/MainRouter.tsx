@@ -22,6 +22,7 @@ import { QAPage } from './QAPage';
 import { SuggestionsPage } from './SuggestionsPage';
 import { AskMeAnythingPage } from './AskMeAnythingPage';
 import { ChatbotPage } from './ChatbotPage';
+import { AuthPage } from '@/components/AuthPage';
 
 interface MainRouterProps {
   currentPage: string;
@@ -87,7 +88,9 @@ const MainRouter = ({
       case 'contact':
         return <ContactPage />;
       case 'profile':
-        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} />;
+        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} setCurrentPage={setCurrentPage} />;
+      case 'auth':
+        return <AuthPage onBack={() => setCurrentPage('home')} />;
       case 'school':
       case 'school-insights':
         return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
