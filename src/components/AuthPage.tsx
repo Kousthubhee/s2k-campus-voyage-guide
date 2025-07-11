@@ -104,7 +104,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
     setResetLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/?reset=true`,
+        redirectTo: `${window.location.origin}/#reset-password=true`,
       });
       
       if (error) throw error;
@@ -201,7 +201,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
           </CardContent>
         </Card>
 
-        <style jsx>{`
+        <style>{`
           @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(30px, -50px) scale(1.1); }
@@ -391,7 +391,7 @@ export function AuthPage({ onBack }: AuthPageProps) {
         </CardContent>
       </Card>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

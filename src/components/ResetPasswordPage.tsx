@@ -37,22 +37,68 @@ export function ResetPasswordPage({ onBack }: ResetPasswordPageProps) {
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
 
   useEffect(() => {
-    // Wait a moment for Supabase to process the auth session from the URL
-    const timer = setTimeout(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session);
-      setSessionReady(true);
+    // Check for session immediately and handle the password reset flow
+    const handlePasswordReset = async () => {
+      console.log('Checking for reset password session...');
       
-      if (!session) {
-        toast({
-          title: "Session Expired",
-          description: "Your reset link has expired. Please request a new one.",
-          variant: "destructive"
-        });
+      // Check URL hash for access token (Supabase sends tokens in URL hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
+      
+      console.log('Hash params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+      
+      if (accessToken && refreshToken && type === 'recovery') {
+        try {
+          // Set the session with the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) {
+            console.error('Error setting session:', error);
+            toast({
+              title: "Session Error",
+              description: "Unable to verify reset link. Please try requesting a new one.",
+              variant: "destructive"
+            });
+            setSessionReady(true);
+            return;
+          }
+          
+          console.log('Session set successfully:', data);
+          setSessionReady(true);
+          
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error('Error in password reset flow:', error);
+          toast({
+            title: "Error",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive"
+          });
+          setSessionReady(true);
+        }
+      } else {
+        // No tokens in URL, check if there's already a session
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Current session:', session);
+        
+        if (!session) {
+          toast({
+            title: "Invalid Reset Link",
+            description: "This reset link is invalid or has expired. Please request a new one.",
+            variant: "destructive"
+          });
+        }
+        setSessionReady(true);
       }
-    }, 1000);
+    };
 
-    return () => clearTimeout(timer);
+    handlePasswordReset();
   }, [toast]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -268,7 +314,7 @@ export function ResetPasswordPage({ onBack }: ResetPasswordPageProps) {
         </CardContent>
       </Card>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

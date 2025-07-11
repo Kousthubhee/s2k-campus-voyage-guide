@@ -117,6 +117,7 @@ const Index = () => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
+    const resetParam = hashParams.get('reset-password');
     
     // Also check query parameters as backup
     const urlParams = new URLSearchParams(window.location.search);
@@ -124,17 +125,16 @@ const Index = () => {
     const queryType = urlParams.get('type');
     
     console.log('Checking for reset password params:', { 
-      hashToken: accessToken, 
+      hashToken: !!accessToken, 
       hashType: type, 
-      queryToken: queryAccessToken, 
-      queryType: queryType 
+      queryToken: !!queryAccessToken, 
+      queryType: queryType,
+      resetParam: resetParam
     });
     
-    if ((accessToken && type === 'recovery') || (queryAccessToken && queryType === 'recovery')) {
+    if ((accessToken && type === 'recovery') || (queryAccessToken && queryType === 'recovery') || resetParam === 'true') {
       console.log('Password recovery detected, showing reset password page');
       setCurrentPage('reset-password');
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
