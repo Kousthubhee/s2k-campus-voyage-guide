@@ -1,4 +1,3 @@
-
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -112,13 +111,27 @@ const Index = () => {
     }
   }, []);
 
-  // Check for reset password token on load
+  // Check for reset password token on load - Updated to properly detect password recovery
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const type = urlParams.get('type');
+    // Check for URL hash parameters (Supabase sends token in hash)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
     
-    if (accessToken && type === 'recovery') {
+    // Also check query parameters as backup
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryAccessToken = urlParams.get('access_token');
+    const queryType = urlParams.get('type');
+    
+    console.log('Checking for reset password params:', { 
+      hashToken: accessToken, 
+      hashType: type, 
+      queryToken: queryAccessToken, 
+      queryType: queryType 
+    });
+    
+    if ((accessToken && type === 'recovery') || (queryAccessToken && queryType === 'recovery')) {
+      console.log('Password recovery detected, showing reset password page');
       setCurrentPage('reset-password');
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
