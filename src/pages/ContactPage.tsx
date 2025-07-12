@@ -1,84 +1,59 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, Clock, Send, MessageSquare, Globe, Heart } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { useContactForm } from '@/hooks/useContactForm';
 
 export const ContactPage = () => {
-  const [formData, setFormData] = React.useState({
-    name: '',
+  const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     subject: '',
     message: ''
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const { submitContactForm, loading } = useContactForm();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Here you would typically send the form data to your backend
-    alert('Thank you for your message! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    
+    if (!formData.fullName || !formData.email || !formData.subject || !formData.message) {
+      return;
+    }
+
+    const success = await submitContactForm(formData);
+    if (success) {
+      setFormData({
+        fullName: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    }
   };
 
-  const contactMethods = [
-    {
-      icon: Mail,
-      title: 'Email Support',
-      description: 'Get help via email',
-      value: 'pass2kampus@gmail.com',
-      action: 'mailto:pass2kampus@gmail.com'
-    },
-    {
-      icon: MessageSquare,
-      title: 'Live Chat',
-      description: 'Chat with our support team',
-      value: 'Available 24/7',
-      action: '#'
-    },
-    {
-      icon: Phone,
-      title: 'Phone Support',
-      description: 'Speak with our team',
-      value: '+33 745736466',
-      action: 'tel:+33745736466'
-    },
-    {
-      icon: Globe,
-      title: 'Help Center',
-      description: 'Browse our knowledge base',
-      value: 'Visit Help Center',
-      action: '#'
-    }
-  ];
-
-  const supportHours = [
-    { day: 'Monday - Friday', hours: '9:00 AM - 6:00 PM CET' },
-    { day: 'Saturday', hours: '10:00 AM - 4:00 PM CET' },
-    { day: 'Sunday', hours: 'Closed' }
-  ];
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Have questions about studying in France? Need help with your application? 
-          Our dedicated support team is here to help you succeed.
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Contact Us</h1>
+        <p className="text-lg text-gray-600">
+          Have questions about studying abroad? We're here to help!
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Contact Form */}
-        <Card className="h-fit">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Send className="h-5 w-5" />
@@ -86,193 +61,123 @@ export const ContactPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
-              
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Subject *
-                </label>
+                <Label htmlFor="fullName">Full Name *</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your email address"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="subject">Subject *</Label>
                 <Input
                   id="subject"
                   name="subject"
-                  type="text"
-                  required
                   value={formData.subject}
-                  onChange={handleInputChange}
-                  placeholder="What's this about?"
+                  onChange={handleChange}
+                  required
+                  placeholder="What is your message about?"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message *
-                </label>
+                <Label htmlFor="message">Message *</Label>
                 <Textarea
                   id="message"
                   name="message"
-                  required
-                  rows={6}
                   value={formData.message}
-                  onChange={handleInputChange}
+                  onChange={handleChange}
+                  required
                   placeholder="Tell us how we can help you..."
+                  rows={6}
                 />
               </div>
-              
-              <Button type="submit" className="w-full" size="lg">
-                <Send className="h-4 w-4 mr-2" />
-                Send Message
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading}
+              >
+                {loading ? 'Sending...' : 'Send Message'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Contact Methods & Support Hours */}
         <div className="space-y-6">
-          {/* Contact Methods */}
           <Card>
             <CardHeader>
-              <CardTitle>Other Ways to Reach Us</CardTitle>
+              <CardTitle>Get in Touch</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {contactMethods.map((method, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-shrink-0">
-                    <method.icon className="h-5 w-5 text-blue-600 mt-1" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-semibold text-gray-900">{method.title}</h4>
-                    <p className="text-xs text-gray-500 mb-1">{method.description}</p>
-                    <a 
-                      href={method.action}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      {method.value}
-                    </a>
-                  </div>
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium">Email</p>
+                  <p className="text-gray-600">support@studyabroad.com</p>
                 </div>
-              ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium">Phone</p>
+                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <MapPin className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium">Office</p>
+                  <p className="text-gray-600">123 Education Street, Learning City, LC 12345</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Support Hours */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Support Hours
-              </CardTitle>
+              <CardTitle>Frequently Asked Questions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {supportHours.map((schedule, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">{schedule.day}</span>
-                    <span className="text-sm font-medium text-gray-900">{schedule.hours}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-blue-800">
-                  <strong>Emergency Support:</strong> For urgent matters, our emergency hotline is available 24/7.
-                </p>
+                <div>
+                  <p className="font-medium">How long does the visa process take?</p>
+                  <p className="text-sm text-gray-600">Typically 2-8 weeks depending on your country and visa type.</p>
+                </div>
+                <div>
+                  <p className="font-medium">Do you provide housing assistance?</p>
+                  <p className="text-sm text-gray-600">Yes, we help you find suitable accommodation near your university.</p>
+                </div>
+                <div>
+                  <p className="font-medium">What documents do I need?</p>
+                  <p className="text-sm text-gray-600">Check our document checklist in the app for a comprehensive list.</p>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      {/* FAQ Section */}
-      <Card className="mb-12">
-        <CardHeader>
-          <CardTitle>Frequently Asked Questions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">How long does visa processing take?</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Student visa processing typically takes 2-4 weeks, but we recommend applying at least 8 weeks before your intended travel date.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Do you help with accommodation?</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Yes! We have partnerships with student housing providers and can help you find suitable accommodation near your university.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">What documents do I need?</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Required documents vary by program, but typically include passport, academic transcripts, language certificates, and financial proof.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Is there application assistance?</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Absolutely! Our team provides step-by-step guidance throughout your entire application process, from university selection to visa approval.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Creator Information */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <CardContent className="p-8 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <Heart className="h-6 w-6 text-red-500 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">We are a team of Indian Students, and this is created based on our experiences</h2>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <p className="text-lg text-blue-600 mb-6">
-              We're passionate about helping students navigate their journey to study in France. Our platform provides comprehensive guides, checklists, and support to make your French education dreams a reality.
-            </p>
-            
-           
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Helping students navigate their journey to study in France</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Our mission is to provide comprehensive, reliable, and up-to-date information to help international students successfully pursue their education in France.
-              </p>
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Made for students</strong> - We understand the challenges of studying abroad and have created this platform to make your journey smoother and more successful.
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

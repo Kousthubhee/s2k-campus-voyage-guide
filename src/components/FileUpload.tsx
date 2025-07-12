@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, File, X } from 'lucide-react';
+import { Upload, File, X, Calendar, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface FileItem {
   id: string;
@@ -14,6 +15,9 @@ interface FileItem {
   file_size: number;
   created_at: string;
   file_path: string;
+  category?: string;
+  is_important?: boolean;
+  notes?: string;
 }
 
 export function FileUpload() {
@@ -33,7 +37,7 @@ export function FileUpload() {
 
     const { data, error } = await supabase
       .from('documents')
-      .select('id, name, file_size, created_at, file_path')
+      .select('id, name, file_size, created_at, file_path, category, is_important, notes')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -66,7 +70,9 @@ export function FileUpload() {
           file_path: fileName,
           file_size: file.size,
           mime_type: file.type,
-          type: 'upload' // Add required type field
+          type: 'upload',
+          category: 'General',
+          is_important: false
         })
         .select()
         .single();
@@ -77,7 +83,7 @@ export function FileUpload() {
         setFiles([data, ...files]);
         toast({
           title: "File uploaded successfully",
-          description: `${file.name} has been uploaded.`
+          description: `${file.name} has been uploaded and stored securely.`
         });
       }
     } catch (error: any) {
@@ -88,7 +94,6 @@ export function FileUpload() {
       });
     } finally {
       setUploading(false);
-      // Reset input
       event.target.value = '';
     }
   };
@@ -115,6 +120,32 @@ export function FileUpload() {
     }
   };
 
+  const handleMarkImportant = async (fileId: string, isImportant: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .update({ is_important: !isImportant })
+        .eq('id', fileId);
+
+      if (error) throw error;
+
+      setFiles(files.map(f => 
+        f.id === fileId ? { ...f, is_important: !isImportant } : f
+      ));
+
+      toast({
+        title: !isImportant ? "Marked as important" : "Removed from important",
+        description: "File importance updated successfully."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -127,7 +158,7 @@ export function FileUpload() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center h-32">
-          <p className="text-muted-foreground">Please sign in to upload files</p>
+          <p className="text-muted-foreground">Please sign in to upload and manage files</p>
         </CardContent>
       </Card>
     );
@@ -138,7 +169,7 @@ export function FileUpload() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          File Storage
+          Document Storage
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -149,36 +180,66 @@ export function FileUpload() {
             disabled={uploading}
             className="hidden"
             id="file-upload"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
           />
           <label htmlFor="file-upload" className="cursor-pointer">
             <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
             <p className="text-sm text-gray-600">
-              {uploading ? 'Uploading...' : 'Click to upload file'}
+              {uploading ? 'Uploading...' : 'Click to upload document'}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Supports PDF, DOC, DOCX, JPG, PNG, TXT files
             </p>
           </label>
         </div>
 
         {files.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Your Files</h3>
+            <h3 className="text-sm font-medium">Your Documents ({files.length})</h3>
             {files.map((file) => (
               <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <File className="h-4 w-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm font-medium">{file.name}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{file.name}</p>
+                      {file.is_important && (
+                        <Badge variant="destructive" className="text-xs">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          Important
+                        </Badge>
+                      )}
+                      {file.category && file.category !== 'General' && (
+                        <Badge variant="outline" className="text-xs">
+                          {file.category}
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-500">
                       {formatFileSize(file.file_size)} • {new Date(file.created_at).toLocaleDateString()}
                     </p>
+                    {file.notes && (
+                      <p className="text-xs text-gray-400 italic">{file.notes}</p>
+                    )}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteFile(file.id, file.file_path)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleMarkImportant(file.id, file.is_important || false)}
+                    className="text-xs"
+                  >
+                    {file.is_important ? 'Unmark' : 'Mark Important'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteFile(file.id, file.file_path)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
