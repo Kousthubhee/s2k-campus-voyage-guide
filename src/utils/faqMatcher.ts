@@ -1,3 +1,4 @@
+
 import { matchSorter } from 'match-sorter';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,23 +24,28 @@ const normalizeText = (text: string): string => {
     .trim();
 };
 
-// Extract key terms and synonyms
+// Extract key terms and synonyms with better part-time handling
 const getKeyTerms = (query: string): string[] => {
   const normalized = normalizeText(query);
-  const terms = [];
+  let terms = [];
   
   // Add original words
   terms.push(...normalized.split(' '));
   
+  // Special handling for part-time variations
+  if (normalized.includes('part time') || normalized.includes('part-time') || normalized.includes('parttime')) {
+    terms.push('part-time', 'parttime', 'part time', 'part', 'time', 'job', 'work');
+  }
+  
   // Add synonyms and variations
   const synonymMap: Record<string, string[]> = {
-    'job': ['work', 'employment', 'position'],
-    'work': ['job', 'employment', 'position'],
-    'part-time': ['parttime', 'part time'],
-    'parttime': ['part-time', 'part time'],
+    'job': ['work', 'employment', 'position', 'jobs'],
+    'work': ['job', 'employment', 'position', 'working'],
+    'jobs': ['job', 'work', 'employment'],
     'can': ['am able', 'possible', 'allowed'],
     'get': ['find', 'obtain', 'have'],
     'find': ['get', 'obtain', 'locate'],
+    'available': ['exist', 'possible', 'there'],
   };
   
   for (const word of normalized.split(' ')) {
@@ -51,10 +57,41 @@ const getKeyTerms = (query: string): string[] => {
   return [...new Set(terms)]; // Remove duplicates
 };
 
+// Check for specific question patterns
+const getSpecificMatches = (query: string, faqs: FAQ[]): FAQ | null => {
+  const normalized = normalizeText(query);
+  
+  // Part-time job specific matching
+  if ((normalized.includes('part time') || normalized.includes('part-time') || normalized.includes('parttime')) && 
+      (normalized.includes('job') || normalized.includes('work') || normalized.includes('available'))) {
+    const partTimeJobFAQ = faqs.find(faq => 
+      normalizeText(faq.question).includes('part-time jobs available') ||
+      normalizeText(faq.question).includes('part time jobs') ||
+      (normalizeText(faq.question).includes('part') && normalizeText(faq.question).includes('jobs'))
+    );
+    if (partTimeJobFAQ) {
+      console.log('Found specific part-time job match:', partTimeJobFAQ.question);
+      return partTimeJobFAQ;
+    }
+  }
+  
+  return null;
+};
+
 export const findBestFAQMatch = (query: string, faqs: FAQ[]): MatchResult => {
   console.log('Finding match for query:', query);
   
-  // First, try exact keyword matching for better consistency
+  // First check for specific pattern matches
+  const specificMatch = getSpecificMatches(query, faqs);
+  if (specificMatch) {
+    return {
+      faq: specificMatch,
+      confidence: 0.95,
+      suggestions: []
+    };
+  }
+  
+  // Then try keyword matching for better consistency
   const queryTerms = getKeyTerms(query);
   console.log('Query terms:', queryTerms);
   
@@ -69,7 +106,7 @@ export const findBestFAQMatch = (query: string, faqs: FAQ[]): MatchResult => {
     // Count matches in question (higher weight)
     for (const term of queryTerms) {
       if (questionTerms.some(qTerm => qTerm.includes(term) || term.includes(qTerm))) {
-        score += 2;
+        score += 3; // Increased weight for question matches
         matchedTerms++;
       }
     }
@@ -80,6 +117,13 @@ export const findBestFAQMatch = (query: string, faqs: FAQ[]): MatchResult => {
         score += 1;
         matchedTerms++;
       }
+    }
+    
+    // Bonus for exact phrase matches
+    const queryNormalized = normalizeText(query);
+    const questionNormalized = normalizeText(faq.question);
+    if (questionNormalized.includes(queryNormalized) || queryNormalized.includes(questionNormalized)) {
+      score += 5;
     }
     
     // Calculate confidence based on term coverage
@@ -99,7 +143,7 @@ export const findBestFAQMatch = (query: string, faqs: FAQ[]): MatchResult => {
   
   // Use the highest scoring FAQ if it has a decent score
   const topMatch = scoredFAQs[0];
-  if (topMatch && topMatch.score >= 2) {
+  if (topMatch && topMatch.score >= 3) { // Increased threshold
     console.log('Using keyword match:', topMatch.faq.question);
     return {
       faq: topMatch.faq,
