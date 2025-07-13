@@ -22,19 +22,41 @@ export const useHubUserProfiles = () => {
     }
 
     try {
+      // Use raw SQL query since types aren't updated yet
       const { data, error } = await supabase
-        .from('hub_user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
+        .rpc('get_hub_user_profile', { user_id_param: userId });
 
       if (error) {
         console.error('Error fetching user profile:', error);
+        
+        // Fallback: try to get from profiles table
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', userId)
+          .single();
+
+        if (profileData) {
+          const fallbackProfile: HubUserProfile = {
+            id: userId,
+            user_id: userId,
+            display_name: profileData.name || profileData.email || 'Anonymous User',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
+          return fallbackProfile;
+        }
         return null;
       }
 
-      setProfiles(prev => ({ ...prev, [userId]: data }));
-      return data;
+      if (data && data.length > 0) {
+        const profileData = data[0] as HubUserProfile;
+        setProfiles(prev => ({ ...prev, [userId]: profileData }));
+        return profileData;
+      }
+
+      return null;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
@@ -45,25 +67,22 @@ export const useHubUserProfiles = () => {
     if (!user) return;
 
     try {
+      // Check if hub profile exists using raw query
       const { data: existingProfile } = await supabase
-        .from('hub_user_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .rpc('get_hub_user_profile', { user_id_param: user.id });
 
-      if (!existingProfile) {
+      if (!existingProfile || existingProfile.length === 0) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('name, email')
           .eq('id', user.id)
           .single();
 
-        await supabase
-          .from('hub_user_profiles')
-          .insert({
-            user_id: user.id,
-            display_name: profile?.name || profile?.email || 'Anonymous User'
-          });
+        // Create hub profile using raw SQL
+        await supabase.rpc('create_hub_user_profile', {
+          user_id_param: user.id,
+          display_name_param: profile?.name || profile?.email || 'Anonymous User'
+        });
       }
     } catch (error) {
       console.error('Error ensuring user profile:', error);

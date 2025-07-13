@@ -29,22 +29,42 @@ export const useHubComments = (postId: string) => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Get comments with basic info first
+      const { data: commentsData, error: commentsError } = await supabase
         .from('hub_comments')
-        .select(`
-          *,
-          hub_user_profiles!inner(display_name, avatar_url)
-        `)
+        .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (commentsError) throw commentsError;
 
-      const commentsWithProfiles = data.map(comment => ({
+      // Get user profiles for all comment authors
+      const userIds = [...new Set(commentsData?.map(c => c.user_id) || [])];
+      const profilePromises = userIds.map(async (userId) => {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', userId)
+          .single();
+        
+        return {
+          user_id: userId,
+          display_name: profileData?.name || profileData?.email || 'Anonymous User'
+        };
+      });
+
+      const profiles = await Promise.all(profilePromises);
+      const profileMap = profiles.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, { display_name: string }>);
+
+      // Transform comments with profile data
+      const commentsWithProfiles = (commentsData || []).map(comment => ({
         ...comment,
         user_profile: {
-          display_name: comment.hub_user_profiles?.display_name || 'Anonymous',
-          avatar_url: comment.hub_user_profiles?.avatar_url
+          display_name: profileMap[comment.user_id]?.display_name || 'Anonymous',
+          avatar_url: undefined
         }
       }));
 
@@ -70,14 +90,19 @@ export const useHubComments = (postId: string) => {
     if (!user || !content.trim()) return;
 
     try {
+      const insertData: any = {
+        post_id: postId,
+        user_id: user.id,
+        content: content.trim()
+      };
+
+      if (parentId) {
+        insertData.parent_id = parentId;
+      }
+
       const { error } = await supabase
         .from('hub_comments')
-        .insert({
-          post_id: postId,
-          user_id: user.id,
-          content: content.trim(),
-          parent_id: parentId
-        });
+        .insert(insertData);
 
       if (error) throw error;
 

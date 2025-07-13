@@ -29,20 +29,39 @@ export const useHubPosts = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // Get posts first
+      const { data: postsData, error: postsError } = await supabase
         .from('hub_posts')
-        .select(`
-          *,
-          hub_user_profiles!inner(display_name, avatar_url)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (postsError) throw postsError;
       
-      console.log('Fetched posts data:', data);
+      console.log('Fetched posts data:', postsData);
+
+      // Get user profiles for all post authors
+      const userIds = [...new Set(postsData?.map(p => p.user_id) || [])];
+      const profilePromises = userIds.map(async (userId) => {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', userId)
+          .single();
+        
+        return {
+          user_id: userId,
+          display_name: profileData?.name || profileData?.email || 'Anonymous User'
+        };
+      });
+
+      const profiles = await Promise.all(profilePromises);
+      const profileMap = profiles.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {} as Record<string, { display_name: string }>);
       
       // Transform the data to match our HubPost interface
-      const transformedPosts: HubPost[] = (data || []).map(post => ({
+      const transformedPosts: HubPost[] = (postsData || []).map(post => ({
         id: post.id,
         user_id: post.user_id,
         title: post.title,
@@ -56,8 +75,8 @@ export const useHubPosts = () => {
         created_at: post.created_at,
         updated_at: post.updated_at,
         user_profile: {
-          display_name: post.hub_user_profiles?.display_name || 'Anonymous',
-          avatar_url: post.hub_user_profiles?.avatar_url
+          display_name: profileMap[post.user_id]?.display_name || 'Anonymous',
+          avatar_url: undefined
         }
       }));
       
@@ -83,30 +102,21 @@ export const useHubPosts = () => {
       return;
     }
 
-    // Ensure user has a hub profile
+    // Ensure user has a profile
     try {
       const { data: existingProfile } = await supabase
-        .from('hub_user_profiles')
+        .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (!existingProfile) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', user.id)
-          .single();
-
-        await supabase
-          .from('hub_user_profiles')
-          .insert({
-            user_id: user.id,
-            display_name: profile?.name || profile?.email || 'Anonymous User'
-          });
+        console.error('User profile not found');
+        toast.error('Please complete your profile first');
+        return;
       }
     } catch (error) {
-      console.error('Error ensuring user profile:', error);
+      console.error('Error checking user profile:', error);
     }
 
     console.log('Creating post with data:', postData);
@@ -123,10 +133,7 @@ export const useHubPosts = () => {
           poll_options: postData.poll_options,
           user_id: user.id,
         })
-        .select(`
-          *,
-          hub_user_profiles!inner(display_name, avatar_url)
-        `)
+        .select()
         .single();
 
       if (error) {
@@ -135,6 +142,13 @@ export const useHubPosts = () => {
       }
       
       console.log('Created post response:', data);
+
+      // Get user profile for the new post
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .eq('id', user.id)
+        .single();
       
       const newPost: HubPost = {
         id: data.id,
@@ -150,8 +164,8 @@ export const useHubPosts = () => {
         created_at: data.created_at,
         updated_at: data.updated_at,
         user_profile: {
-          display_name: data.hub_user_profiles?.display_name || 'Anonymous',
-          avatar_url: data.hub_user_profiles?.avatar_url
+          display_name: profileData?.name || profileData?.email || 'Anonymous User',
+          avatar_url: undefined
         }
       };
       
