@@ -32,7 +32,24 @@ export const useHubPosts = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Transform the data to match our HubPost interface
+      const transformedPosts: HubPost[] = (data || []).map(post => ({
+        id: post.id,
+        user_id: post.user_id,
+        title: post.title,
+        content: post.content,
+        category: post.category,
+        type: post.type as 'qa' | 'blog' | 'reel' | 'poll',
+        media_url: post.media_url,
+        poll_options: post.poll_options,
+        likes_count: post.likes_count || 0,
+        comments_count: post.comments_count || 0,
+        created_at: post.created_at,
+        updated_at: post.updated_at
+      }));
+      
+      setPosts(transformedPosts);
     } catch (error: any) {
       console.error('Error fetching posts:', error);
       toast.error('Failed to load posts');
@@ -66,9 +83,24 @@ export const useHubPosts = () => {
 
       if (error) throw error;
       
-      setPosts(prev => [data, ...prev]);
+      const newPost: HubPost = {
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title,
+        content: data.content,
+        category: data.category,
+        type: data.type as 'qa' | 'blog' | 'reel' | 'poll',
+        media_url: data.media_url,
+        poll_options: data.poll_options,
+        likes_count: data.likes_count || 0,
+        comments_count: data.comments_count || 0,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+      
+      setPosts(prev => [newPost, ...prev]);
       toast.success('Post created successfully!');
-      return data;
+      return newPost;
     } catch (error: any) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post');
@@ -90,7 +122,22 @@ export const useHubPosts = () => {
 
       if (error) throw error;
       
-      setPosts(prev => prev.map(post => post.id === postId ? data : post));
+      const updatedPost: HubPost = {
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title,
+        content: data.content,
+        category: data.category,
+        type: data.type as 'qa' | 'blog' | 'reel' | 'poll',
+        media_url: data.media_url,
+        poll_options: data.poll_options,
+        likes_count: data.likes_count || 0,
+        comments_count: data.comments_count || 0,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+      
+      setPosts(prev => prev.map(post => post.id === postId ? updatedPost : post));
       toast.success('Post updated successfully!');
     } catch (error: any) {
       console.error('Error updating post:', error);
