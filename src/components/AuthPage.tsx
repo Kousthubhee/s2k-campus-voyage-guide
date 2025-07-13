@@ -72,18 +72,28 @@ export function AuthPage({ onBack }: AuthPageProps) {
 
   const handleGoogleAuth = async () => {
     try {
+      console.log('Starting Google OAuth with redirect to:', `${window.location.origin}/`);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Google OAuth error:', error);
+        throw error;
+      }
     } catch (error: any) {
+      console.error('Google sign in failed:', error);
       toast({
         title: "Google Sign In Error",
-        description: error.message,
+        description: error.message || "Failed to sign in with Google. Please try again.",
         variant: "destructive"
       });
     }
