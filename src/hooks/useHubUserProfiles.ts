@@ -22,38 +22,35 @@ export const useHubUserProfiles = () => {
     }
 
     try {
-      // Use raw SQL query since types aren't updated yet
-      const { data, error } = await supabase
-        .rpc('get_hub_user_profile', { user_id_param: userId });
+      // Try to get from hub_user_profiles table first
+      const { data: hubProfileData, error: hubError } = await supabase
+        .from('hub_user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        
-        // Fallback: try to get from profiles table
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', userId)
-          .single();
-
-        if (profileData) {
-          const fallbackProfile: HubUserProfile = {
-            id: userId,
-            user_id: userId,
-            display_name: profileData.name || profileData.email || 'Anonymous User',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
-          return fallbackProfile;
-        }
-        return null;
+      if (hubProfileData && !hubError) {
+        setProfiles(prev => ({ ...prev, [userId]: hubProfileData }));
+        return hubProfileData;
       }
 
-      if (data && data.length > 0) {
-        const profileData = data[0] as HubUserProfile;
-        setProfiles(prev => ({ ...prev, [userId]: profileData }));
-        return profileData;
+      // Fallback: try to get from profiles table
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('name, email')
+        .eq('id', userId)
+        .single();
+
+      if (profileData) {
+        const fallbackProfile: HubUserProfile = {
+          id: userId,
+          user_id: userId,
+          display_name: profileData.name || profileData.email || 'Anonymous User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
+        return fallbackProfile;
       }
 
       return null;
@@ -67,22 +64,33 @@ export const useHubUserProfiles = () => {
     if (!user) return;
 
     try {
-      // Check if hub profile exists using raw query
+      // Check if hub profile exists
       const { data: existingProfile } = await supabase
-        .rpc('get_hub_user_profile', { user_id_param: user.id });
+        .from('hub_user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      if (!existingProfile || existingProfile.length === 0) {
+      if (!existingProfile) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('name, email')
           .eq('id', user.id)
           .single();
 
-        // Create hub profile using raw SQL
-        await supabase.rpc('create_hub_user_profile', {
-          user_id_param: user.id,
-          display_name_param: profile?.name || profile?.email || 'Anonymous User'
-        });
+        // Create hub profile
+        const { data: newProfile } = await supabase
+          .from('hub_user_profiles')
+          .insert({
+            user_id: user.id,
+            display_name: profile?.name || profile?.email || 'Anonymous User'
+          })
+          .select()
+          .single();
+
+        if (newProfile) {
+          setProfiles(prev => ({ ...prev, [user.id]: newProfile }));
+        }
       }
     } catch (error) {
       console.error('Error ensuring user profile:', error);
