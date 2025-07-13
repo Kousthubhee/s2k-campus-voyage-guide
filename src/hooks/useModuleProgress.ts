@@ -21,19 +21,13 @@ export const useModuleProgress = () => {
     if (!user) return;
 
     try {
-      // For now, we'll use a workaround since the table might not exist yet
-      // Try to query, but handle gracefully if it fails
-      const { data, error } = await supabase
-        .rpc('get_user_data', { user_uuid: user.id });
-
-      if (error) {
-        console.error('Error fetching module completions:', error);
-        // If the function doesn't exist, use empty array
-        setCompletions([]);
+      // For now, we'll work with local storage until the module_completions table is properly set up
+      const stored = localStorage.getItem(`module_completions_${user.id}`);
+      if (stored) {
+        const parsedCompletions = JSON.parse(stored);
+        setCompletions(parsedCompletions);
       } else {
-        // Filter for module completion data if it exists
-        const moduleData = (data || []).filter((item: any) => item.module_id);
-        setCompletions(moduleData);
+        setCompletions([]);
       }
     } catch (error: any) {
       console.error('Error fetching module completions:', error);
@@ -50,7 +44,7 @@ export const useModuleProgress = () => {
     }
 
     try {
-      // Create a completion record manually for now
+      // Create a completion record
       const completion: ModuleCompletion = {
         id: crypto.randomUUID(),
         user_id: user.id,
@@ -59,13 +53,19 @@ export const useModuleProgress = () => {
         notes: notes,
       };
 
-      setCompletions(prev => {
-        const existing = prev.find(c => c.module_id === moduleId);
-        if (existing) {
-          return prev.map(c => c.module_id === moduleId ? completion : c);
-        }
-        return [...prev, completion];
-      });
+      const updatedCompletions = [...completions];
+      const existingIndex = updatedCompletions.findIndex(c => c.module_id === moduleId);
+      
+      if (existingIndex >= 0) {
+        updatedCompletions[existingIndex] = completion;
+      } else {
+        updatedCompletions.push(completion);
+      }
+
+      setCompletions(updatedCompletions);
+      
+      // Store in localStorage for now
+      localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
 
       toast.success('Module marked as complete!');
     } catch (error: any) {
