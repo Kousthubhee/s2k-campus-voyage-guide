@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,6 @@ export const HubPage = () => {
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
-  const [newComment, setNewComment] = useState({});
 
   const { posts, loading, createPost, updatePost, deletePost, likePost } = useHubPosts();
   const { user } = useAuth();
@@ -213,29 +211,16 @@ export const HubPage = () => {
         <div className="lg:col-span-2 space-y-6">
           {activeTab === 'qa' && (
             <QATab
-              qaPosts={qaPosts.map(post => ({
-                id: parseInt(post.id),
-                type: 'post' as const,
-                author: 'User',
-                avatar: '👤',
-                time: new Date(post.created_at).toLocaleDateString(),
-                content: post.content,
-                likes: post.likes_count,
-                comments: [],
-                category: post.category
-              }))}
+              qaPosts={qaPosts}
               newPost={newPost}
               onNewPostChange={setNewPost}
               onPublishPost={handlePublishPost}
-              onLike={(id) => likePost(qaPosts.find(p => parseInt(p.id) === id)?.id || '')}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              newComment={newComment}
-              setNewComment={setNewComment}
-              onComment={() => {}}
-              onReply={() => {}}
-              onEditComment={() => {}}
-              onDeleteComment={() => {}}
+              onLike={(postId) => likePost(postId)}
+              onEdit={(postId) => {
+                console.log('Edit post:', postId);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={(postId) => deletePost(postId)}
             />
           )}
           {activeTab === 'blogs' && (
@@ -257,8 +242,8 @@ export const HubPage = () => {
               onLike={(id) => likePost(blogs.find(p => parseInt(p.id) === id)?.id || '')}
               onEdit={() => {}}
               onDelete={() => {}}
-              newComment={newComment}
-              setNewComment={setNewComment}
+              newComment={{}}
+              setNewComment={() => {}}
               onComment={() => {}}
               onReply={() => {}}
               onEditComment={() => {}}
@@ -287,8 +272,8 @@ export const HubPage = () => {
               onLike={(id) => likePost(reels.find(p => parseInt(p.id) === id)?.id || '')}
               onEdit={() => {}}
               onDelete={() => {}}
-              newComment={newComment}
-              setNewComment={setNewComment}
+              newComment={{}}
+              setNewComment={() => {}}
               onComment={() => {}}
               onReply={() => {}}
               onEditComment={() => {}}
@@ -319,8 +304,8 @@ export const HubPage = () => {
               onLike={(id) => likePost(polls.find(p => parseInt(p.id) === id)?.id || '')}
               onEdit={() => {}}
               onDelete={() => {}}
-              newComment={newComment}
-              setNewComment={setNewComment}
+              newComment={{}}
+              setNewComment={() => {}}
               onComment={() => {}}
               onReply={() => {}}
               onEditComment={() => {}}

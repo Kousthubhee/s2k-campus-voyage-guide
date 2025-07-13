@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +16,10 @@ export interface HubPost {
   comments_count: number;
   created_at: string;
   updated_at: string;
+  user_profile?: {
+    display_name: string;
+    avatar_url?: string;
+  };
 }
 
 export const useHubPosts = () => {
@@ -28,7 +31,10 @@ export const useHubPosts = () => {
     try {
       const { data, error } = await supabase
         .from('hub_posts')
-        .select('*')
+        .select(`
+          *,
+          hub_user_profiles!inner(display_name, avatar_url)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -48,7 +54,11 @@ export const useHubPosts = () => {
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,
         created_at: post.created_at,
-        updated_at: post.updated_at
+        updated_at: post.updated_at,
+        user_profile: {
+          display_name: post.hub_user_profiles?.display_name || 'Anonymous',
+          avatar_url: post.hub_user_profiles?.avatar_url
+        }
       }));
       
       setPosts(transformedPosts);
@@ -73,6 +83,32 @@ export const useHubPosts = () => {
       return;
     }
 
+    // Ensure user has a hub profile
+    try {
+      const { data: existingProfile } = await supabase
+        .from('hub_user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!existingProfile) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', user.id)
+          .single();
+
+        await supabase
+          .from('hub_user_profiles')
+          .insert({
+            user_id: user.id,
+            display_name: profile?.name || profile?.email || 'Anonymous User'
+          });
+      }
+    } catch (error) {
+      console.error('Error ensuring user profile:', error);
+    }
+
     console.log('Creating post with data:', postData);
 
     try {
@@ -87,7 +123,10 @@ export const useHubPosts = () => {
           poll_options: postData.poll_options,
           user_id: user.id,
         })
-        .select()
+        .select(`
+          *,
+          hub_user_profiles!inner(display_name, avatar_url)
+        `)
         .single();
 
       if (error) {
@@ -109,7 +148,11 @@ export const useHubPosts = () => {
         likes_count: data.likes_count || 0,
         comments_count: data.comments_count || 0,
         created_at: data.created_at,
-        updated_at: data.updated_at
+        updated_at: data.updated_at,
+        user_profile: {
+          display_name: data.hub_user_profiles?.display_name || 'Anonymous',
+          avatar_url: data.hub_user_profiles?.avatar_url
+        }
       };
       
       setPosts(prev => [newPost, ...prev]);
