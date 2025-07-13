@@ -149,7 +149,7 @@ export const ContactPage = () => {
                 <MapPin className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Office</p>
-                  <p className="text-gray-600">123 Education Street, Learning City, LC 12345</p>
+                  <p className="text-gray-600">Remote</p>
                 </div>
               </div>
             </CardContent>
