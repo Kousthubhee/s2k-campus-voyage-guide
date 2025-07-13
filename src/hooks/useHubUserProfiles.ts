@@ -27,7 +27,7 @@ export const useHubUserProfiles = () => {
         .from('hub_user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (hubProfileData && !hubError) {
         setProfiles(prev => ({ ...prev, [userId]: hubProfileData }));
@@ -39,7 +39,7 @@ export const useHubUserProfiles = () => {
         .from('profiles')
         .select('name, email')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileData) {
         const fallbackProfile: HubUserProfile = {
@@ -69,14 +69,14 @@ export const useHubUserProfiles = () => {
         .from('hub_user_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!existingProfile) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('name, email')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         // Create hub profile
         const { data: newProfile } = await supabase

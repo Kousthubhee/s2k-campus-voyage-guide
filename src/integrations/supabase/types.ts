@@ -370,6 +370,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          parent_id: string | null
           post_id: string
           updated_at: string
           user_id: string
@@ -378,6 +379,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           post_id: string
           updated_at?: string
           user_id: string
@@ -386,11 +388,19 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           post_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "hub_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "hub_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hub_comments_post_id_fkey"
             columns: ["post_id"]
@@ -469,6 +479,33 @@ export type Database = {
           poll_options?: Json | null
           title?: string
           type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hub_user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
           updated_at?: string
           user_id?: string
         }

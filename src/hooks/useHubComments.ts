@@ -59,9 +59,15 @@ export const useHubComments = (postId: string) => {
         return acc;
       }, {} as Record<string, { display_name: string }>);
 
-      // Transform comments with profile data
+      // Transform comments with profile data and include parent_id
       const commentsWithProfiles = (commentsData || []).map(comment => ({
-        ...comment,
+        id: comment.id,
+        post_id: comment.post_id,
+        user_id: comment.user_id,
+        content: comment.content,
+        parent_id: comment.parent_id,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
         user_profile: {
           display_name: profileMap[comment.user_id]?.display_name || 'Anonymous',
           avatar_url: undefined
