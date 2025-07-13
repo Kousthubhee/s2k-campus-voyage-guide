@@ -437,7 +437,10 @@ export type Database = {
           created_at: string
           id: string
           likes_count: number | null
+          media_url: string | null
+          poll_options: Json | null
           title: string
+          type: string | null
           updated_at: string
           user_id: string
         }
@@ -448,7 +451,10 @@ export type Database = {
           created_at?: string
           id?: string
           likes_count?: number | null
+          media_url?: string | null
+          poll_options?: Json | null
           title: string
+          type?: string | null
           updated_at?: string
           user_id: string
         }
@@ -459,7 +465,10 @@ export type Database = {
           created_at?: string
           id?: string
           likes_count?: number | null
+          media_url?: string | null
+          poll_options?: Json | null
           title?: string
+          type?: string | null
           updated_at?: string
           user_id?: string
         }

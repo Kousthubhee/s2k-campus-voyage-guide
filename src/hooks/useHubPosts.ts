@@ -33,6 +33,8 @@ export const useHubPosts = () => {
 
       if (error) throw error;
       
+      console.log('Fetched posts data:', data);
+      
       // Transform the data to match our HubPost interface
       const transformedPosts: HubPost[] = (data || []).map(post => ({
         id: post.id,
@@ -40,9 +42,9 @@ export const useHubPosts = () => {
         title: post.title,
         content: post.content,
         category: post.category,
-        type: (post as any).type || 'qa' as 'qa' | 'blog' | 'reel' | 'poll',
-        media_url: (post as any).media_url,
-        poll_options: (post as any).poll_options,
+        type: post.type as 'qa' | 'blog' | 'reel' | 'poll' || 'qa',
+        media_url: post.media_url,
+        poll_options: post.poll_options,
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,
         created_at: post.created_at,
@@ -71,17 +73,29 @@ export const useHubPosts = () => {
       return;
     }
 
+    console.log('Creating post with data:', postData);
+
     try {
       const { data, error } = await supabase
         .from('hub_posts')
         .insert({
-          ...postData,
+          title: postData.title,
+          content: postData.content,
+          category: postData.category,
+          type: postData.type,
+          media_url: postData.media_url,
+          poll_options: postData.poll_options,
           user_id: user.id,
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Created post response:', data);
       
       const newPost: HubPost = {
         id: data.id,
@@ -89,9 +103,9 @@ export const useHubPosts = () => {
         title: data.title,
         content: data.content,
         category: data.category,
-        type: (data as any).type || postData.type,
-        media_url: (data as any).media_url || postData.media_url,
-        poll_options: (data as any).poll_options || postData.poll_options,
+        type: data.type as 'qa' | 'blog' | 'reel' | 'poll',
+        media_url: data.media_url,
+        poll_options: data.poll_options,
         likes_count: data.likes_count || 0,
         comments_count: data.comments_count || 0,
         created_at: data.created_at,
@@ -103,7 +117,7 @@ export const useHubPosts = () => {
       return newPost;
     } catch (error: any) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      toast.error(`Failed to create post: ${error.message}`);
       throw error;
     }
   };
