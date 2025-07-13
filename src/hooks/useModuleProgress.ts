@@ -21,17 +21,19 @@ export const useModuleProgress = () => {
     if (!user) return;
 
     try {
-      // For now, we'll use a workaround until the types are updated
+      // For now, we'll use a workaround since the table might not exist yet
+      // Try to query, but handle gracefully if it fails
       const { data, error } = await supabase
-        .rpc('get_module_completions', { user_uuid: user.id })
-        .select('*');
+        .rpc('get_user_data', { user_uuid: user.id });
 
       if (error) {
         console.error('Error fetching module completions:', error);
-        // If RPC doesn't exist, fall back to empty array
+        // If the function doesn't exist, use empty array
         setCompletions([]);
       } else {
-        setCompletions(data || []);
+        // Filter for module completion data if it exists
+        const moduleData = (data || []).filter((item: any) => item.module_id);
+        setCompletions(moduleData);
       }
     } catch (error: any) {
       console.error('Error fetching module completions:', error);
