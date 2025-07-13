@@ -133,7 +133,7 @@ export const ContactPage = () => {
                 <Mail className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Email</p>
-                  <p className="text-gray-600">support@studyabroad.com</p>
+                  <p className="text-gray-600">pass2kampus@gmail.com</p>
                 </div>
               </div>
 
@@ -141,7 +141,7 @@ export const ContactPage = () => {
                 <Phone className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                  <p className="text-gray-600">+33 745736466</p>
                 </div>
               </div>
 
