@@ -130,7 +130,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   );
 };
 
-// Separate component for individual reel cards to make it more manageable
+// Separate component for individual reel cards
 const ReelCard: React.FC<{
   reel: Reel;
   onLike: (itemId: number, type: "post" | "reel" | "poll" | "blog") => void;
@@ -154,12 +154,16 @@ const ReelCard: React.FC<{
   onEditComment, 
   onDeleteComment 
 }) => {
-  const { comments, addComment } = useHubComments(reel.id.toString());
+  const { comments, addComment, loading } = useHubComments(reel.id.toString());
   const [commentText, setCommentText] = useState('');
 
   const handleAddComment = async () => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim()) {
+      toast.error('Please enter a comment');
+      return;
+    }
     
+    console.log('Adding comment to reel:', reel.id, 'with text:', commentText);
     await addComment(commentText);
     setCommentText('');
   };
@@ -223,6 +227,8 @@ const ReelCard: React.FC<{
 
         {/* Comments Section */}
         <div className="space-y-3">
+          {loading && <p className="text-sm text-gray-500">Loading comments...</p>}
+          
           {comments.map((comment) => (
             <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
               <div className="flex items-start justify-between mb-2">
@@ -270,8 +276,13 @@ const ReelCard: React.FC<{
               placeholder="Add a comment..."
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddComment();
+                }
+              }}
             />
-            <Button onClick={handleAddComment}>
+            <Button onClick={handleAddComment} disabled={!commentText.trim()}>
               Comment
             </Button>
           </div>

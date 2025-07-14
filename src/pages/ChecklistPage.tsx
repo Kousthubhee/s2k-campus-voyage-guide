@@ -5,7 +5,21 @@ import checklistModules from '@/constants/checklistModules';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
 import { useAuth } from '@/hooks/useAuth';
 
-export const ChecklistPage = () => {
+interface ChecklistPageProps {
+  userProgress?: any;
+  setUserProgress?: (progress: any) => void;
+  onSchoolSelect?: (school: any) => void;
+  currentPage?: string;
+  setCurrentPage?: (page: string) => void;
+}
+
+export const ChecklistPage: React.FC<ChecklistPageProps> = ({
+  userProgress: externalUserProgress,
+  setUserProgress: externalSetUserProgress,
+  onSchoolSelect,
+  currentPage = 'checklist',
+  setCurrentPage = () => {}
+}) => {
   const { user } = useAuth();
   const { 
     completions, 
@@ -16,19 +30,19 @@ export const ChecklistPage = () => {
   } = useModuleProgress();
 
   // Create userProgress object from database data
-  const userProgress = {
+  const userProgress = externalUserProgress || {
     keys: completions.length,
     completedModules: completions.map(c => c.module_id),
     unlockedModules: ['school', 'pre-arrival-1', 'pre-arrival-2', ...completions.map(c => c.module_id)]
   };
 
-  const setUserProgress = () => {
+  const setUserProgress = externalSetUserProgress || (() => {
     // This will be handled by the individual module actions
-  };
+  });
 
-  const handleSchoolSelect = (school: any) => {
+  const handleSchoolSelect = onSchoolSelect || ((school: any) => {
     console.log('School selected:', school);
-  };
+  });
 
   if (!user) {
     return (
@@ -60,8 +74,8 @@ export const ChecklistPage = () => {
         userProgress={userProgress}
         setUserProgress={setUserProgress}
         onSchoolSelect={handleSchoolSelect}
-        currentPage="checklist"
-        setCurrentPage={() => {}}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
         onModuleComplete={markModuleComplete}
         onModuleUncomplete={unmarkModuleComplete}
         isModuleComplete={isModuleComplete}

@@ -1,137 +1,124 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
-import { ChecklistPage } from './ChecklistPage';
+import { ChecklistPage } from '@/pages/ChecklistPage';
 import { DocumentsPage } from '@/components/DocumentsPage';
-import { HubPage } from './HubPage';
-import { NewsPage } from './NewsPage';
-import { AffiliationPage } from '@/components/AffiliationPage';
-import { LanguagePage } from './LanguagePage';
+import { HubPage } from '@/pages/HubPage';
+import { SchoolInsightsPage } from '@/pages/SchoolInsightsPage';
+import { PreArrival1Page } from '@/pages/PreArrival1Page';
+import { PreArrival2Page } from '@/pages/PreArrivalPage2';
+import { PostArrivalPage } from '@/pages/PostArrivalPage';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
-import { TranslatePage } from './TranslatePage';
-import { ContactPage } from './ContactPage';
-import { ProfilePage } from './ProfilePage';
-import { SchoolInsightsPage } from './SchoolInsightsPage';
-import { PreArrival1Page } from './PreArrival1Page';
-import { PreArrival2Page } from './PreArrival2Page';
-import { PostArrivalPage } from './PostArrivalPage';
-import { FinanceTrackingPage } from './FinanceTrackingPage';
-import { NotificationsPage } from './NotificationsPage';
-import { QAPage } from './QAPage';
-import { SuggestionsPage } from './SuggestionsPage';
-import { AskMeAnythingPage } from './AskMeAnythingPage';
-import { ChatbotPage } from './ChatbotPage';
+import { FinanceTrackingPage } from '@/pages/FinanceTrackingPage';
+import { SuggestionsPage } from '@/pages/SuggestionsPage';
+import { QAPage } from '@/pages/QAPage';
+import { TranslatePage } from '@/pages/TranslatePage';
+import { ContactPage } from '@/pages/ContactPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 import { AuthPage } from '@/components/AuthPage';
+import { NotificationsPage } from '@/pages/NotificationsPage';
+import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
 
 interface MainRouterProps {
   currentPage: string;
   setCurrentPage: (page: string) => void;
-  userProfile: any;
-  userProgress: any;
-  setUserProgress: (progress: any) => void;
-  selectedSchool: any;
-  setSelectedSchool: (school: any) => void;
-  handleProgressUpdate: (progress: any) => void;
-  profile: any;
-  setUserProfile: (profile: any) => void;
 }
 
-const MainRouter = ({
-  currentPage,
-  setCurrentPage,
-  userProfile,
-  userProgress,
-  setUserProgress,
-  selectedSchool,
-  setSelectedSchool,
-  handleProgressUpdate,
-  profile,
-  setUserProfile
-}: MainRouterProps) => {
-  const { user, loading } = useAuth();
+interface UserProfile {
+  name: string;
+  email: string;
+  about: string;
+  memberSince: string;
+  photo: string;
+  age: string;
+  prevEducation: string;
+  workExperience: string;
+  nationality?: string;
+  education_level?: string;
+  target_city?: string;
+  target_program?: string;
+}
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+export const MainRouter = ({ currentPage, setCurrentPage }: MainRouterProps) => {
+  const { user } = useAuth();
+  const [userProgress, setUserProgress] = useLocalStorageProgress();
+  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+    email: user?.email || '',
+    about: 'Complete your profile to get personalized recommendations.',
+    memberSince: new Date().toLocaleDateString(),
+    photo: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=facearea&w=256&h=256&facepad=3&q=80',
+    age: '',
+    prevEducation: '',
+    workExperience: '',
+    nationality: '',
+    education_level: '',
+    target_city: '',
+    target_program: '',
+  });
 
-  const renderCurrentPage = () => {
-    console.log('Current page in MainRouter:', currentPage);
-    
+  useEffect(() => {
+    if (user) {
+      setUserProfile(prev => ({
+        ...prev,
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        email: user.email || '',
+      }));
+    }
+  }, [user]);
+
+  const renderPage = () => {
     switch (currentPage) {
       case 'home':
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
       case 'checklist':
-        return <ChecklistPage />;
+        return (
+          <ChecklistPage 
+            userProgress={userProgress}
+            setUserProgress={setUserProgress}
+            onSchoolSelect={setSelectedSchool}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        );
       case 'documents':
         return <DocumentsPage />;
       case 'hub':
         return <HubPage />;
-      case 'news':
-        return <NewsPage />;
-      case 'affiliation':
-        return <AffiliationPage />;
-      case 'language':
-        return <LanguagePage />;
+      case 'school-insights':
+        return <SchoolInsightsPage />;
+      case 'pre-arrival-1':
+        return <PreArrival1Page />;
+      case 'pre-arrival-2':
+        return <PreArrival2Page />;
+      case 'post-arrival':
+        return <PostArrivalPage />;
       case 'integration':
-        return <FrenchIntegrationPage onBack={() => setCurrentPage('checklist')} />;
+        return <FrenchIntegrationPage />;
+      case 'finance-tracking':
+        return <FinanceTrackingPage />;
+      case 'suggestions':
+        return <SuggestionsPage />;
+      case 'qa':
+        return <QAPage />;
       case 'translate':
         return <TranslatePage />;
       case 'contact':
         return <ContactPage />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} setCurrentPage={setCurrentPage} />;
       case 'auth':
         return <AuthPage onBack={() => setCurrentPage('home')} />;
       case 'school':
-      case 'school-insights':
-        return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
-      case 'pre-arrival-1':
-        return (
-          <PreArrival1Page 
-            onBack={() => setCurrentPage('checklist')} 
-            onComplete={() => {}} 
-            isCompleted={false} 
-            profile={profile} 
-          />
-        );
-      case 'pre-arrival-2':
-        return (
-          <PreArrival2Page 
-            onBack={() => setCurrentPage('checklist')} 
-          />
-        );
-      case 'post-arrival':
-        return (
-          <PostArrivalPage 
-            onBack={() => setCurrentPage('checklist')} 
-            onComplete={() => {}} 
-            isCompleted={false} 
-          />
-        );
-      case 'finance':
-      case 'finance-tracking':
-        return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
+        return <SchoolInsightsPage selectedSchool={selectedSchool} />;
       case 'notifications':
         return <NotificationsPage />;
-      case 'qa':
-        return <QAPage />;
-      case 'ask-me-anything':
-        return <AskMeAnythingPage />;
-      case 'suggestions':
-        return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
-      case 'chatbot':
-        return <ChatbotPage />;
       default:
-        console.log('Unknown page:', currentPage, '- defaulting to home');
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
     }
   };
 
-  return (
-    <>
-      {renderCurrentPage()}
-    </>
-  );
+  return renderPage();
 };
-
-export default MainRouter;

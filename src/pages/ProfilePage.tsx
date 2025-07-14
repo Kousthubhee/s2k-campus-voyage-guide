@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,9 +25,15 @@ interface ProfileType {
   target_program?: string;
 }
 
+interface ProfilePageProps {
+  userProfile?: any;
+  setUserProfile?: (profile: any) => void;
+  setCurrentPage?: (page: string) => void;
+}
+
 const defaultProfilePhoto = "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=facearea&w=256&h=256&facepad=3&q=80";
 
-export function ProfilePage() {
+export function ProfilePage({ userProfile: externalProfile, setUserProfile: externalSetProfile }: ProfilePageProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { profile, loading, updateProfile } = useProfile();
   const { user } = useAuth();
@@ -54,20 +61,23 @@ export function ProfilePage() {
     );
   }
 
+  // Use external profile if provided, otherwise use internal profile
+  const currentProfile = externalProfile || profile;
+
   const profileData: ProfileType = {
-    id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    about: profile.about || 'Complete your profile to get personalized recommendations.',
-    memberSince: new Date(profile.created_at || Date.now()).toLocaleDateString(),
-    photo: profile.photo_url || defaultProfilePhoto,
-    age: profile.age || '',
-    prevEducation: profile.prev_education || '',
-    workExperience: profile.work_experience || '',
-    nationality: profile.nationality || '',
-    education_level: profile.education_level || '',
-    target_city: profile.target_city || '',
-    target_program: profile.target_program || '',
+    id: currentProfile.id,
+    name: currentProfile.name,
+    email: currentProfile.email,
+    about: currentProfile.about || 'Complete your profile to get personalized recommendations.',
+    memberSince: new Date(currentProfile.created_at || Date.now()).toLocaleDateString(),
+    photo: currentProfile.photo_url || defaultProfilePhoto,
+    age: currentProfile.age || '',
+    prevEducation: currentProfile.prev_education || '',
+    workExperience: currentProfile.work_experience || '',
+    nationality: currentProfile.nationality || '',
+    education_level: currentProfile.education_level || '',
+    target_city: currentProfile.target_city || '',
+    target_program: currentProfile.target_program || '',
   };
 
   const handleSaveProfile = async (updatedProfile: ProfileType) => {
@@ -91,6 +101,13 @@ export function ProfilePage() {
     const success = await updateProfile(profileUpdates);
     if (success) {
       console.log("📌 Profile updated successfully");
+      // Update external profile if setter is provided
+      if (externalSetProfile) {
+        externalSetProfile({
+          ...currentProfile,
+          ...profileUpdates
+        });
+      }
       setIsEditOpen(false);
     } else {
       console.log("📌 Profile update failed");
