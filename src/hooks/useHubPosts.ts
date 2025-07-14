@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,7 +52,7 @@ export const useHubPosts = () => {
             title: post.title,
             content: post.content,
             category: post.category,
-            type: post.type as 'qa' | 'blog' | 'reel' | 'poll' || 'qa',
+            type: (post.type as 'qa' | 'blog' | 'reel' | 'poll') || 'qa',
             media_url: post.media_url,
             poll_options: Array.isArray(post.poll_options) ? post.poll_options : [],
             likes_count: post.likes_count || 0,
@@ -125,7 +124,7 @@ export const useHubPosts = () => {
         title: data.title,
         content: data.content,
         category: data.category,
-        type: data.type as 'qa' | 'blog' | 'reel' | 'poll',
+        type: (data.type as 'qa' | 'blog' | 'reel' | 'poll') || 'qa',
         media_url: data.media_url,
         poll_options: Array.isArray(data.poll_options) ? data.poll_options : [],
         likes_count: data.likes_count || 0,
@@ -172,7 +171,7 @@ export const useHubPosts = () => {
         title: data.title,
         content: data.content,
         category: data.category,
-        type: data.type || 'qa' as 'qa' | 'blog' | 'reel' | 'poll',
+        type: (data.type as 'qa' | 'blog' | 'reel' | 'poll') || 'qa',
         media_url: data.media_url,
         poll_options: Array.isArray(data.poll_options) ? data.poll_options : [],
         likes_count: data.likes_count || 0,

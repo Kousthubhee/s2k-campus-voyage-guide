@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,14 +55,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
 
     const result = await uploadFile(file, 'documents');
     if (result) {
-      // Create a synthetic event to maintain compatibility
-      const syntheticEvent = {
-        target: {
-          files: [file]
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      
-      onReelUpload(syntheticEvent);
+      // Pass the original event to maintain compatibility
+      onReelUpload(e);
     }
   };
 

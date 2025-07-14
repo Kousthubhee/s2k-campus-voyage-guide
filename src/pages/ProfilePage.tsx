@@ -289,9 +289,10 @@ export const ProfilePage = ({ setCurrentPage }: ProfilePageProps) => {
         onOpenChange={setIsEditing}
         profile={{
           ...currentProfile,
-          photo: currentProfile.photo_url,
-          prevEducation: currentProfile.prev_education,
-          workExperience: currentProfile.work_experience,
+          photo: currentProfile.photo_url || '',
+          prevEducation: currentProfile.prev_education || '',
+          workExperience: currentProfile.work_experience || '',
+          about: currentProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
           memberSince: 'Recently joined'
         }}
         onSave={handleSave}
