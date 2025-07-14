@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { VideoPlayer } from './VideoPlayer';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useHubComments } from '@/hooks/useHubComments';
 import { Reel, QAComment } from './hubTypes';
+import { toast } from 'sonner';
 
 interface ReelsTabProps {
   reels: Reel[];
@@ -58,13 +59,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
     try {
       const result = await uploadFile(file, 'documents');
       if (result) {
-        // Create a mock event for compatibility
-        const mockEvent = {
-          target: {
-            files: [file]
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        onReelUpload(mockEvent);
+        // Pass the original event to maintain compatibility
+        onReelUpload(e);
       }
     } catch (error) {
       console.error('File upload error:', error);
