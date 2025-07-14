@@ -39,6 +39,14 @@ export const useFileUpload = () => {
 
       console.log('File uploaded successfully:', urlData.publicUrl);
 
+      // Determine category based on file type
+      let category = 'Document';
+      if (file.type.startsWith('video/')) {
+        category = 'Video';
+      } else if (file.type.startsWith('image/')) {
+        category = 'Image';
+      }
+
       // Save file record to database
       const { data: dbData, error: dbError } = await supabase
         .from('documents')
@@ -49,7 +57,7 @@ export const useFileUpload = () => {
           file_size: file.size,
           mime_type: file.type,
           type: 'upload',
-          category: file.type.startsWith('video/') ? 'Video' : 'Document'
+          category: category
         })
         .select()
         .single();

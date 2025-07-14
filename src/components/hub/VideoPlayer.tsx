@@ -21,8 +21,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     );
   }
 
-  // Handle both blob URLs and actual URLs
-  const videoSrc = src.startsWith('blob:') || src.startsWith('http') ? src : '';
+  // Handle both blob URLs and Supabase URLs
+  const videoSrc = src.startsWith('blob:') || src.startsWith('http') ? src : src;
   
   if (!videoSrc) {
     return (
@@ -33,16 +33,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   return (
-    <video
-      src={videoSrc}
-      controls={controls}
-      className={className}
-      preload="metadata"
-      onError={(e) => {
-        console.error('Video failed to load:', e);
-      }}
-    >
-      Your browser does not support the video tag.
-    </video>
+    <div className={className}>
+      <video
+        src={videoSrc}
+        controls={controls}
+        className="w-full h-auto rounded-lg"
+        preload="metadata"
+        onError={(e) => {
+          console.error('Video failed to load:', e);
+          console.error('Video src:', videoSrc);
+        }}
+        onLoadStart={() => {
+          console.log('Video loading started:', videoSrc);
+        }}
+      >
+        Your browser does not support the video tag.
+      </video>
+    </div>
   );
 };

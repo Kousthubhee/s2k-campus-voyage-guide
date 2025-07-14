@@ -1,13 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, File, X, Calendar, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileItem {
   id: string;
@@ -22,7 +22,7 @@ interface FileItem {
 
 export function FileUpload() {
   const [files, setFiles] = useState<FileItem[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const { uploadFile, uploading } = useFileUpload();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -50,37 +50,12 @@ export function FileUpload() {
     if (!event.target.files || !user) return;
 
     const file = event.target.files[0];
-    setUploading(true);
-
+    
     try {
-      // Upload to Supabase Storage
-      const fileName = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from('uploads')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      // Save file info to database
-      const { data, error: dbError } = await supabase
-        .from('documents')
-        .insert({
-          user_id: user.id,
-          name: file.name,
-          file_path: fileName,
-          file_size: file.size,
-          mime_type: file.type,
-          type: 'upload',
-          category: 'General',
-          is_important: false
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      if (data) {
-        setFiles([data, ...files]);
+      const result = await uploadFile(file, 'documents');
+      if (result) {
+        // Refresh the file list
+        await loadFiles();
         toast({
           title: "File uploaded successfully",
           description: `${file.name} has been uploaded and stored securely.`
@@ -93,7 +68,6 @@ export function FileUpload() {
         variant: "destructive"
       });
     } finally {
-      setUploading(false);
       event.target.value = '';
     }
   };
@@ -101,7 +75,7 @@ export function FileUpload() {
   const handleDeleteFile = async (fileId: string, filePath: string) => {
     try {
       // Delete from storage
-      await supabase.storage.from('uploads').remove([filePath]);
+      await supabase.storage.from('documents').remove([filePath]);
       
       // Delete from database
       await supabase.from('documents').delete().eq('id', fileId);
