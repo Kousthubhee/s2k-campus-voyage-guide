@@ -97,7 +97,7 @@ export const MainRouter = ({ currentPage, setCurrentPage }: MainRouterProps) => 
           profile={userProfile}
         />;
       case 'pre-arrival-2':
-        return <PreArrival2Page />;
+        return <PreArrival2Page onBack={() => setCurrentPage('checklist')} />;
       case 'post-arrival':
         return <PostArrivalPage 
           onBack={() => setCurrentPage('checklist')}
