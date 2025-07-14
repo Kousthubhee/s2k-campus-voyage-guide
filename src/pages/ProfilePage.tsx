@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -293,6 +294,7 @@ export const ProfilePage = ({ setCurrentPage }: ProfilePageProps) => {
           prevEducation: currentProfile.prev_education || '',
           workExperience: currentProfile.work_experience || '',
           about: currentProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
+          age: currentProfile.age || 'Not specified',
           memberSince: 'Recently joined'
         }}
         onSave={handleSave}
