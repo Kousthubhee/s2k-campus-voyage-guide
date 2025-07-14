@@ -7,7 +7,7 @@ import { DocumentsPage } from '@/components/DocumentsPage';
 import { HubPage } from '@/pages/HubPage';
 import { SchoolInsightsPage } from '@/pages/SchoolInsightsPage';
 import { PreArrival1Page } from '@/pages/PreArrival1Page';
-import { PreArrival2Page } from '@/pages/PreArrivalPage2';
+import { PreArrival2Page } from '@/pages/PreArrival2Page';
 import { PostArrivalPage } from '@/pages/PostArrivalPage';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { FinanceTrackingPage } from '@/pages/FinanceTrackingPage';
@@ -88,19 +88,28 @@ export const MainRouter = ({ currentPage, setCurrentPage }: MainRouterProps) => 
       case 'hub':
         return <HubPage />;
       case 'school-insights':
-        return <SchoolInsightsPage />;
+        return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
       case 'pre-arrival-1':
-        return <PreArrival1Page />;
+        return <PreArrival1Page 
+          onBack={() => setCurrentPage('checklist')}
+          onComplete={() => console.log('Pre-arrival 1 completed')}
+          isCompleted={false}
+          profile={userProfile}
+        />;
       case 'pre-arrival-2':
         return <PreArrival2Page />;
       case 'post-arrival':
-        return <PostArrivalPage />;
+        return <PostArrivalPage 
+          onBack={() => setCurrentPage('checklist')}
+          onComplete={() => console.log('Post-arrival completed')}
+          isCompleted={false}
+        />;
       case 'integration':
         return <FrenchIntegrationPage />;
       case 'finance-tracking':
-        return <FinanceTrackingPage />;
+        return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
       case 'suggestions':
-        return <SuggestionsPage />;
+        return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
       case 'qa':
         return <QAPage />;
       case 'translate':
@@ -112,7 +121,7 @@ export const MainRouter = ({ currentPage, setCurrentPage }: MainRouterProps) => 
       case 'auth':
         return <AuthPage onBack={() => setCurrentPage('home')} />;
       case 'school':
-        return <SchoolInsightsPage selectedSchool={selectedSchool} />;
+        return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
       case 'notifications':
         return <NotificationsPage />;
       default:

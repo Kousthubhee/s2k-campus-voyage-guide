@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -62,16 +63,18 @@ export default function Index() {
         <AppSidebar 
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
-          user={user}
-          onLogout={handleLogout}
+          userName={user?.user_metadata?.name || user?.email?.split('@')[0]}
+          userAvatarUrl={user?.user_metadata?.avatar_url}
         />
         
         <div className="flex-1 flex flex-col">
           <Header 
-            user={user} 
-            onLogin={() => setCurrentPage('auth')} 
-            onLogout={handleLogout}
-            onProfile={() => setCurrentPage('profile')}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            userProgress={{}}
+            userProfile={userProfile}
+            setUserProfile={setUserProfile}
+            showAuth={!user}
           />
           
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
