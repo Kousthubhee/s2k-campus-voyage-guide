@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Heart, MessageSquare, Video, Edit, Trash2 } from 'lucide-react';
+import { VideoPlayer } from './VideoPlayer';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { Reel, QAComment } from './hubTypes';
 
 interface ReelsTabProps {
@@ -41,6 +43,30 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   onEditComment,
   onDeleteComment
 }) => {
+  const { uploadFile, uploading } = useFileUpload();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      alert('Please select a video file');
+      return;
+    }
+
+    const result = await uploadFile(file, 'documents');
+    if (result) {
+      // Create a synthetic event to maintain compatibility
+      const syntheticEvent = {
+        target: {
+          files: [file]
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      onReelUpload(syntheticEvent);
+    }
+  };
+
   return (
     <>
       {/* Create New Reel */}
@@ -55,13 +81,16 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
           <input
             type="file"
             accept="video/*"
-            onChange={onReelUpload}
+            onChange={handleFileUpload}
             className="mb-4"
+            disabled={uploading}
           />
+          {uploading && (
+            <p className="text-sm text-gray-500 mb-4">Uploading video...</p>
+          )}
           {newReel && (
-            <video
+            <VideoPlayer
               src={newReel}
-              controls
               className="w-full max-w-md mb-4 rounded-lg"
             />
           )}
@@ -71,7 +100,10 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             onChange={(e) => onChangeCaption(e.target.value)}
             className="mb-4"
           />
-          <Button onClick={onPublish} disabled={!newReel || !newReelCaption.trim()}>
+          <Button 
+            onClick={onPublish} 
+            disabled={!newReel || !newReelCaption.trim() || uploading}
+          >
             Share Reel
           </Button>
         </CardContent>
@@ -111,9 +143,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             </div>
             
             <div className="mb-4">
-              <video
+              <VideoPlayer
                 src={reel.videoUrl}
-                controls
                 className="w-full max-w-md rounded-lg"
               />
             </div>

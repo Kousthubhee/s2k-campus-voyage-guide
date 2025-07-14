@@ -35,28 +35,55 @@ export const useHubUserProfiles = () => {
       }
 
       // Fallback: try to get from profiles table
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('name, email')
         .eq('id', userId)
         .maybeSingle();
 
-      if (profileData) {
-        const fallbackProfile: HubUserProfile = {
-          id: userId,
+      if (profileData && !profileError) {
+        // Create a hub profile entry
+        const hubProfile = {
           user_id: userId,
-          display_name: profileData.name || profileData.email || 'Anonymous User',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          display_name: profileData.name || profileData.email || 'Anonymous User'
         };
-        setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
-        return fallbackProfile;
+
+        const { data: createdProfile, error: createError } = await supabase
+          .from('hub_user_profiles')
+          .insert(hubProfile)
+          .select()
+          .maybeSingle();
+
+        if (createdProfile && !createError) {
+          setProfiles(prev => ({ ...prev, [userId]: createdProfile }));
+          return createdProfile;
+        }
       }
 
-      return null;
+      // Last resort fallback
+      const fallbackProfile: HubUserProfile = {
+        id: userId,
+        user_id: userId,
+        display_name: 'Anonymous User',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
+      return fallbackProfile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      return null;
+      
+      const fallbackProfile: HubUserProfile = {
+        id: userId,
+        user_id: userId,
+        display_name: 'Anonymous User',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
+      return fallbackProfile;
     }
   };
 
@@ -72,6 +99,7 @@ export const useHubUserProfiles = () => {
         .maybeSingle();
 
       if (!existingProfile) {
+        // Get profile data
         const { data: profile } = await supabase
           .from('profiles')
           .select('name, email')
@@ -79,18 +107,20 @@ export const useHubUserProfiles = () => {
           .maybeSingle();
 
         // Create hub profile
-        const { data: newProfile } = await supabase
+        const { data: newProfile, error } = await supabase
           .from('hub_user_profiles')
           .insert({
             user_id: user.id,
-            display_name: profile?.name || profile?.email || 'Anonymous User'
+            display_name: profile?.name || profile?.email || user.email || 'User'
           })
           .select()
-          .single();
+          .maybeSingle();
 
-        if (newProfile) {
+        if (newProfile && !error) {
           setProfiles(prev => ({ ...prev, [user.id]: newProfile }));
         }
+      } else {
+        setProfiles(prev => ({ ...prev, [user.id]: existingProfile }));
       }
     } catch (error) {
       console.error('Error ensuring user profile:', error);

@@ -1,70 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2, LogIn } from 'lucide-react';
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from '@/hooks/useProfile';
 
 interface ProfilePageProps {
-  userProfile: {
-    id: string;
-    name: string;
-    email: string;
-    about: string;
-    memberSince: string;
-    photo: string;
-    age: string;
-    prevEducation: string;
-    workExperience: string;
-  } | null;
-  setUserProfile: (profile: any) => void;
+  userProfile?: any;
+  setUserProfile?: (profile: any) => void;
   setCurrentPage: (page: string) => void;
 }
 
-export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: ProfilePageProps) => {
+export const ProfilePage = ({ setCurrentPage }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
-  
-  useEffect(() => {
-    const loadProfileData = async () => {
-      if (!user?.email) return;
-      
-      try {
-        const { data: fetchedProfile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('email', user.email)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        if (fetchedProfile) {
-          const profileData = {
-            id: fetchedProfile.id,
-            name: fetchedProfile.name || user.email,
-            email: fetchedProfile.email,
-            about: fetchedProfile.about || 'Complete your profile to personalize your experience and get better recommendations.',
-            memberSince: fetchedProfile.created_at ? new Date(fetchedProfile.created_at).toLocaleDateString() : 'Recently joined',
-            photo: fetchedProfile.photo_url || '',
-            age: fetchedProfile.age || 'Not specified',
-            prevEducation: fetchedProfile.prev_education || 'Add your education background',
-            workExperience: fetchedProfile.work_experience || 'Add your work experience'
-          };
-          
-          setUserProfile(profileData);
-        }
-      } catch (error) {
-        console.error('Error loading profile data:', error);
-      }
-    };
-
-    loadProfileData();
-  }, [user, setUserProfile]);
+  const { profile, loading, updateProfile } = useProfile();
   
   if (!user) {
     return (
@@ -86,17 +38,29 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
       </div>
     );
   }
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading profile...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
-  const profile = userProfile || {
+  const currentProfile = profile || {
     id: user.id || '',
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
     about: 'Complete your profile to personalize your experience and get better recommendations.',
-    memberSince: 'Recently joined',
-    photo: '',
     age: 'Not specified',
-    prevEducation: 'Add your education background',
-    workExperience: 'Add your work experience'
+    prev_education: 'Add your education background',
+    work_experience: 'Add your work experience',
+    photo_url: ''
   };
 
   const achievements = [
@@ -123,15 +87,9 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
     { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
 
-  const handleSave = async (updatedProfile: typeof userProfile) => {
+  const handleSave = async (updatedProfile: any) => {
     console.log("📌 handleSave in ProfilePage.tsx triggered");
     console.log("📌 updatedProfile:", updatedProfile);
-    console.log("📌 user.id:", user?.id);
-
-    if (!user?.id) {
-      console.error('❌ No user ID available for profile update');
-      return;
-    }
 
     const updatePayload = {
       name: updatedProfile.name,
@@ -142,26 +100,9 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
       work_experience: updatedProfile.workExperience,
     };
 
-    try {
-      console.log("📌 Supabase update payload:", updatePayload);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updatePayload)
-        .eq('id', user.id)
-        .select()
-        .throwOnError();
-
-      console.log('✅ Supabase update success:', data);
-
-      setUserProfile({
-        ...updatedProfile,
-        id: user.id,
-      });
-
+    const success = await updateProfile(updatePayload);
+    if (success) {
       setIsEditing(false);
-    } catch (err) {
-      console.error('❌ Supabase update error:', err);
     }
   };
 
@@ -176,10 +117,10 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="flex-shrink-0">
-              {profile.photo ? (
+              {currentProfile.photo_url ? (
                 <img
-                  src={profile.photo}
-                  alt={profile.name}
+                  src={currentProfile.photo_url}
+                  alt={currentProfile.name}
                   className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
@@ -191,7 +132,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
             
             <div className="flex-1 space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{currentProfile.name}</h1>
                 <Button
                   onClick={() => setIsEditing(true)}
                   variant="outline"
@@ -206,11 +147,11 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
               <div className="flex flex-wrap items-center gap-4 text-gray-600">
                 <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
-                  <span className="text-sm">{profile.email}</span>
+                  <span className="text-sm">{currentProfile.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  <span className="text-sm">Member since {profile.memberSince}</span>
+                  <span className="text-sm">Member since Recently joined</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -218,7 +159,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
                 </div>
               </div>
               
-              <p className="text-gray-700 mt-3">{profile.about}</p>
+              <p className="text-gray-700 mt-3">{currentProfile.about}</p>
               
               <div className="flex items-center gap-4 mt-4">
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
@@ -346,7 +287,13 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
       <ProfileEditDialog
         open={isEditing}
         onOpenChange={setIsEditing}
-        profile={profile}
+        profile={{
+          ...currentProfile,
+          photo: currentProfile.photo_url,
+          prevEducation: currentProfile.prev_education,
+          workExperience: currentProfile.work_experience,
+          memberSince: 'Recently joined'
+        }}
         onSave={handleSave}
       />
     </div>

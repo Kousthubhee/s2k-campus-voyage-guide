@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useHubUserProfiles } from '@/hooks/useHubUserProfiles';
 import { toast } from 'sonner';
 
 export interface HubPost {
@@ -26,6 +28,7 @@ export const useHubPosts = () => {
   const [posts, setPosts] = useState<HubPost[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { getProfile } = useHubUserProfiles();
 
   const fetchPosts = async () => {
     try {
@@ -40,47 +43,34 @@ export const useHubPosts = () => {
       console.log('Fetched posts data:', postsData);
 
       // Get user profiles for all post authors
-      const userIds = [...new Set(postsData?.map(p => p.user_id) || [])];
-      const profilePromises = userIds.map(async (userId) => {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', userId)
-          .single();
-        
-        return {
-          user_id: userId,
-          display_name: profileData?.name || profileData?.email || 'Anonymous User'
-        };
-      });
-
-      const profiles = await Promise.all(profilePromises);
-      const profileMap = profiles.reduce((acc, profile) => {
-        acc[profile.user_id] = profile;
-        return acc;
-      }, {} as Record<string, { display_name: string }>);
+      const postsWithProfiles = await Promise.all(
+        (postsData || []).map(async (post) => {
+          const userProfile = await getProfile(post.user_id);
+          
+          return {
+            id: post.id,
+            user_id: post.user_id,
+            title: post.title,
+            content: post.content,
+            category: post.category,
+            type: post.type as 'qa' | 'blog' | 'reel' | 'poll' || 'qa',
+            media_url: post.media_url,
+            poll_options: Array.isArray(post.poll_options) ? post.poll_options : [],
+            likes_count: post.likes_count || 0,
+            comments_count: post.comments_count || 0,
+            created_at: post.created_at,
+            updated_at: post.updated_at,
+            user_profile: userProfile ? {
+              display_name: userProfile.display_name,
+              avatar_url: userProfile.avatar_url
+            } : {
+              display_name: 'Anonymous User'
+            }
+          };
+        })
+      );
       
-      // Transform the data to match our HubPost interface
-      const transformedPosts: HubPost[] = (postsData || []).map(post => ({
-        id: post.id,
-        user_id: post.user_id,
-        title: post.title,
-        content: post.content,
-        category: post.category,
-        type: post.type as 'qa' | 'blog' | 'reel' | 'poll' || 'qa',
-        media_url: post.media_url,
-        poll_options: Array.isArray(post.poll_options) ? post.poll_options : [],
-        likes_count: post.likes_count || 0,
-        comments_count: post.comments_count || 0,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-        user_profile: {
-          display_name: profileMap[post.user_id]?.display_name || 'Anonymous',
-          avatar_url: undefined
-        }
-      }));
-      
-      setPosts(transformedPosts);
+      setPosts(postsWithProfiles);
     } catch (error: any) {
       console.error('Error fetching posts:', error);
       toast.error('Failed to load posts');
@@ -100,23 +90,6 @@ export const useHubPosts = () => {
     if (!user) {
       toast.error('Please sign in to create posts');
       return;
-    }
-
-    // Ensure user has a profile
-    try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!existingProfile) {
-        console.error('User profile not found');
-        toast.error('Please complete your profile first');
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking user profile:', error);
     }
 
     console.log('Creating post with data:', postData);
@@ -144,11 +117,7 @@ export const useHubPosts = () => {
       console.log('Created post response:', data);
 
       // Get user profile for the new post
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('name, email')
-        .eq('id', user.id)
-        .single();
+      const userProfile = await getProfile(user.id);
       
       const newPost: HubPost = {
         id: data.id,
@@ -163,9 +132,11 @@ export const useHubPosts = () => {
         comments_count: data.comments_count || 0,
         created_at: data.created_at,
         updated_at: data.updated_at,
-        user_profile: {
-          display_name: profileData?.name || profileData?.email || 'Anonymous User',
-          avatar_url: undefined
+        user_profile: userProfile ? {
+          display_name: userProfile.display_name,
+          avatar_url: userProfile.avatar_url
+        } : {
+          display_name: 'Anonymous User'
         }
       };
       
@@ -193,19 +164,27 @@ export const useHubPosts = () => {
 
       if (error) throw error;
       
+      const userProfile = await getProfile(user.id);
+      
       const updatedPost: HubPost = {
         id: data.id,
         user_id: data.user_id,
         title: data.title,
         content: data.content,
         category: data.category,
-        type: (data as any).type || 'qa' as 'qa' | 'blog' | 'reel' | 'poll',
-        media_url: (data as any).media_url,
-        poll_options: Array.isArray((data as any).poll_options) ? (data as any).poll_options : [],
+        type: data.type || 'qa' as 'qa' | 'blog' | 'reel' | 'poll',
+        media_url: data.media_url,
+        poll_options: Array.isArray(data.poll_options) ? data.poll_options : [],
         likes_count: data.likes_count || 0,
         comments_count: data.comments_count || 0,
         created_at: data.created_at,
-        updated_at: data.updated_at
+        updated_at: data.updated_at,
+        user_profile: userProfile ? {
+          display_name: userProfile.display_name,
+          avatar_url: userProfile.avatar_url
+        } : {
+          display_name: 'Anonymous User'
+        }
       };
       
       setPosts(prev => prev.map(post => post.id === postId ? updatedPost : post));
@@ -249,7 +228,7 @@ export const useHubPosts = () => {
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (existingLike) {
         // Unlike
