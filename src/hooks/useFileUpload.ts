@@ -20,7 +20,7 @@ export const useFileUpload = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      console.log('Uploading file:', fileName);
+      console.log('Uploading file:', fileName, 'to bucket:', bucketName);
       
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -49,7 +49,7 @@ export const useFileUpload = () => {
           file_size: file.size,
           mime_type: file.type,
           type: 'upload',
-          category: 'General'
+          category: file.type.startsWith('video/') ? 'Video' : 'Document'
         })
         .select()
         .single();

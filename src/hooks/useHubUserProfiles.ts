@@ -22,6 +22,8 @@ export const useHubUserProfiles = () => {
     }
 
     try {
+      console.log('Fetching profile for user:', userId);
+      
       // Try to get from hub_user_profiles table first
       const { data: hubProfileData, error: hubError } = await supabase
         .from('hub_user_profiles')
@@ -30,6 +32,7 @@ export const useHubUserProfiles = () => {
         .maybeSingle();
 
       if (hubProfileData && !hubError) {
+        console.log('Found hub profile:', hubProfileData);
         setProfiles(prev => ({ ...prev, [userId]: hubProfileData }));
         return hubProfileData;
       }
@@ -42,10 +45,12 @@ export const useHubUserProfiles = () => {
         .maybeSingle();
 
       if (profileData && !profileError) {
+        console.log('Found profile data:', profileData);
+        
         // Create a hub profile entry
         const hubProfile = {
           user_id: userId,
-          display_name: profileData.name || profileData.email || 'Anonymous User'
+          display_name: profileData.name || profileData.email || 'User'
         };
 
         const { data: createdProfile, error: createError } = await supabase
@@ -55,6 +60,7 @@ export const useHubUserProfiles = () => {
           .maybeSingle();
 
         if (createdProfile && !createError) {
+          console.log('Created new hub profile:', createdProfile);
           setProfiles(prev => ({ ...prev, [userId]: createdProfile }));
           return createdProfile;
         }
@@ -64,11 +70,12 @@ export const useHubUserProfiles = () => {
       const fallbackProfile: HubUserProfile = {
         id: userId,
         user_id: userId,
-        display_name: 'Anonymous User',
+        display_name: 'User',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       
+      console.log('Using fallback profile for user:', userId);
       setProfiles(prev => ({ ...prev, [userId]: fallbackProfile }));
       return fallbackProfile;
     } catch (error) {
@@ -77,7 +84,7 @@ export const useHubUserProfiles = () => {
       const fallbackProfile: HubUserProfile = {
         id: userId,
         user_id: userId,
-        display_name: 'Anonymous User',
+        display_name: 'User',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -91,6 +98,8 @@ export const useHubUserProfiles = () => {
     if (!user) return;
 
     try {
+      console.log('Ensuring profile for current user:', user.id);
+      
       // Check if hub profile exists
       const { data: existingProfile } = await supabase
         .from('hub_user_profiles')
@@ -99,6 +108,8 @@ export const useHubUserProfiles = () => {
         .maybeSingle();
 
       if (!existingProfile) {
+        console.log('No hub profile found, creating one...');
+        
         // Get profile data
         const { data: profile } = await supabase
           .from('profiles')
@@ -117,9 +128,11 @@ export const useHubUserProfiles = () => {
           .maybeSingle();
 
         if (newProfile && !error) {
+          console.log('Created hub profile for current user:', newProfile);
           setProfiles(prev => ({ ...prev, [user.id]: newProfile }));
         }
       } else {
+        console.log('Hub profile already exists:', existingProfile);
         setProfiles(prev => ({ ...prev, [user.id]: existingProfile }));
       }
     } catch (error) {
