@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { HomePage } from '@/components/HomePage';
@@ -62,15 +61,7 @@ const MainRouter = ({
       case 'home':
         return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
       case 'checklist':
-        return (
-          <ChecklistPage 
-            userProgress={userProgress}
-            setUserProgress={setUserProgress}
-            onSchoolSelect={setSelectedSchool}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-        );
+        return <ChecklistPage />;
       case 'documents':
         return <DocumentsPage />;
       case 'hub':
@@ -88,7 +79,7 @@ const MainRouter = ({
       case 'contact':
         return <ContactPage />;
       case 'profile':
-        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} setCurrentPage={setCurrentPage} />;
+        return <ProfilePage />;
       case 'auth':
         return <AuthPage onBack={() => setCurrentPage('home')} />;
       case 'school':

@@ -17,6 +17,7 @@ interface ProfileData {
   education_level?: string;
   target_city?: string;
   target_program?: string;
+  created_at?: string;
 }
 
 export const useProfile = () => {

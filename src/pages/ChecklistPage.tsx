@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ChecklistModule } from '@/components/ChecklistModule';
-import { checklistModules } from '@/constants/checklistModules';
+import checklistModules from '@/constants/checklistModules';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
 import { useAuth } from '@/hooks/useAuth';
 

@@ -275,11 +275,7 @@ const Index = () => {
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
               {currentPage === "profile" ? (
-                <ProfilePage 
-                  userProfile={userProfile} 
-                  setUserProfile={setUserProfile} 
-                  setCurrentPage={setCurrentPage}
-                />
+                <ProfilePage />
               ) : currentPage === "qa" ? (
                 <div className="space-y-6">
                   <h1 className="text-3xl font-bold">AI Assistant</h1>
