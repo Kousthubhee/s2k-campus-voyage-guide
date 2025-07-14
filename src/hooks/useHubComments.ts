@@ -25,15 +25,10 @@ export const useHubComments = (postId: string) => {
   const { user } = useAuth();
 
   const fetchComments = async () => {
-    if (!postId) {
-      console.log('No postId provided');
-      return;
-    }
+    if (!postId) return;
     
     setLoading(true);
     try {
-      console.log('Fetching comments for post:', postId);
-      
       // Get comments with basic info first
       const { data: commentsData, error: commentsError } = await supabase
         .from('hub_comments')
@@ -41,71 +36,31 @@ export const useHubComments = (postId: string) => {
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
-      if (commentsError) {
-        console.error('Error fetching comments:', commentsError);
-        throw commentsError;
-      }
-
-      console.log('Comments data:', commentsData);
-
-      if (!commentsData || commentsData.length === 0) {
-        setComments([]);
-        return;
-      }
+      if (commentsError) throw commentsError;
 
       // Get user profiles for all comment authors
-      const userIds = [...new Set(commentsData.map(c => c.user_id))];
-      console.log('User IDs for profiles:', userIds);
-      
+      const userIds = [...new Set(commentsData?.map(c => c.user_id) || [])];
       const profilePromises = userIds.map(async (userId) => {
-        try {
-          // First try hub_user_profiles
-          const { data: hubProfile } = await supabase
-            .from('hub_user_profiles')
-            .select('display_name, avatar_url')
-            .eq('user_id', userId)
-            .maybeSingle();
-
-          if (hubProfile) {
-            return {
-              user_id: userId,
-              display_name: hubProfile.display_name,
-              avatar_url: hubProfile.avatar_url
-            };
-          }
-
-          // Fallback to profiles table
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('name, email')
-            .eq('id', userId)
-            .maybeSingle();
-          
-          return {
-            user_id: userId,
-            display_name: profileData?.name || profileData?.email || 'Anonymous User',
-            avatar_url: undefined
-          };
-        } catch (error) {
-          console.error('Error fetching profile for user:', userId, error);
-          return {
-            user_id: userId,
-            display_name: 'Anonymous User',
-            avatar_url: undefined
-          };
-        }
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name, email')
+          .eq('id', userId)
+          .single();
+        
+        return {
+          user_id: userId,
+          display_name: profileData?.name || profileData?.email || 'Anonymous User'
+        };
       });
 
       const profiles = await Promise.all(profilePromises);
       const profileMap = profiles.reduce((acc, profile) => {
         acc[profile.user_id] = profile;
         return acc;
-      }, {} as Record<string, { display_name: string; avatar_url?: string }>);
+      }, {} as Record<string, { display_name: string }>);
 
-      console.log('Profile map:', profileMap);
-
-      // Transform comments with profile data
-      const commentsWithProfiles = commentsData.map(comment => ({
+      // Transform comments with profile data and include parent_id
+      const commentsWithProfiles = (commentsData || []).map(comment => ({
         id: comment.id,
         post_id: comment.post_id,
         user_id: comment.user_id,
@@ -114,8 +69,8 @@ export const useHubComments = (postId: string) => {
         created_at: comment.created_at,
         updated_at: comment.updated_at,
         user_profile: {
-          display_name: profileMap[comment.user_id]?.display_name || 'Anonymous User',
-          avatar_url: profileMap[comment.user_id]?.avatar_url
+          display_name: profileMap[comment.user_id]?.display_name || 'Anonymous',
+          avatar_url: undefined
         }
       }));
 
@@ -128,24 +83,17 @@ export const useHubComments = (postId: string) => {
         replies: childComments.filter(child => child.parent_id === parent.id)
       }));
 
-      console.log('Organized comments:', organizedComments);
       setComments(organizedComments);
     } catch (error: any) {
       console.error('Error fetching comments:', error);
       toast.error('Failed to load comments');
-      setComments([]);
     } finally {
       setLoading(false);
     }
   };
 
   const addComment = async (content: string, parentId?: string) => {
-    if (!user || !content.trim()) {
-      toast.error('Please sign in and enter a comment');
-      return;
-    }
-
-    console.log('Adding comment:', { content, parentId, postId, userId: user.id });
+    if (!user || !content.trim()) return;
 
     try {
       const insertData: any = {
@@ -158,18 +106,12 @@ export const useHubComments = (postId: string) => {
         insertData.parent_id = parentId;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('hub_comments')
-        .insert(insertData)
-        .select()
-        .single();
+        .insert(insertData);
 
-      if (error) {
-        console.error('Error inserting comment:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Comment added successfully:', data);
       toast.success('Comment added successfully!');
       fetchComments();
     } catch (error: any) {
@@ -219,9 +161,7 @@ export const useHubComments = (postId: string) => {
   };
 
   useEffect(() => {
-    if (postId) {
-      fetchComments();
-    }
+    fetchComments();
   }, [postId]);
 
   return {

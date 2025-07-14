@@ -2,25 +2,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 
 interface ModuleContentProps {
   module: any;
   onBack: () => void;
   onComplete: (moduleId: string) => void;
-  onUncomplete?: (moduleId: string) => void;
   isCompleted: boolean;
   onToast?: (args: { title: string; description?: string; variant?: "default" | "destructive" }) => void;
 }
 
-export const ModuleContent = ({ 
-  module, 
-  onBack, 
-  onComplete, 
-  onUncomplete,
-  isCompleted, 
-  onToast 
-}: ModuleContentProps) => {
+export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast }: ModuleContentProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
   const getModuleSteps = (moduleId: string) => {
@@ -81,19 +73,6 @@ export const ModuleContent = ({
     }
   };
 
-  const handleModuleUncomplete = () => {
-    if (onUncomplete) {
-      onUncomplete(module.id);
-      if (onToast) {
-        onToast({
-          title: "Module Unmarked",
-          description: "Module has been unmarked as complete.",
-          variant: "default",
-        });
-      }
-    }
-  };
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center mb-6">
@@ -114,20 +93,9 @@ export const ModuleContent = ({
         
         {isCompleted && (
           <div className="mt-4 bg-white bg-opacity-20 p-3 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span>Module Completed! You earned a key 🗝️</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleModuleUncomplete}
-                className="text-white hover:bg-white hover:bg-opacity-20"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Unmark
-              </Button>
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2" />
+              <span>Module Completed! You earned a key 🗝️</span>
             </div>
           </div>
         )}
@@ -191,7 +159,7 @@ export const ModuleContent = ({
                   onClick={handleModuleComplete}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  Module Completed! You earned a key 🗝️
+                 Module Completed! You earned a key 🗝️
                 </Button>
               </div>
             </CardContent>

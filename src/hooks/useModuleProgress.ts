@@ -18,30 +18,14 @@ export const useModuleProgress = () => {
   const { user } = useAuth();
 
   const fetchCompletions = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      if (data && data.completed_modules) {
-        const moduleCompletions = data.completed_modules.map((moduleId: string) => ({
-          id: crypto.randomUUID(),
-          user_id: user.id,
-          module_id: moduleId,
-          completed_at: new Date().toISOString(),
-        }));
-        setCompletions(moduleCompletions);
+      // For now, we'll work with local storage until the module_completions table is properly set up
+      const stored = localStorage.getItem(`module_completions_${user.id}`);
+      if (stored) {
+        const parsedCompletions = JSON.parse(stored);
+        setCompletions(parsedCompletions);
       } else {
         setCompletions([]);
       }
@@ -60,70 +44,32 @@ export const useModuleProgress = () => {
     }
 
     try {
-      // Get current progress
-      const { data: currentProgress } = await supabase
-        .from('user_progress')
-        .select('completed_modules')
-        .eq('user_id', user.id)
-        .single();
+      // Create a completion record
+      const completion: ModuleCompletion = {
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        module_id: moduleId,
+        completed_at: new Date().toISOString(),
+        notes: notes,
+      };
 
-      const completedModules = currentProgress?.completed_modules || [];
+      const updatedCompletions = [...completions];
+      const existingIndex = updatedCompletions.findIndex(c => c.module_id === moduleId);
       
-      if (!completedModules.includes(moduleId)) {
-        const updatedModules = [...completedModules, moduleId];
-        
-        const { error } = await supabase
-          .from('user_progress')
-          .update({ completed_modules: updatedModules })
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        const completion: ModuleCompletion = {
-          id: crypto.randomUUID(),
-          user_id: user.id,
-          module_id: moduleId,
-          completed_at: new Date().toISOString(),
-          notes: notes,
-        };
-
-        setCompletions([...completions, completion]);
-        toast.success('Module marked as complete!');
+      if (existingIndex >= 0) {
+        updatedCompletions[existingIndex] = completion;
+      } else {
+        updatedCompletions.push(completion);
       }
+
+      setCompletions(updatedCompletions);
+      
+      // Store in localStorage for now
+      localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
+
+      toast.success('Module marked as complete!');
     } catch (error: any) {
       console.error('Error marking module complete:', error);
-      toast.error('Failed to update progress');
-    }
-  };
-
-  const unmarkModuleComplete = async (moduleId: string) => {
-    if (!user) {
-      toast.error('Please sign in to track progress');
-      return;
-    }
-
-    try {
-      // Get current progress
-      const { data: currentProgress } = await supabase
-        .from('user_progress')
-        .select('completed_modules')
-        .eq('user_id', user.id)
-        .single();
-
-      const completedModules = currentProgress?.completed_modules || [];
-      const updatedModules = completedModules.filter((id: string) => id !== moduleId);
-      
-      const { error } = await supabase
-        .from('user_progress')
-        .update({ completed_modules: updatedModules })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setCompletions(completions.filter(c => c.module_id !== moduleId));
-      toast.success('Module unmarked as complete!');
-    } catch (error: any) {
-      console.error('Error unmarking module complete:', error);
       toast.error('Failed to update progress');
     }
   };
@@ -144,7 +90,6 @@ export const useModuleProgress = () => {
     completions,
     loading,
     markModuleComplete,
-    unmarkModuleComplete,
     isModuleComplete,
     getModuleCompletion,
     refetch: fetchCompletions,

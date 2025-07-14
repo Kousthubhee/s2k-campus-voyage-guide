@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ModuleContent } from './ModuleContent';
 import { ModuleCard } from './ModuleCard';
@@ -21,9 +22,6 @@ interface ChecklistModuleProps {
   onSchoolSelect: (school: any) => void;
   currentPage: string;
   setCurrentPage: (page: string) => void;
-  onModuleComplete?: (moduleId: string) => void;
-  onModuleUncomplete?: (moduleId: string) => void;  
-  isModuleComplete?: (moduleId: string) => boolean;
 }
 
 const ChecklistHeader = () => {
@@ -88,10 +86,7 @@ export const ChecklistModule = ({
   setUserProgress,
   onSchoolSelect,
   currentPage,
-  setCurrentPage,
-  onModuleComplete,
-  onModuleUncomplete,
-  isModuleComplete
+  setCurrentPage
 }: ChecklistModuleProps) => {
   const pageMapping: { [key: string]: string } = {
     'school': 'school-insights',
@@ -180,42 +175,18 @@ export const ChecklistModule = ({
   };
 
   const handleModuleComplete = (moduleId: string) => {
-    if (onModuleComplete) {
-      onModuleComplete(moduleId);
-    } else {
-      // Fallback to local state if no prop provided
-      if (userProgress.completedModules.includes(moduleId)) return;
-      const newProgress = {
-        ...userProgress,
-        completedModules: [...userProgress.completedModules, moduleId],
-        keys: userProgress.keys + 1,
-      };
-      setUserProgress(newProgress);
-    }
+    if (userProgress.completedModules.includes(moduleId)) return;
+    const newProgress = {
+      ...userProgress,
+      completedModules: [...userProgress.completedModules, moduleId],
+      keys: userProgress.keys + 1,
+    };
+
+    setUserProgress(newProgress);
 
     toast({
       title: "Module Completed!",
       description: "You earned a key for completing this module.",
-      variant: "default",
-    });
-  };
-
-  const handleModuleUncomplete = (moduleId: string) => {
-    if (onModuleUncomplete) {
-      onModuleUncomplete(moduleId);
-    } else {
-      // Fallback to local state
-      const newProgress = {
-        ...userProgress,
-        completedModules: userProgress.completedModules.filter((id: string) => id !== moduleId),
-        keys: Math.max(0, userProgress.keys - 1),
-      };
-      setUserProgress(newProgress);
-    }
-
-    toast({
-      title: "Module Unmarked",
-      description: "Module has been unmarked as complete.",
       variant: "default",
     });
   };
@@ -225,15 +196,12 @@ export const ChecklistModule = ({
   };
 
   if (selectedModule) {
-    const moduleCompleted = isModuleComplete ? isModuleComplete(selectedModule.id) : userProgress.completedModules.includes(selectedModule.id);
-    
     return (
       <ModuleContent
         module={selectedModule}
         onBack={() => setSelectedModule(null)}
         onComplete={handleModuleComplete}
-        onUncomplete={handleModuleUncomplete}
-        isCompleted={moduleCompleted}
+        isCompleted={userProgress.completedModules.includes(selectedModule.id)}
         onToast={handleToast}
       />
     );
@@ -245,7 +213,7 @@ export const ChecklistModule = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module) => {
-          const isCompleted = isModuleComplete ? isModuleComplete(module.id) : userProgress.completedModules.includes(module.id);
+          const isCompleted = userProgress.completedModules.includes(module.id);
           const isUnlocked = userProgress.unlockedModules.includes(module.id);
 
           return (
