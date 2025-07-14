@@ -8,6 +8,7 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { QAPage } from '@/pages/QAPage';
 import { FloatingChatbot } from '@/components/FloatingChatbot';
 import { Toaster } from 'sonner';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 interface UserProfile {
   name: string;
@@ -58,51 +59,53 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
-      <div className="flex h-screen">
-        <AppSidebar 
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          userName={user?.user_metadata?.name || user?.email?.split('@')[0]}
-          userAvatarUrl={user?.user_metadata?.avatar_url}
-        />
-        
-        <div className="flex-1 flex flex-col">
-          <Header 
+    <SidebarProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+        <div className="flex h-screen w-full">
+          <AppSidebar 
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            userProgress={{}}
-            userProfile={userProfile}
-            setUserProfile={setUserProfile}
-            showAuth={!user}
+            userName={user?.user_metadata?.name || user?.email?.split('@')[0]}
+            userAvatarUrl={user?.user_metadata?.avatar_url}
           />
           
-          <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
-            <div className="max-w-5xl mx-auto animate-fade-in section-padding">
-              {currentPage === "profile" ? (
-                <ProfilePage 
-                  userProfile={userProfile} 
-                  setUserProfile={setUserProfile} 
-                  setCurrentPage={setCurrentPage}
-                />
-              ) : currentPage === "qa" ? (
-                <div className="space-y-6">
-                  <h1 className="text-3xl font-bold">AI Assistant</h1>
-                  <QAPage />
-                </div>
-              ) : (
-                <MainRouter 
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                />
-              )}
-            </div>
-          </main>
+          <div className="flex-1 flex flex-col">
+            <Header 
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              userProgress={{}}
+              userProfile={userProfile}
+              setUserProfile={setUserProfile}
+              showAuth={!user}
+            />
+            
+            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+              <div className="max-w-5xl mx-auto animate-fade-in section-padding">
+                {currentPage === "profile" ? (
+                  <ProfilePage 
+                    userProfile={userProfile} 
+                    setUserProfile={setUserProfile} 
+                    setCurrentPage={setCurrentPage}
+                  />
+                ) : currentPage === "qa" ? (
+                  <div className="space-y-6">
+                    <h1 className="text-3xl font-bold">AI Assistant</h1>
+                    <QAPage />
+                  </div>
+                ) : (
+                  <MainRouter 
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                  />
+                )}
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
 
-      <FloatingChatbot />
-      <Toaster />
-    </div>
+        <FloatingChatbot />
+        <Toaster />
+      </div>
+    </SidebarProvider>
   );
 }
