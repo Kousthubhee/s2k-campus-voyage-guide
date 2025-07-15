@@ -23,17 +23,17 @@ export const ChecklistPage = ({
 
   // Sync database completions with local state
   useEffect(() => {
-    if (!loading && completions.length >= 0) {
+    if (!loading) {
       const dbCompletedModules = completions.map(c => c.module_id);
       console.log('Syncing completions to local state:', dbCompletedModules);
       
-      // Always update to ensure consistency
-      setUserProgress({
-        ...userProgress,
+      // Update local progress to match database
+      setUserProgress(prevProgress => ({
+        ...prevProgress,
         completedModules: dbCompletedModules
-      });
+      }));
     }
-  }, [completions, loading]);
+  }, [completions, loading, setUserProgress]);
 
   // Enhanced userProgress with database tracking
   const enhancedUserProgress = {

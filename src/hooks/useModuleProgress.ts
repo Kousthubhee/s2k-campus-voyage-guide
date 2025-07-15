@@ -19,6 +19,7 @@ export const useModuleProgress = () => {
 
   const fetchCompletions = async () => {
     if (!user) {
+      console.log('No user found, setting loading to false');
       setLoading(false);
       return;
     }
@@ -33,6 +34,8 @@ export const useModuleProgress = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('Database query result:', { userProgress, progressError });
+
       if (!progressError && userProgress?.completed_modules) {
         console.log('Found completed modules in database:', userProgress.completed_modules);
         // Convert the completed modules array to our completion format
@@ -43,6 +46,9 @@ export const useModuleProgress = () => {
           completed_at: new Date().toISOString(),
         }));
         setCompletions(dbCompletions);
+        
+        // Also save to localStorage for backup
+        localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(dbCompletions));
       } else {
         console.log('No database progress found, checking localStorage');
         // Fallback to localStorage
@@ -54,6 +60,7 @@ export const useModuleProgress = () => {
           
           // Sync to database
           const completedModuleIds = parsedCompletions.map((c: ModuleCompletion) => c.module_id);
+          console.log('Syncing to database:', completedModuleIds);
           await supabase
             .from('user_progress')
             .upsert({
@@ -63,8 +70,18 @@ export const useModuleProgress = () => {
               onConflict: 'user_id'
             });
         } else {
-          console.log('No progress found anywhere');
+          console.log('No progress found anywhere, initializing empty');
           setCompletions([]);
+          
+          // Initialize empty progress in database
+          await supabase
+            .from('user_progress')
+            .upsert({
+              user_id: user.id,
+              completed_modules: []
+            }, {
+              onConflict: 'user_id'
+            });
         }
       }
     } catch (error: any) {
@@ -109,6 +126,7 @@ export const useModuleProgress = () => {
         updatedCompletions.push(completion);
       }
 
+      // Update state immediately for UI responsiveness
       setCompletions(updatedCompletions);
       
       // Save to database
@@ -154,6 +172,8 @@ export const useModuleProgress = () => {
       console.log('Marking module incomplete:', moduleId);
       
       const updatedCompletions = completions.filter(c => c.module_id !== moduleId);
+      
+      // Update state immediately for UI responsiveness
       setCompletions(updatedCompletions);
       
       // Save to database
@@ -199,9 +219,11 @@ export const useModuleProgress = () => {
     return completions.find(c => c.module_id === moduleId);
   };
 
+  // Load completions when user changes or component mounts
   useEffect(() => {
+    console.log('useEffect triggered for user:', user?.id);
     fetchCompletions();
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id to avoid infinite loops
 
   return {
     completions,

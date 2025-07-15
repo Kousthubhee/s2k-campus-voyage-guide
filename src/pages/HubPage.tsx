@@ -96,6 +96,8 @@ export const HubPage = () => {
     if (!newReel || !newReelCaption.trim()) return;
     if (blockIfPhone(newReelCaption)) return;
 
+    console.log('Publishing reel with media URL:', newReel);
+
     await createPost({
       title: newReelCaption.slice(0, 100),
       content: newReelCaption,
@@ -127,7 +129,11 @@ export const HubPage = () => {
 
   const handleReelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
-    if (file) setNewReel(URL.createObjectURL(file));
+    if (file) {
+      const videoUrl = URL.createObjectURL(file);
+      console.log('Video uploaded, creating URL:', videoUrl);
+      setNewReel(videoUrl);
+    }
   };
 
   const addPollOption = () => setPollOptions([...pollOptions, '']);

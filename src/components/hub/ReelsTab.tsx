@@ -54,7 +54,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             <video
               src={newReel}
               controls
-              className="w-full max-w-md mb-4 rounded-lg"
+              className="w-full max-w-md mb-4 rounded-lg bg-gray-100"
               style={{ maxHeight: '400px' }}
               preload="metadata"
             />
@@ -109,17 +109,27 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             <div className="mb-4">
               {reel.media_url ? (
                 <video
-                  src={reel.media_url}
+                  key={reel.media_url}
                   controls
-                  className="w-full max-w-md rounded-lg bg-gray-100"
-                  style={{ maxHeight: '400px' }}
+                  className="w-full max-w-md rounded-lg"
+                  style={{ maxHeight: '400px', backgroundColor: '#f3f4f6' }}
                   playsInline
                   preload="metadata"
                   onError={(e) => {
-                    console.error('Video failed to load:', reel.media_url);
-                    e.currentTarget.style.display = 'none';
+                    console.error('Video failed to load:', reel.media_url, e);
                   }}
-                />
+                  onLoadStart={() => {
+                    console.log('Video loading started:', reel.media_url);
+                  }}
+                  onCanPlay={() => {
+                    console.log('Video can play:', reel.media_url);
+                  }}
+                >
+                  <source src={reel.media_url} type="video/mp4" />
+                  <source src={reel.media_url} type="video/webm" />
+                  <source src={reel.media_url} type="video/ogg" />
+                  Your browser does not support the video tag.
+                </video>
               ) : (
                 <div className="w-full max-w-md h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                   <span className="text-gray-500">Video not available</span>
