@@ -136,6 +136,11 @@ export const HubPage = () => {
     setPollOptions(updatedOptions);
   };
 
+  const handleVote = (pollId: string, optionIndex: number) => {
+    // TODO: Implement poll voting functionality
+    console.log('Vote on poll:', pollId, 'option:', optionIndex);
+  };
+
   // Filter posts based on type and search/category filters
   const qaPosts = posts.filter(post => {
     if (post.type !== 'qa') return false;
@@ -225,91 +230,52 @@ export const HubPage = () => {
           )}
           {activeTab === 'blogs' && (
             <BlogsTab
+              blogs={blogs}
               blogTitle={blogTitle}
               blogContent={blogContent}
               onChangeTitle={setBlogTitle}
               onChangeContent={setBlogContent}
               onPublish={handlePublishBlog}
-              blogs={blogs.map(post => ({
-                id: parseInt(post.id),
-                author: 'User',
-                title: post.title,
-                time: new Date(post.created_at).toLocaleDateString(),
-                content: post.content,
-                likes: post.likes_count,
-                comments: []
-              }))}
-              onLike={(id) => likePost(blogs.find(p => parseInt(p.id) === id)?.id || '')}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              newComment={{}}
-              setNewComment={() => {}}
-              onComment={() => {}}
-              onReply={() => {}}
-              onEditComment={() => {}}
-              onDeleteComment={() => {}}
+              onLike={(postId) => likePost(postId)}
+              onEdit={(postId) => {
+                console.log('Edit blog:', postId);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={(postId) => deletePost(postId)}
             />
           )}
           {activeTab === 'reels' && (
             <ReelsTab
-              reels={reels.map(post => ({
-                id: parseInt(post.id),
-                type: 'reel' as const,
-                author: 'User',
-                avatar: '👤',
-                time: new Date(post.created_at).toLocaleDateString(),
-                videoUrl: post.media_url || '',
-                caption: post.content,
-                likes: post.likes_count,
-                comments: [],
-                category: post.category
-              }))}
+              reels={reels}
               newReel={newReel}
               newReelCaption={newReelCaption}
               onReelUpload={handleReelUpload}
               onChangeCaption={setNewReelCaption}
               onPublish={handlePublishReel}
-              onLike={(id) => likePost(reels.find(p => parseInt(p.id) === id)?.id || '')}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              newComment={{}}
-              setNewComment={() => {}}
-              onComment={() => {}}
-              onReply={() => {}}
-              onEditComment={() => {}}
-              onDeleteComment={() => {}}
+              onLike={(postId) => likePost(postId)}
+              onEdit={(postId) => {
+                console.log('Edit reel:', postId);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={(postId) => deletePost(postId)}
             />
           )}
           {activeTab === 'polls' && (
             <PollsTab
-              polls={polls.map(post => ({
-                id: parseInt(post.id),
-                type: 'poll' as const,
-                author: 'User',
-                avatar: '👤',
-                time: new Date(post.created_at).toLocaleDateString(),
-                question: post.title,
-                options: post.poll_options || [],
-                likes: post.likes_count,
-                comments: [],
-                category: post.category
-              }))}
+              polls={polls}
               pollQuestion={pollQuestion}
               pollOptions={pollOptions}
               onChangeQuestion={setPollQuestion}
               onUpdateOption={updatePollOption}
               onAddOption={addPollOption}
               onPublish={handlePublishPoll}
-              onVote={() => {}}
-              onLike={(id) => likePost(polls.find(p => parseInt(p.id) === id)?.id || '')}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              newComment={{}}
-              setNewComment={() => {}}
-              onComment={() => {}}
-              onReply={() => {}}
-              onEditComment={() => {}}
-              onDeleteComment={() => {}}
+              onVote={handleVote}
+              onLike={(postId) => likePost(postId)}
+              onEdit={(postId) => {
+                console.log('Edit poll:', postId);
+                // TODO: Implement edit functionality
+              }}
+              onDelete={(postId) => deletePost(postId)}
             />
           )}
         </div>
