@@ -18,17 +18,23 @@ export const useModuleProgress = () => {
   const { user } = useAuth();
 
   const fetchCompletions = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      // First try to fetch from the database if user_progress table exists
+      console.log('Fetching completions for user:', user.id);
+      
+      // First try to fetch from the database
       const { data: userProgress, error: progressError } = await supabase
         .from('user_progress')
         .select('completed_modules')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!progressError && userProgress?.completed_modules) {
+        console.log('Found completed modules in database:', userProgress.completed_modules);
         // Convert the completed modules array to our completion format
         const dbCompletions = userProgress.completed_modules.map((moduleId: string) => ({
           id: crypto.randomUUID(),
@@ -38,12 +44,26 @@ export const useModuleProgress = () => {
         }));
         setCompletions(dbCompletions);
       } else {
+        console.log('No database progress found, checking localStorage');
         // Fallback to localStorage
         const stored = localStorage.getItem(`module_completions_${user.id}`);
         if (stored) {
           const parsedCompletions = JSON.parse(stored);
+          console.log('Found localStorage completions:', parsedCompletions);
           setCompletions(parsedCompletions);
+          
+          // Sync to database
+          const completedModuleIds = parsedCompletions.map((c: ModuleCompletion) => c.module_id);
+          await supabase
+            .from('user_progress')
+            .upsert({
+              user_id: user.id,
+              completed_modules: completedModuleIds
+            }, {
+              onConflict: 'user_id'
+            });
         } else {
+          console.log('No progress found anywhere');
           setCompletions([]);
         }
       }
@@ -69,6 +89,8 @@ export const useModuleProgress = () => {
     }
 
     try {
+      console.log('Marking module complete:', moduleId);
+      
       // Create a completion record
       const completion: ModuleCompletion = {
         id: crypto.randomUUID(),
@@ -89,9 +111,10 @@ export const useModuleProgress = () => {
 
       setCompletions(updatedCompletions);
       
-      // Try to save to database first
+      // Save to database
       try {
         const completedModuleIds = updatedCompletions.map(c => c.module_id);
+        console.log('Saving to database:', completedModuleIds);
         
         const { error: upsertError } = await supabase
           .from('user_progress')
@@ -103,11 +126,12 @@ export const useModuleProgress = () => {
           });
 
         if (upsertError) {
-          console.error('Database save failed, using localStorage:', upsertError);
+          console.error('Database save failed:', upsertError);
           throw upsertError;
         }
+        console.log('Successfully saved to database');
       } catch (dbError) {
-        console.error('Database operation failed, falling back to localStorage:', dbError);
+        console.error('Database operation failed, using localStorage only:', dbError);
       }
       
       // Always save to localStorage as backup
@@ -127,12 +151,15 @@ export const useModuleProgress = () => {
     }
 
     try {
+      console.log('Marking module incomplete:', moduleId);
+      
       const updatedCompletions = completions.filter(c => c.module_id !== moduleId);
       setCompletions(updatedCompletions);
       
-      // Try to save to database first
+      // Save to database
       try {
         const completedModuleIds = updatedCompletions.map(c => c.module_id);
+        console.log('Updating database with:', completedModuleIds);
         
         const { error: upsertError } = await supabase
           .from('user_progress')
@@ -144,11 +171,12 @@ export const useModuleProgress = () => {
           });
 
         if (upsertError) {
-          console.error('Database save failed, using localStorage:', upsertError);
+          console.error('Database save failed:', upsertError);
           throw upsertError;
         }
+        console.log('Successfully updated database');
       } catch (dbError) {
-        console.error('Database operation failed, falling back to localStorage:', dbError);
+        console.error('Database operation failed, using localStorage only:', dbError);
       }
       
       // Always save to localStorage as backup
@@ -162,7 +190,9 @@ export const useModuleProgress = () => {
   };
 
   const isModuleComplete = (moduleId: string) => {
-    return completions.some(c => c.module_id === moduleId);
+    const isComplete = completions.some(c => c.module_id === moduleId);
+    console.log(`Module ${moduleId} is complete:`, isComplete);
+    return isComplete;
   };
 
   const getModuleCompletion = (moduleId: string) => {

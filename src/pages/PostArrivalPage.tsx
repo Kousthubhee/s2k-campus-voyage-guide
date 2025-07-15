@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -9,6 +9,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useModuleProgress } from '@/hooks/useModuleProgress';
 
 import confetti from "canvas-confetti";
 import { useToast } from "@/hooks/use-toast";
@@ -192,7 +193,6 @@ const processOrder = [
 ];
 
 export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrivalPageProps) => {
-  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [reminders, setReminders] = useState<{ [id: string]: ReminderItem[] }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
@@ -200,6 +200,14 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
   const [newReminderDate, setNewReminderDate] = useState('');
   const [newReminderNote, setNewReminderNote] = useState('');
   const { toast } = useToast();
+  
+  // Use the module progress hook for persistence
+  const { completions, markModuleComplete, markModuleIncomplete, isModuleComplete, loading } = useModuleProgress();
+  
+  // Get completed steps from the hook
+  const completedSteps = completions
+    .filter(c => tasks.some(task => task.id === c.module_id))
+    .map(c => c.module_id);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => 
@@ -209,9 +217,15 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
     );
   };
 
-  const handleStepComplete = (stepId: string) => {
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps([...completedSteps, stepId]);
+  const handleStepComplete = async (stepId: string) => {
+    if (!isModuleComplete(stepId)) {
+      await markModuleComplete(stepId);
+    }
+  };
+
+  const handleStepIncomplete = async (stepId: string) => {
+    if (isModuleComplete(stepId)) {
+      await markModuleIncomplete(stepId);
     }
   };
 
@@ -252,6 +266,14 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
     onComplete();
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading your progress...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
@@ -276,14 +298,14 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
                 <div 
                   key={proc}
                   className={`px-4 py-2 rounded-full text-xs font-semibold border shadow transition-all 
-                    ${completedSteps.includes(tasks[idx]?.id)
+                    ${isModuleComplete(tasks[idx]?.id)
                       ? "bg-green-100 border-green-400 text-green-700"
                       : "bg-white border-gray-300 text-gray-600"
                     }
                   `}
                 >
                   {idx+1}. {proc}
-                  {completedSteps.includes(tasks[idx]?.id) && <CheckCircle className="h-4 w-4 inline ml-1 text-green-500" />}
+                  {isModuleComplete(tasks[idx]?.id) && <CheckCircle className="h-4 w-4 inline ml-1 text-green-500" />}
                 </div>
               ))}
             </div>
@@ -304,7 +326,7 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
 
       <div className="space-y-4">
         {tasks.map((task, index) => {
-          const isStepCompleted = completedSteps.includes(task.id);
+          const isStepCompleted = isModuleComplete(task.id);
           const isOpen = openSections.includes(task.id);
           const taskReminders = reminders[task.id] || [];
 
@@ -481,16 +503,25 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
                       <Plus className="h-4 w-4" />
                       Add Reminder
                     </Button>
-                    {!isStepCompleted && (
+                    {!isStepCompleted ? (
                       <Button 
                         size="sm"
                         onClick={() => handleStepComplete(task.id)}
                       >
                         Mark Complete
                       </Button>
-                    )}
-                    {isStepCompleted && (
-                      <span className="text-green-600 text-sm font-medium">Completed ✓</span>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <span className="text-green-600 text-sm font-medium">Completed ✓</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleStepIncomplete(task.id)}
+                          className="text-red-500 hover:text-red-700 text-xs"
+                        >
+                          Undo
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>

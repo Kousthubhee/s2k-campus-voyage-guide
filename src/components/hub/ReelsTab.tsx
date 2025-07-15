@@ -56,6 +56,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
               controls
               className="w-full max-w-md mb-4 rounded-lg"
               style={{ maxHeight: '400px' }}
+              preload="metadata"
             />
           )}
           <Input
@@ -106,13 +107,24 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             </div>
             
             <div className="mb-4">
-              <video
-                src={reel.media_url}
-                controls
-                className="w-full max-w-md rounded-lg"
-                style={{ maxHeight: '400px' }}
-                playsInline
-              />
+              {reel.media_url ? (
+                <video
+                  src={reel.media_url}
+                  controls
+                  className="w-full max-w-md rounded-lg bg-gray-100"
+                  style={{ maxHeight: '400px' }}
+                  playsInline
+                  preload="metadata"
+                  onError={(e) => {
+                    console.error('Video failed to load:', reel.media_url);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-full max-w-md h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500">Video not available</span>
+                </div>
+              )}
             </div>
             
             <p className="mb-4">{reel.content}</p>
