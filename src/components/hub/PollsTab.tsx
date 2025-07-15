@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Heart, MessageSquare, Plus, BarChart3, Edit, Trash2 } from 'lucide-react';
 import { HubPost } from '@/hooks/useHubPosts';
-import { useHubComments } from '@/hooks/useHubComments';
-import { HubCommentItem } from './HubCommentItem';
+import { CommentSection } from './CommentSection';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PollsTabProps {
@@ -36,49 +35,7 @@ export const PollsTab: React.FC<PollsTabProps> = ({
   onEdit,
   onDelete
 }) => {
-  const [newComments, setNewComments] = useState<Record<string, string>>({});
   const { user } = useAuth();
-
-  const PostComments: React.FC<{ postId: string }> = ({ postId }) => {
-    const { comments, loading, addComment, updateComment, deleteComment } = useHubComments(postId);
-
-    const handleAddComment = () => {
-      const content = newComments[postId];
-      if (content?.trim()) {
-        addComment(content);
-        setNewComments(prev => ({ ...prev, [postId]: '' }));
-      }
-    };
-
-    return (
-      <div className="space-y-3">
-        {comments.map((comment) => (
-          <HubCommentItem
-            key={comment.id}
-            comment={comment}
-            onEdit={updateComment}
-            onDelete={deleteComment}
-            onReply={(content, parentId) => addComment(content, parentId)}
-          />
-        ))}
-        
-        {/* Add Comment */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Add a comment..."
-            value={newComments[postId] || ''}
-            onChange={(e) => setNewComments(prev => ({
-              ...prev,
-              [postId]: e.target.value
-            }))}
-          />
-          <Button onClick={handleAddComment}>
-            Comment
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -204,7 +161,7 @@ export const PollsTab: React.FC<PollsTabProps> = ({
             </div>
 
             {/* Comments Section */}
-            <PostComments postId={poll.id} />
+            <CommentSection postId={poll.id} />
           </CardContent>
         </Card>
       ))}

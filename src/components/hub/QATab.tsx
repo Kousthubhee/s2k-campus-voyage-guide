@@ -1,13 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { MessageSquare, Heart, Edit, Trash2 } from 'lucide-react';
+import { Heart, MessageSquare, HelpCircle, Edit, Trash2 } from 'lucide-react';
 import { HubPost } from '@/hooks/useHubPosts';
-import { useHubComments } from '@/hooks/useHubComments';
-import { HubCommentItem } from './HubCommentItem';
+import { CommentSection } from './CommentSection';
 import { useAuth } from '@/hooks/useAuth';
 
 interface QATabProps {
@@ -29,71 +27,32 @@ export const QATab: React.FC<QATabProps> = ({
   onEdit,
   onDelete
 }) => {
-  const [newComments, setNewComments] = useState<Record<string, string>>({});
   const { user } = useAuth();
-
-  const PostComments: React.FC<{ postId: string }> = ({ postId }) => {
-    const { comments, loading, addComment, updateComment, deleteComment } = useHubComments(postId);
-
-    const handleAddComment = () => {
-      const content = newComments[postId];
-      if (content?.trim()) {
-        addComment(content);
-        setNewComments(prev => ({ ...prev, [postId]: '' }));
-      }
-    };
-
-    return (
-      <div className="space-y-3">
-        {comments.map((comment) => (
-          <HubCommentItem
-            key={comment.id}
-            comment={comment}
-            onEdit={updateComment}
-            onDelete={deleteComment}
-            onReply={(content, parentId) => addComment(content, parentId)}
-          />
-        ))}
-        
-        {/* Add Comment */}
-        <div className="flex gap-2">
-          <Input
-            placeholder="Add a comment..."
-            value={newComments[postId] || ''}
-            onChange={(e) => setNewComments(prev => ({
-              ...prev,
-              [postId]: e.target.value
-            }))}
-          />
-          <Button onClick={handleAddComment}>
-            Comment
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
-      {/* Create New Post */}
+      {/* Create New Q&A Post */}
       <Card>
         <CardHeader>
-          <CardTitle>Share Your Experience</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <HelpCircle className="h-5 w-5" />
+            Ask a Question
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
-            placeholder="What's on your mind? Share your experience, ask questions..."
+            placeholder="What would you like to know? Share your question with the community..."
             value={newPost}
             onChange={(e) => onNewPostChange(e.target.value)}
-            className="mb-4"
+            className="mb-4 min-h-[120px]"
           />
           <Button onClick={onPublishPost} disabled={!newPost.trim()}>
-            Post
+            Post Question
           </Button>
         </CardContent>
       </Card>
 
-      {/* Posts Feed */}
+      {/* Q&A Feed */}
       {qaPosts.map((post) => (
         <Card key={post.id}>
           <CardContent className="p-6">
@@ -128,7 +87,7 @@ export const QATab: React.FC<QATabProps> = ({
               )}
             </div>
             
-            <p className="mb-4">{post.content}</p>
+            <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
             
             <div className="flex items-center gap-4 mb-4">
               <Button
@@ -147,7 +106,7 @@ export const QATab: React.FC<QATabProps> = ({
             </div>
 
             {/* Comments Section */}
-            <PostComments postId={post.id} />
+            <CommentSection postId={post.id} />
           </CardContent>
         </Card>
       ))}

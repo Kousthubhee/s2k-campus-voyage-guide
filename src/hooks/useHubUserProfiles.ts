@@ -22,6 +22,8 @@ export const useHubUserProfiles = () => {
     }
 
     try {
+      console.log('Fetching profile for user:', userId);
+      
       // Try to get from hub_user_profiles table first
       const { data: hubProfileData, error: hubError } = await supabase
         .from('hub_user_profiles')
@@ -30,16 +32,19 @@ export const useHubUserProfiles = () => {
         .maybeSingle();
 
       if (hubProfileData && !hubError) {
+        console.log('Found hub profile:', hubProfileData);
         setProfiles(prev => ({ ...prev, [userId]: hubProfileData }));
         return hubProfileData;
       }
 
       // Fallback: try to get from profiles table
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('name, email')
         .eq('id', userId)
         .maybeSingle();
+
+      console.log('Profile fallback data:', profileData, 'Error:', profileError);
 
       if (profileData) {
         const fallbackProfile: HubUserProfile = {
@@ -53,7 +58,16 @@ export const useHubUserProfiles = () => {
         return fallbackProfile;
       }
 
-      return null;
+      // Last resort fallback
+      const anonymousProfile: HubUserProfile = {
+        id: userId,
+        user_id: userId,
+        display_name: 'Anonymous User',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setProfiles(prev => ({ ...prev, [userId]: anonymousProfile }));
+      return anonymousProfile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
@@ -91,6 +105,8 @@ export const useHubUserProfiles = () => {
         if (newProfile) {
           setProfiles(prev => ({ ...prev, [user.id]: newProfile }));
         }
+      } else {
+        setProfiles(prev => ({ ...prev, [user.id]: existingProfile }));
       }
     } catch (error) {
       console.error('Error ensuring user profile:', error);

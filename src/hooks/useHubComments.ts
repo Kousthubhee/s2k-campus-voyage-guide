@@ -1,7 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useHubUserProfiles } from '@/hooks/useHubUserProfiles';
 import { toast } from 'sonner';
 
 export interface HubComment {
@@ -23,12 +24,15 @@ export const useHubComments = (postId: string) => {
   const [comments, setComments] = useState<HubComment[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { getProfile } = useHubUserProfiles();
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (!postId) return;
     
     setLoading(true);
     try {
+      console.log('Fetching comments for post:', postId);
+      
       // Get comments with basic info first
       const { data: commentsData, error: commentsError } = await supabase
         .from('hub_comments')
@@ -38,28 +42,25 @@ export const useHubComments = (postId: string) => {
 
       if (commentsError) throw commentsError;
 
+      console.log('Raw comments data:', commentsData);
+
       // Get user profiles for all comment authors
       const userIds = [...new Set(commentsData?.map(c => c.user_id) || [])];
-      const profilePromises = userIds.map(async (userId) => {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', userId)
-          .single();
-        
-        return {
-          user_id: userId,
-          display_name: profileData?.name || profileData?.email || 'Anonymous User'
-        };
-      });
-
+      console.log('User IDs to fetch profiles for:', userIds);
+      
+      const profilePromises = userIds.map(userId => getProfile(userId));
       const profiles = await Promise.all(profilePromises);
+      
       const profileMap = profiles.reduce((acc, profile) => {
-        acc[profile.user_id] = profile;
+        if (profile) {
+          acc[profile.user_id] = profile;
+        }
         return acc;
-      }, {} as Record<string, { display_name: string }>);
+      }, {} as Record<string, any>);
 
-      // Transform comments with profile data and include parent_id
+      console.log('Profile map:', profileMap);
+
+      // Transform comments with profile data
       const commentsWithProfiles = (commentsData || []).map(comment => ({
         id: comment.id,
         post_id: comment.post_id,
@@ -69,8 +70,8 @@ export const useHubComments = (postId: string) => {
         created_at: comment.created_at,
         updated_at: comment.updated_at,
         user_profile: {
-          display_name: profileMap[comment.user_id]?.display_name || 'Anonymous',
-          avatar_url: undefined
+          display_name: profileMap[comment.user_id]?.display_name || 'Anonymous User',
+          avatar_url: profileMap[comment.user_id]?.avatar_url
         }
       }));
 
@@ -83,6 +84,7 @@ export const useHubComments = (postId: string) => {
         replies: childComments.filter(child => child.parent_id === parent.id)
       }));
 
+      console.log('Organized comments:', organizedComments);
       setComments(organizedComments);
     } catch (error: any) {
       console.error('Error fetching comments:', error);
@@ -90,7 +92,7 @@ export const useHubComments = (postId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, getProfile]);
 
   const addComment = async (content: string, parentId?: string) => {
     if (!user || !content.trim()) return;
@@ -162,7 +164,7 @@ export const useHubComments = (postId: string) => {
 
   useEffect(() => {
     fetchComments();
-  }, [postId]);
+  }, [fetchComments]);
 
   return {
     comments,
