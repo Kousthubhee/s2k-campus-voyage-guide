@@ -120,6 +120,47 @@ export const useModuleProgress = () => {
     }
   };
 
+  const markModuleIncomplete = async (moduleId: string) => {
+    if (!user) {
+      toast.error('Please sign in to track progress');
+      return;
+    }
+
+    try {
+      const updatedCompletions = completions.filter(c => c.module_id !== moduleId);
+      setCompletions(updatedCompletions);
+      
+      // Try to save to database first
+      try {
+        const completedModuleIds = updatedCompletions.map(c => c.module_id);
+        
+        const { error: upsertError } = await supabase
+          .from('user_progress')
+          .upsert({
+            user_id: user.id,
+            completed_modules: completedModuleIds
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (upsertError) {
+          console.error('Database save failed, using localStorage:', upsertError);
+          throw upsertError;
+        }
+      } catch (dbError) {
+        console.error('Database operation failed, falling back to localStorage:', dbError);
+      }
+      
+      // Always save to localStorage as backup
+      localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
+
+      toast.success('Module marked as incomplete!');
+    } catch (error: any) {
+      console.error('Error marking module incomplete:', error);
+      toast.error('Failed to update progress');
+    }
+  };
+
   const isModuleComplete = (moduleId: string) => {
     return completions.some(c => c.module_id === moduleId);
   };
@@ -136,6 +177,7 @@ export const useModuleProgress = () => {
     completions,
     loading,
     markModuleComplete,
+    markModuleIncomplete,
     isModuleComplete,
     getModuleCompletion,
     refetch: fetchCompletions,

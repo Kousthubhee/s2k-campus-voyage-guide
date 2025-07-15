@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,26 +29,38 @@ export const useHubPosts = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the posts
+      const { data: postsData, error: postsError } = await supabase
         .from('hub_posts')
-        .select(`
-          *,
-          user_profile:hub_user_profiles(display_name, avatar_url)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (postsError) throw postsError;
 
-      const transformedPosts: HubPost[] = (data || []).map(post => ({
+      // Then get user profiles separately
+      const userIds = [...new Set(postsData?.map(post => post.user_id) || [])];
+      const { data: profilesData } = await supabase
+        .from('hub_user_profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', userIds);
+
+      // Create a map of user profiles
+      const profilesMap = new Map();
+      profilesData?.forEach(profile => {
+        profilesMap.set(profile.user_id, profile);
+      });
+
+      const transformedPosts: HubPost[] = (postsData || []).map(post => ({
         ...post,
         likes_count: post.likes_count || 0,
         comments_count: post.comments_count || 0,
         poll_options: post.poll_options ? 
           (Array.isArray(post.poll_options) ? post.poll_options : []) as Array<{ text: string; votes: number; voters?: string[] }> : 
           undefined,
-        user_profile: Array.isArray(post.user_profile) 
-          ? post.user_profile[0] 
-          : post.user_profile
+        user_profile: profilesMap.get(post.user_id) || {
+          display_name: 'Anonymous User',
+          avatar_url: null
+        }
       }));
 
       setPosts(transformedPosts);
