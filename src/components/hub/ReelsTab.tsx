@@ -74,18 +74,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
 
       console.log('Public URL:', urlData.publicUrl);
       
-      // Create a synthetic event to pass the URL
-      const syntheticEvent = {
-        target: {
-          files: [file]
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-
-      // Store the URL for the reel
-      onReelUpload(syntheticEvent);
-      
-      // Update the reel URL in the parent component state
-      // We'll need to modify this to work with the uploaded URL
+      // Call the parent handler with the original event
+      onReelUpload(e);
       
     } catch (error) {
       console.error('Error uploading video:', error);
