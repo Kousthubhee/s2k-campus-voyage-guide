@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ReminderButton } from "@/components/ReminderButton";
+import { LucideIcon } from "lucide-react";
 
 interface Step {
   id: string;
@@ -11,7 +12,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   timeline: string;
   priority: "urgent" | "high";
   steps: Step[];
@@ -87,6 +88,7 @@ export const PostArrivalTaskCards = ({
     <div className="space-y-7">
       {tasks.map((task) => {
         const isCompleted = completedSteps.includes(task.id);
+        const IconComponent = task.icon;
         
         return (
           <div
@@ -110,7 +112,7 @@ export const PostArrivalTaskCards = ({
                         : "text-yellow-700 text-2xl pt-0.5"
                     }
                   >
-                    {task.icon}
+                    <IconComponent />
                   </span>
                   <div>
                     <div className="flex items-center gap-2">

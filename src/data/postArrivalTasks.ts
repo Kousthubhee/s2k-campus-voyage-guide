@@ -6,7 +6,7 @@ export const postArrivalTasks = [
     id: 'bank-account',
     title: 'Open a French Bank Account',
     description: 'Essential for receiving payments, paying rent, and daily transactions',
-    icon: <CreditCard />,
+    icon: CreditCard,
     timeline: 'Within first 2 weeks',
     priority: 'urgent' as const,
     steps: [
@@ -30,7 +30,7 @@ export const postArrivalTasks = [
     id: 'accommodation',
     title: 'Secure Permanent Housing',
     description: 'Find and finalize your long-term accommodation',
-    icon: <Home />,
+    icon: Home,
     timeline: 'Within first month',
     priority: 'urgent' as const,
     steps: [
@@ -54,7 +54,7 @@ export const postArrivalTasks = [
     id: 'health-insurance',
     title: 'Register for Health Insurance',
     description: 'Essential for medical care and required by law',
-    icon: <Heart />,
+    icon: Heart,
     timeline: 'Within first 3 months',
     priority: 'high' as const,
     steps: [
