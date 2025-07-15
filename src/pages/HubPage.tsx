@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,7 @@ export const HubPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const { posts, loading, createPost, updatePost, deletePost, likePost } = useHubPosts();
+  const { posts, loading, createPost, updatePost, deletePost, likePost, voteOnPoll } = useHubPosts();
   const { user } = useAuth();
 
   const upcomingEvents = [
@@ -116,7 +117,7 @@ export const HubPage = () => {
       content: pollQuestion,
       category: 'Poll',
       type: 'poll',
-      poll_options: pollOptions.map(opt => ({ text: opt, votes: 0 }))
+      poll_options: pollOptions.map(opt => ({ text: opt, votes: 0, voters: [] }))
     });
 
     setPollQuestion('');
@@ -134,11 +135,6 @@ export const HubPage = () => {
     const updatedOptions = [...pollOptions];
     updatedOptions[index] = value;
     setPollOptions(updatedOptions);
-  };
-
-  const handleVote = (pollId: string, optionIndex: number) => {
-    // TODO: Implement poll voting functionality
-    console.log('Vote on poll:', pollId, 'option:', optionIndex);
   };
 
   // Filter posts based on type and search/category filters
@@ -269,7 +265,7 @@ export const HubPage = () => {
               onUpdateOption={updatePollOption}
               onAddOption={addPollOption}
               onPublish={handlePublishPoll}
-              onVote={handleVote}
+              onVote={voteOnPoll}
               onLike={(postId) => likePost(postId)}
               onEdit={(postId) => {
                 console.log('Edit poll:', postId);

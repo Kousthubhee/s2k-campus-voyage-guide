@@ -37,6 +37,13 @@ export const PollsTab: React.FC<PollsTabProps> = ({
 }) => {
   const { user } = useAuth();
 
+  const hasUserVoted = (poll: HubPost) => {
+    if (!user || !poll.poll_options) return false;
+    return poll.poll_options.some(option => 
+      option.voters && option.voters.includes(user.id)
+    );
+  };
+
   return (
     <>
       {/* Create New Poll */}
@@ -82,89 +89,99 @@ export const PollsTab: React.FC<PollsTabProps> = ({
       </Card>
 
       {/* Polls Feed */}
-      {polls.map((poll) => (
-        <Card key={poll.id}>
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-purple-600">
-                  {poll.user_profile?.display_name?.charAt(0)?.toUpperCase() || '?'}
+      {polls.map((poll) => {
+        const userHasVoted = hasUserVoted(poll);
+        
+        return (
+          <Card key={poll.id}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-purple-600">
+                    {poll.user_profile?.display_name?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div>
+                    <div className="font-semibold">{poll.user_profile?.display_name || 'Anonymous'}</div>
+                    <div className="text-sm text-gray-500">{new Date(poll.created_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-semibold">{poll.user_profile?.display_name || 'Anonymous'}</div>
-                  <div className="text-sm text-gray-500">{new Date(poll.created_at).toLocaleDateString()}</div>
-                </div>
-              </div>
-              {user?.id === poll.user_id && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(poll.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(poll.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-            
-            <h3 className="text-lg font-semibold mb-4">{poll.title}</h3>
-            
-            <div className="space-y-2 mb-4">
-              {(poll.poll_options || []).map((option: any, index: number) => {
-                const totalVotes = (poll.poll_options || []).reduce((sum: number, opt: any) => sum + (opt.votes || 0), 0);
-                const percentage = totalVotes > 0 ? ((option.votes || 0) / totalVotes) * 100 : 0;
-                
-                return (
-                  <div key={index} className="relative">
+                {user?.id === poll.user_id && (
+                  <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      className="w-full justify-start relative overflow-hidden"
-                      onClick={() => onVote(poll.id, index)}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEdit(poll.id)}
                     >
-                      <div
-                        className="absolute left-0 top-0 h-full bg-blue-100 transition-all"
-                        style={{ width: `${percentage}%` }}
-                      />
-                      <span className="relative z-10 flex justify-between w-full">
-                        <span>{option.text}</span>
-                        <span>{option.votes || 0} votes ({percentage.toFixed(1)}%)</span>
-                      </span>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDelete(poll.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                );
-              })}
-            </div>
-            
-            <div className="flex items-center gap-4 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onLike(poll.id)}
-                className="flex items-center gap-2"
-              >
-                <Heart className="h-4 w-4" />
-                {poll.likes_count}
-              </Button>
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                {poll.comments_count}
-              </Button>
-            </div>
+                )}
+              </div>
+              
+              <h3 className="text-lg font-semibold mb-4">{poll.title}</h3>
+              
+              <div className="space-y-2 mb-4">
+                {(poll.poll_options || []).map((option: any, index: number) => {
+                  const totalVotes = (poll.poll_options || []).reduce((sum: number, opt: any) => sum + (opt.votes || 0), 0);
+                  const percentage = totalVotes > 0 ? ((option.votes || 0) / totalVotes) * 100 : 0;
+                  
+                  return (
+                    <div key={index} className="relative">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start relative overflow-hidden"
+                        onClick={() => onVote(poll.id, index)}
+                        disabled={userHasVoted}
+                      >
+                        <div
+                          className="absolute left-0 top-0 h-full bg-blue-100 transition-all"
+                          style={{ width: `${percentage}%` }}
+                        />
+                        <span className="relative z-10 flex justify-between w-full">
+                          <span>{option.text}</span>
+                          <span>{option.votes || 0} votes ({percentage.toFixed(1)}%)</span>
+                        </span>
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {userHasVoted && (
+                <div className="text-sm text-green-600 mb-4">
+                  ✓ You have voted on this poll
+                </div>
+              )}
+              
+              <div className="flex items-center gap-4 mb-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onLike(poll.id)}
+                  className="flex items-center gap-2"
+                >
+                  <Heart className="h-4 w-4" />
+                  {poll.likes_count}
+                </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  {poll.comments_count}
+                </Button>
+              </div>
 
-            {/* Comments Section */}
-            <CommentSection postId={poll.id} />
-          </CardContent>
-        </Card>
-      ))}
+              <CommentSection postId={poll.id} />
+            </CardContent>
+          </Card>
+        );
+      })}
     </>
   );
 };

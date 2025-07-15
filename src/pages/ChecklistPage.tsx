@@ -25,8 +25,9 @@ export const ChecklistPage = ({
   const enhancedUserProgress = {
     ...userProgress,
     completedModules: userProgress.completedModules || [],
-    markComplete: (moduleId: string) => {
-      markModuleComplete(moduleId);
+    markComplete: async (moduleId: string) => {
+      await markModuleComplete(moduleId);
+      // Also update local state for immediate UI feedback
       setUserProgress({
         ...userProgress,
         completedModules: [...(userProgress.completedModules || []), moduleId]

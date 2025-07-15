@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -5,17 +6,17 @@ import { toast } from 'sonner';
 
 export interface HubPost {
   id: string;
-  user_id: string;
   title: string;
   content: string;
   category: string;
-  type: 'qa' | 'blog' | 'reel' | 'poll';
-  media_url?: string;
-  poll_options?: any[];
-  likes_count: number;
-  comments_count: number;
+  type: string;
+  user_id: string;
   created_at: string;
   updated_at: string;
+  likes_count: number;
+  comments_count: number;
+  media_url?: string;
+  poll_options?: Array<{ text: string; votes: number; voters?: string[] }>;
   user_profile?: {
     display_name: string;
     avatar_url?: string;
@@ -29,59 +30,23 @@ export const useHubPosts = () => {
 
   const fetchPosts = async () => {
     try {
-      // Get posts first
-      const { data: postsData, error: postsError } = await supabase
+      const { data, error } = await supabase
         .from('hub_posts')
-        .select('*')
+        .select(`
+          *,
+          user_profile:hub_user_profiles(display_name, avatar_url)
+        `)
         .order('created_at', { ascending: false });
 
-      if (postsError) throw postsError;
-      
-      console.log('Fetched posts data:', postsData);
+      if (error) throw error;
 
-      // Get user profiles for all post authors
-      const userIds = [...new Set(postsData?.map(p => p.user_id) || [])];
-      const profilePromises = userIds.map(async (userId) => {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('name, email')
-          .eq('id', userId)
-          .single();
-        
-        return {
-          user_id: userId,
-          display_name: profileData?.name || profileData?.email || 'Anonymous User'
-        };
-      });
-
-      const profiles = await Promise.all(profilePromises);
-      const profileMap = profiles.reduce((acc, profile) => {
-        acc[profile.user_id] = profile;
-        return acc;
-      }, {} as Record<string, { display_name: string }>);
-      
-      // Transform the data to match our HubPost interface
-      const transformedPosts: HubPost[] = (postsData || []).map(post => ({
-        id: post.id,
-        user_id: post.user_id,
-        title: post.title,
-        content: post.content,
-        category: post.category,
-        type: post.type as 'qa' | 'blog' | 'reel' | 'poll' || 'qa',
-        media_url: post.media_url,
-        poll_options: Array.isArray(post.poll_options) ? post.poll_options : [],
-        likes_count: post.likes_count || 0,
-        comments_count: post.comments_count || 0,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-        user_profile: {
-          display_name: profileMap[post.user_id]?.display_name || 'Anonymous',
-          avatar_url: undefined
-        }
-      }));
-      
-      setPosts(transformedPosts);
-    } catch (error: any) {
+      setPosts(data?.map(post => ({
+        ...post,
+        user_profile: Array.isArray(post.user_profile) 
+          ? post.user_profile[0] 
+          : post.user_profile
+      })) || []);
+    } catch (error) {
       console.error('Error fetching posts:', error);
       toast.error('Failed to load posts');
     } finally {
@@ -89,93 +54,40 @@ export const useHubPosts = () => {
     }
   };
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   const createPost = async (postData: {
     title: string;
     content: string;
     category: string;
-    type: 'qa' | 'blog' | 'reel' | 'poll';
+    type: string;
     media_url?: string;
-    poll_options?: any[];
+    poll_options?: Array<{ text: string; votes: number }>;
   }) => {
     if (!user) {
       toast.error('Please sign in to create posts');
       return;
     }
 
-    // Ensure user has a profile
-    try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!existingProfile) {
-        console.error('User profile not found');
-        toast.error('Please complete your profile first');
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking user profile:', error);
-    }
-
-    console.log('Creating post with data:', postData);
-
     try {
       const { data, error } = await supabase
         .from('hub_posts')
         .insert({
-          title: postData.title,
-          content: postData.content,
-          category: postData.category,
-          type: postData.type,
-          media_url: postData.media_url,
-          poll_options: postData.poll_options,
+          ...postData,
           user_id: user.id,
         })
         .select()
         .single();
 
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-      
-      console.log('Created post response:', data);
+      if (error) throw error;
 
-      // Get user profile for the new post
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('name, email')
-        .eq('id', user.id)
-        .single();
-      
-      const newPost: HubPost = {
-        id: data.id,
-        user_id: data.user_id,
-        title: data.title,
-        content: data.content,
-        category: data.category,
-        type: data.type as 'qa' | 'blog' | 'reel' | 'poll',
-        media_url: data.media_url,
-        poll_options: Array.isArray(data.poll_options) ? data.poll_options : [],
-        likes_count: data.likes_count || 0,
-        comments_count: data.comments_count || 0,
-        created_at: data.created_at,
-        updated_at: data.updated_at,
-        user_profile: {
-          display_name: profileData?.name || profileData?.email || 'Anonymous User',
-          avatar_url: undefined
-        }
-      };
-      
-      setPosts(prev => [newPost, ...prev]);
+      await fetchPosts();
       toast.success('Post created successfully!');
-      return newPost;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating post:', error);
-      toast.error(`Failed to create post: ${error.message}`);
-      throw error;
+      toast.error('Failed to create post');
     }
   };
 
@@ -183,34 +95,17 @@ export const useHubPosts = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('hub_posts')
         .update(updates)
         .eq('id', postId)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+        .eq('user_id', user.id);
 
       if (error) throw error;
-      
-      const updatedPost: HubPost = {
-        id: data.id,
-        user_id: data.user_id,
-        title: data.title,
-        content: data.content,
-        category: data.category,
-        type: (data as any).type || 'qa' as 'qa' | 'blog' | 'reel' | 'poll',
-        media_url: (data as any).media_url,
-        poll_options: Array.isArray((data as any).poll_options) ? (data as any).poll_options : [],
-        likes_count: data.likes_count || 0,
-        comments_count: data.comments_count || 0,
-        created_at: data.created_at,
-        updated_at: data.updated_at
-      };
-      
-      setPosts(prev => prev.map(post => post.id === postId ? updatedPost : post));
+
+      await fetchPosts();
       toast.success('Post updated successfully!');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating post:', error);
       toast.error('Failed to update post');
     }
@@ -227,10 +122,10 @@ export const useHubPosts = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      
-      setPosts(prev => prev.filter(post => post.id !== postId));
+
+      await fetchPosts();
       toast.success('Post deleted successfully!');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting post:', error);
       toast.error('Failed to delete post');
     }
@@ -243,7 +138,7 @@ export const useHubPosts = () => {
     }
 
     try {
-      // Check if already liked
+      // Check if user already liked the post
       const { data: existingLike } = await supabase
         .from('hub_likes')
         .select('id')
@@ -252,39 +147,71 @@ export const useHubPosts = () => {
         .single();
 
       if (existingLike) {
-        // Unlike
+        // Unlike the post
         await supabase
           .from('hub_likes')
           .delete()
           .eq('post_id', postId)
           .eq('user_id', user.id);
-
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, likes_count: Math.max(0, post.likes_count - 1) }
-            : post
-        ));
       } else {
-        // Like
+        // Like the post
         await supabase
           .from('hub_likes')
           .insert({ post_id: postId, user_id: user.id });
-
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, likes_count: post.likes_count + 1 }
-            : post
-        ));
       }
-    } catch (error: any) {
+
+      await fetchPosts();
+    } catch (error) {
       console.error('Error liking post:', error);
-      toast.error('Failed to like post');
+      toast.error('Failed to update like');
     }
   };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  const voteOnPoll = async (postId: string, optionIndex: number) => {
+    if (!user) {
+      toast.error('Please sign in to vote');
+      return;
+    }
+
+    try {
+      // Get the current post
+      const post = posts.find(p => p.id === postId);
+      if (!post || !post.poll_options) return;
+
+      const updatedOptions = [...post.poll_options];
+      
+      // Check if user has already voted
+      const hasVoted = updatedOptions.some(option => 
+        option.voters && option.voters.includes(user.id)
+      );
+
+      if (hasVoted) {
+        toast.error('You have already voted on this poll');
+        return;
+      }
+
+      // Add vote to the selected option
+      if (!updatedOptions[optionIndex].voters) {
+        updatedOptions[optionIndex].voters = [];
+      }
+      updatedOptions[optionIndex].voters.push(user.id);
+      updatedOptions[optionIndex].votes = updatedOptions[optionIndex].voters.length;
+
+      // Update the post in database
+      const { error } = await supabase
+        .from('hub_posts')
+        .update({ poll_options: updatedOptions })
+        .eq('id', postId);
+
+      if (error) throw error;
+
+      await fetchPosts();
+      toast.success('Vote recorded successfully!');
+    } catch (error) {
+      console.error('Error voting on poll:', error);
+      toast.error('Failed to record vote');
+    }
+  };
 
   return {
     posts,
@@ -293,6 +220,7 @@ export const useHubPosts = () => {
     updatePost,
     deletePost,
     likePost,
+    voteOnPoll,
     refetch: fetchPosts,
   };
 };

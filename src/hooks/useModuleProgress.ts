@@ -21,7 +21,35 @@ export const useModuleProgress = () => {
     if (!user) return;
 
     try {
-      // For now, we'll work with local storage until the module_completions table is properly set up
+      // First try to fetch from the database if user_progress table exists
+      const { data: userProgress, error: progressError } = await supabase
+        .from('user_progress')
+        .select('completed_modules')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!progressError && userProgress?.completed_modules) {
+        // Convert the completed modules array to our completion format
+        const dbCompletions = userProgress.completed_modules.map((moduleId: string) => ({
+          id: crypto.randomUUID(),
+          user_id: user.id,
+          module_id: moduleId,
+          completed_at: new Date().toISOString(),
+        }));
+        setCompletions(dbCompletions);
+      } else {
+        // Fallback to localStorage
+        const stored = localStorage.getItem(`module_completions_${user.id}`);
+        if (stored) {
+          const parsedCompletions = JSON.parse(stored);
+          setCompletions(parsedCompletions);
+        } else {
+          setCompletions([]);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching module completions:', error);
+      // Fallback to localStorage on any error
       const stored = localStorage.getItem(`module_completions_${user.id}`);
       if (stored) {
         const parsedCompletions = JSON.parse(stored);
@@ -29,9 +57,6 @@ export const useModuleProgress = () => {
       } else {
         setCompletions([]);
       }
-    } catch (error: any) {
-      console.error('Error fetching module completions:', error);
-      setCompletions([]);
     } finally {
       setLoading(false);
     }
@@ -64,7 +89,28 @@ export const useModuleProgress = () => {
 
       setCompletions(updatedCompletions);
       
-      // Store in localStorage for now
+      // Try to save to database first
+      try {
+        const completedModuleIds = updatedCompletions.map(c => c.module_id);
+        
+        const { error: upsertError } = await supabase
+          .from('user_progress')
+          .upsert({
+            user_id: user.id,
+            completed_modules: completedModuleIds
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (upsertError) {
+          console.error('Database save failed, using localStorage:', upsertError);
+          throw upsertError;
+        }
+      } catch (dbError) {
+        console.error('Database operation failed, falling back to localStorage:', dbError);
+      }
+      
+      // Always save to localStorage as backup
       localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
 
       toast.success('Module marked as complete!');
