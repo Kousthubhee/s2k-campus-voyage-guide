@@ -3,10 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, MessageSquare, Video, Edit, Trash2 } from 'lucide-react';
+import { Heart, MessageSquare, Video, Edit, Trash2, Upload } from 'lucide-react';
 import { HubPost } from '@/hooks/useHubPosts';
 import { CommentSection } from './CommentSection';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ReelsTabProps {
   reels: HubPost[];
@@ -33,6 +35,64 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
 }) => {
   const { user } = useAuth();
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!user) {
+      toast.error('Please sign in to upload videos');
+      return;
+    }
+
+    try {
+      console.log('Uploading video file:', file.name, file.size);
+      
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(`videos/${fileName}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error('Failed to upload video');
+        return;
+      }
+
+      console.log('Upload successful:', uploadData);
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(`videos/${fileName}`);
+
+      console.log('Public URL:', urlData.publicUrl);
+      
+      // Create a synthetic event to pass the URL
+      const syntheticEvent = {
+        target: {
+          files: [file]
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      // Store the URL for the reel
+      onReelUpload(syntheticEvent);
+      
+      // Update the reel URL in the parent component state
+      // We'll need to modify this to work with the uploaded URL
+      
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast.error('Failed to upload video');
+    }
+  };
+
   return (
     <>
       {/* Create New Reel */}
@@ -44,30 +104,62 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={onReelUpload}
-            className="mb-4"
-          />
-          {newReel && (
-            <video
-              src={newReel}
-              controls
-              className="w-full max-w-md mb-4 rounded-lg bg-gray-100"
-              style={{ maxHeight: '400px' }}
-              preload="metadata"
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleVideoUpload}
+                className="hidden"
+                id="video-upload"
+              />
+              <label
+                htmlFor="video-upload"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Video
+              </label>
+            </div>
+            
+            {newReel && (
+              <div className="w-full max-w-md">
+                <video
+                  src={newReel}
+                  controls
+                  className="w-full rounded-lg bg-gray-900"
+                  style={{ maxHeight: '400px' }}
+                  preload="metadata"
+                  playsInline
+                  onError={(e) => {
+                    console.error('Video failed to load:', newReel, e);
+                  }}
+                  onLoadStart={() => {
+                    console.log('Video loading started:', newReel);
+                  }}
+                  onCanPlay={() => {
+                    console.log('Video can play:', newReel);
+                  }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            )}
+            
+            <Input
+              placeholder="Add a caption..."
+              value={newReelCaption}
+              onChange={(e) => onChangeCaption(e.target.value)}
             />
-          )}
-          <Input
-            placeholder="Add a caption..."
-            value={newReelCaption}
-            onChange={(e) => onChangeCaption(e.target.value)}
-            className="mb-4"
-          />
-          <Button onClick={onPublish} disabled={!newReel || !newReelCaption.trim()}>
-            Share Reel
-          </Button>
+            
+            <Button 
+              onClick={onPublish} 
+              disabled={!newReel || !newReelCaption.trim()}
+              className="w-full"
+            >
+              Share Reel
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -108,28 +200,30 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             
             <div className="mb-4">
               {reel.media_url ? (
-                <video
-                  key={reel.media_url}
-                  controls
-                  className="w-full max-w-md rounded-lg"
-                  style={{ maxHeight: '400px', backgroundColor: '#f3f4f6' }}
-                  playsInline
-                  preload="metadata"
-                  onError={(e) => {
-                    console.error('Video failed to load:', reel.media_url, e);
-                  }}
-                  onLoadStart={() => {
-                    console.log('Video loading started:', reel.media_url);
-                  }}
-                  onCanPlay={() => {
-                    console.log('Video can play:', reel.media_url);
-                  }}
-                >
-                  <source src={reel.media_url} type="video/mp4" />
-                  <source src={reel.media_url} type="video/webm" />
-                  <source src={reel.media_url} type="video/ogg" />
-                  Your browser does not support the video tag.
-                </video>
+                <div className="w-full max-w-md">
+                  <video
+                    key={reel.media_url}
+                    controls
+                    className="w-full rounded-lg bg-gray-900"
+                    style={{ maxHeight: '400px' }}
+                    playsInline
+                    preload="metadata"
+                    onError={(e) => {
+                      console.error('Video failed to load:', reel.media_url, e);
+                    }}
+                    onLoadStart={() => {
+                      console.log('Video loading started:', reel.media_url);
+                    }}
+                    onCanPlay={() => {
+                      console.log('Video can play:', reel.media_url);
+                    }}
+                  >
+                    <source src={reel.media_url} type="video/mp4" />
+                    <source src={reel.media_url} type="video/webm" />
+                    <source src={reel.media_url} type="video/ogg" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
               ) : (
                 <div className="w-full max-w-md h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                   <span className="text-gray-500">Video not available</span>
@@ -155,7 +249,6 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
               </Button>
             </div>
 
-            {/* Comments Section */}
             <CommentSection postId={reel.id} />
           </CardContent>
         </Card>

@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { ChecklistModule } from '@/components/ChecklistModule';
 import checklistModules from '@/constants/checklistModules';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
 
 interface ChecklistPageProps {
   userProgress: any;
@@ -19,7 +21,27 @@ export const ChecklistPage = ({
   currentPage,
   setCurrentPage
 }: ChecklistPageProps) => {
-  const { completions, markModuleComplete, markModuleIncomplete, isModuleComplete, loading } = useModuleProgress();
+  const { 
+    completions, 
+    markModuleComplete, 
+    markModuleIncomplete, 
+    isModuleComplete, 
+    loading,
+    saveAllChanges,
+    discardChanges,
+    hasUnsavedChanges
+  } = useModuleProgress();
+
+  const {
+    hasUnsavedChanges: hasChanges,
+    isSaving,
+    markAsChanged,
+    saveChanges,
+    promptBeforeLeaving
+  } = useUnsavedChanges({
+    onSave: saveAllChanges,
+    onDiscard: discardChanges
+  });
 
   // Sync database completions with local state
   useEffect(() => {
@@ -27,7 +49,6 @@ export const ChecklistPage = ({
       const dbCompletedModules = completions.map(c => c.module_id);
       console.log('Syncing completions to local state:', dbCompletedModules);
       
-      // Update local progress to match database
       setUserProgress(prevProgress => ({
         ...prevProgress,
         completedModules: dbCompletedModules
@@ -35,22 +56,37 @@ export const ChecklistPage = ({
     }
   }, [completions, loading, setUserProgress]);
 
-  // Enhanced userProgress with database tracking
+  // Enhanced userProgress with database tracking and save functionality
   const enhancedUserProgress = {
     ...userProgress,
     completedModules: completions.map(c => c.module_id),
     markComplete: async (moduleId: string) => {
       console.log('Enhanced markComplete called for:', moduleId);
       await markModuleComplete(moduleId);
+      markAsChanged();
     },
     markIncomplete: async (moduleId: string) => {
       console.log('Enhanced markIncomplete called for:', moduleId);
       await markModuleIncomplete(moduleId);
+      markAsChanged();
     },
     isComplete: (moduleId: string) => {
       return isModuleComplete(moduleId);
     }
   };
+
+  // Prompt before navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   if (loading) {
     return (
@@ -61,13 +97,28 @@ export const ChecklistPage = ({
   }
 
   return (
-    <ChecklistModule
-      modules={checklistModules}
-      userProgress={enhancedUserProgress}
-      setUserProgress={setUserProgress}
-      onSchoolSelect={onSchoolSelect}
-      currentPage={currentPage}
-      setCurrentPage={setCurrentPage}
-    />
+    <>
+      <ChecklistModule
+        modules={checklistModules}
+        userProgress={enhancedUserProgress}
+        setUserProgress={setUserProgress}
+        onSchoolSelect={onSchoolSelect}
+        currentPage={currentPage}
+        setCurrentPage={async (page: string) => {
+          await promptBeforeLeaving();
+          setCurrentPage(page);
+        }}
+      />
+      
+      <SaveChangesPrompt
+        hasUnsavedChanges={hasUnsavedChanges() || hasChanges}
+        isSaving={isSaving}
+        onSave={saveChanges}
+        onDiscard={() => {
+          discardChanges();
+          markAsChanged();
+        }}
+      />
+    </>
   );
 };

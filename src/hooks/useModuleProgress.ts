@@ -15,6 +15,7 @@ interface ModuleCompletion {
 export const useModuleProgress = () => {
   const [completions, setCompletions] = useState<ModuleCompletion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
   const { user } = useAuth();
 
   const fetchCompletions = async () => {
@@ -27,7 +28,6 @@ export const useModuleProgress = () => {
     try {
       console.log('Fetching completions for user:', user.id);
       
-      // First try to fetch from the database
       const { data: userProgress, error: progressError } = await supabase
         .from('user_progress')
         .select('completed_modules')
@@ -38,7 +38,6 @@ export const useModuleProgress = () => {
 
       if (!progressError && userProgress?.completed_modules) {
         console.log('Found completed modules in database:', userProgress.completed_modules);
-        // Convert the completed modules array to our completion format
         const dbCompletions = userProgress.completed_modules.map((moduleId: string) => ({
           id: crypto.randomUUID(),
           user_id: user.id,
@@ -46,54 +45,22 @@ export const useModuleProgress = () => {
           completed_at: new Date().toISOString(),
         }));
         setCompletions(dbCompletions);
-        
-        // Also save to localStorage for backup
-        localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(dbCompletions));
       } else {
-        console.log('No database progress found, checking localStorage');
-        // Fallback to localStorage
-        const stored = localStorage.getItem(`module_completions_${user.id}`);
-        if (stored) {
-          const parsedCompletions = JSON.parse(stored);
-          console.log('Found localStorage completions:', parsedCompletions);
-          setCompletions(parsedCompletions);
-          
-          // Sync to database
-          const completedModuleIds = parsedCompletions.map((c: ModuleCompletion) => c.module_id);
-          console.log('Syncing to database:', completedModuleIds);
-          await supabase
-            .from('user_progress')
-            .upsert({
-              user_id: user.id,
-              completed_modules: completedModuleIds
-            }, {
-              onConflict: 'user_id'
-            });
-        } else {
-          console.log('No progress found anywhere, initializing empty');
-          setCompletions([]);
-          
-          // Initialize empty progress in database
-          await supabase
-            .from('user_progress')
-            .upsert({
-              user_id: user.id,
-              completed_modules: []
-            }, {
-              onConflict: 'user_id'
-            });
-        }
+        console.log('No database progress found, initializing empty');
+        setCompletions([]);
+        
+        await supabase
+          .from('user_progress')
+          .upsert({
+            user_id: user.id,
+            completed_modules: []
+          }, {
+            onConflict: 'user_id'
+          });
       }
     } catch (error: any) {
       console.error('Error fetching module completions:', error);
-      // Fallback to localStorage on any error
-      const stored = localStorage.getItem(`module_completions_${user.id}`);
-      if (stored) {
-        const parsedCompletions = JSON.parse(stored);
-        setCompletions(parsedCompletions);
-      } else {
-        setCompletions([]);
-      }
+      setCompletions([]);
     } finally {
       setLoading(false);
     }
@@ -105,61 +72,27 @@ export const useModuleProgress = () => {
       return;
     }
 
-    try {
-      console.log('Marking module complete:', moduleId);
-      
-      // Create a completion record
-      const completion: ModuleCompletion = {
-        id: crypto.randomUUID(),
-        user_id: user.id,
-        module_id: moduleId,
-        completed_at: new Date().toISOString(),
-        notes: notes,
-      };
+    console.log('Marking module complete locally:', moduleId);
+    
+    const completion: ModuleCompletion = {
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      module_id: moduleId,
+      completed_at: new Date().toISOString(),
+      notes: notes,
+    };
 
-      const updatedCompletions = [...completions];
-      const existingIndex = updatedCompletions.findIndex(c => c.module_id === moduleId);
-      
-      if (existingIndex >= 0) {
-        updatedCompletions[existingIndex] = completion;
-      } else {
-        updatedCompletions.push(completion);
-      }
-
-      // Update state immediately for UI responsiveness
-      setCompletions(updatedCompletions);
-      
-      // Save to database
-      try {
-        const completedModuleIds = updatedCompletions.map(c => c.module_id);
-        console.log('Saving to database:', completedModuleIds);
-        
-        const { error: upsertError } = await supabase
-          .from('user_progress')
-          .upsert({
-            user_id: user.id,
-            completed_modules: completedModuleIds
-          }, {
-            onConflict: 'user_id'
-          });
-
-        if (upsertError) {
-          console.error('Database save failed:', upsertError);
-          throw upsertError;
-        }
-        console.log('Successfully saved to database');
-      } catch (dbError) {
-        console.error('Database operation failed, using localStorage only:', dbError);
-      }
-      
-      // Always save to localStorage as backup
-      localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
-
-      toast.success('Module marked as complete!');
-    } catch (error: any) {
-      console.error('Error marking module complete:', error);
-      toast.error('Failed to update progress');
+    const updatedCompletions = [...completions];
+    const existingIndex = updatedCompletions.findIndex(c => c.module_id === moduleId);
+    
+    if (existingIndex >= 0) {
+      updatedCompletions[existingIndex] = completion;
+    } else {
+      updatedCompletions.push(completion);
     }
+
+    setCompletions(updatedCompletions);
+    setPendingChanges(prev => new Set([...prev, moduleId]));
   };
 
   const markModuleIncomplete = async (moduleId: string) => {
@@ -168,45 +101,48 @@ export const useModuleProgress = () => {
       return;
     }
 
-    try {
-      console.log('Marking module incomplete:', moduleId);
-      
-      const updatedCompletions = completions.filter(c => c.module_id !== moduleId);
-      
-      // Update state immediately for UI responsiveness
-      setCompletions(updatedCompletions);
-      
-      // Save to database
-      try {
-        const completedModuleIds = updatedCompletions.map(c => c.module_id);
-        console.log('Updating database with:', completedModuleIds);
-        
-        const { error: upsertError } = await supabase
-          .from('user_progress')
-          .upsert({
-            user_id: user.id,
-            completed_modules: completedModuleIds
-          }, {
-            onConflict: 'user_id'
-          });
+    console.log('Marking module incomplete locally:', moduleId);
+    
+    const updatedCompletions = completions.filter(c => c.module_id !== moduleId);
+    setCompletions(updatedCompletions);
+    setPendingChanges(prev => new Set([...prev, moduleId]));
+  };
 
-        if (upsertError) {
-          console.error('Database save failed:', upsertError);
-          throw upsertError;
-        }
-        console.log('Successfully updated database');
-      } catch (dbError) {
-        console.error('Database operation failed, using localStorage only:', dbError);
-      }
-      
-      // Always save to localStorage as backup
-      localStorage.setItem(`module_completions_${user.id}`, JSON.stringify(updatedCompletions));
-
-      toast.success('Module marked as incomplete!');
-    } catch (error: any) {
-      console.error('Error marking module incomplete:', error);
-      toast.error('Failed to update progress');
+  const saveAllChanges = async () => {
+    if (!user || pendingChanges.size === 0) {
+      return;
     }
+
+    try {
+      console.log('Saving all changes to database');
+      const completedModuleIds = completions.map(c => c.module_id);
+      
+      const { error: upsertError } = await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: user.id,
+          completed_modules: completedModuleIds
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (upsertError) {
+        console.error('Database save failed:', upsertError);
+        throw upsertError;
+      }
+
+      console.log('Successfully saved to database');
+      setPendingChanges(new Set());
+    } catch (error: any) {
+      console.error('Error saving changes:', error);
+      throw error;
+    }
+  };
+
+  const discardChanges = () => {
+    console.log('Discarding pending changes');
+    setPendingChanges(new Set());
+    fetchCompletions(); // Reload from database
   };
 
   const isModuleComplete = (moduleId: string) => {
@@ -219,11 +155,14 @@ export const useModuleProgress = () => {
     return completions.find(c => c.module_id === moduleId);
   };
 
-  // Load completions when user changes or component mounts
+  const hasUnsavedChanges = () => {
+    return pendingChanges.size > 0;
+  };
+
   useEffect(() => {
     console.log('useEffect triggered for user:', user?.id);
     fetchCompletions();
-  }, [user?.id]); // Only depend on user.id to avoid infinite loops
+  }, [user?.id]);
 
   return {
     completions,
@@ -233,5 +172,9 @@ export const useModuleProgress = () => {
     isModuleComplete,
     getModuleCompletion,
     refetch: fetchCompletions,
+    saveAllChanges,
+    discardChanges,
+    hasUnsavedChanges,
+    pendingChanges: Array.from(pendingChanges)
   };
 };
