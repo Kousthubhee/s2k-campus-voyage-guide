@@ -13,9 +13,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   const [newComment, setNewComment] = useState('');
   const { comments, loading, addComment, updateComment, deleteComment } = useHubComments(postId);
 
-  const handleAddComment = useCallback(() => {
+  const handleAddComment = useCallback(async () => {
     if (newComment.trim()) {
-      addComment(newComment);
+      await addComment(newComment);
       setNewComment('');
     }
   }, [newComment, addComment]);
@@ -26,9 +26,14 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleAddComment();
     }
   }, [handleAddComment]);
+
+  if (loading) {
+    return <div className="text-center text-gray-500">Loading comments...</div>;
+  }
 
   return (
     <div className="space-y-3">
@@ -38,7 +43,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
           comment={comment}
           onEdit={updateComment}
           onDelete={deleteComment}
-          onReply={(content, parentId) => addComment(content, parentId)}
+          onReply={addComment}
         />
       ))}
       

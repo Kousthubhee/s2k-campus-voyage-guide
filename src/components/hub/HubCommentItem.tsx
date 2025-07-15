@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Edit, Trash2, Reply, MessageSquare } from 'lucide-react';
+import { Edit, Trash2, Reply } from 'lucide-react';
 import { HubComment } from '@/hooks/useHubComments';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,7 +28,7 @@ export const HubCommentItem: React.FC<HubCommentItemProps> = ({
   const { user } = useAuth();
 
   const isOwnComment = user?.id === comment.user_id;
-  const indentClass = level > 0 ? 'ml-6 border-l-2 border-gray-200 pl-4' : '';
+  const indentClass = level > 0 ? `ml-${Math.min(level * 4, 12)} border-l-2 border-gray-200 pl-4` : '';
 
   const handleEdit = () => {
     if (editContent.trim()) {
@@ -42,6 +42,12 @@ export const HubCommentItem: React.FC<HubCommentItemProps> = ({
       onReply(replyContent, comment.id);
       setReplyContent('');
       setIsReplying(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter') {
+      action();
     }
   };
 
@@ -90,7 +96,9 @@ export const HubCommentItem: React.FC<HubCommentItemProps> = ({
             <Input
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
+              onKeyPress={(e) => handleKeyPress(e, handleEdit)}
               className="text-sm"
+              autoFocus
             />
             <div className="flex gap-2">
               <Button size="sm" onClick={handleEdit}>
@@ -129,7 +137,9 @@ export const HubCommentItem: React.FC<HubCommentItemProps> = ({
               placeholder="Write a reply..."
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
+              onKeyPress={(e) => handleKeyPress(e, handleReply)}
               className="text-sm"
+              autoFocus
             />
             <div className="flex gap-2">
               <Button size="sm" onClick={handleReply}>
@@ -150,7 +160,7 @@ export const HubCommentItem: React.FC<HubCommentItemProps> = ({
         )}
       </div>
 
-      {/* Render replies */}
+      {/* Render nested replies */}
       {comment.replies && comment.replies.length > 0 && (
         <div className="space-y-2">
           {comment.replies.map((reply) => (

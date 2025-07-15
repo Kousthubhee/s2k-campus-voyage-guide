@@ -26,6 +26,16 @@ export const useHubComments = (postId: string) => {
   const { user } = useAuth();
   const { getProfile } = useHubUserProfiles();
 
+  // Build nested comment tree recursively
+  const buildCommentTree = (comments: HubComment[], parentId: string | null = null): HubComment[] => {
+    return comments
+      .filter(comment => comment.parent_id === parentId)
+      .map(comment => ({
+        ...comment,
+        replies: buildCommentTree(comments, comment.id)
+      }));
+  };
+
   const fetchComments = useCallback(async () => {
     if (!postId) return;
     
@@ -33,7 +43,7 @@ export const useHubComments = (postId: string) => {
     try {
       console.log('Fetching comments for post:', postId);
       
-      // Get comments with basic info first
+      // Get all comments for this post
       const { data: commentsData, error: commentsError } = await supabase
         .from('hub_comments')
         .select('*')
@@ -44,8 +54,13 @@ export const useHubComments = (postId: string) => {
 
       console.log('Raw comments data:', commentsData);
 
+      if (!commentsData || commentsData.length === 0) {
+        setComments([]);
+        return;
+      }
+
       // Get user profiles for all comment authors
-      const userIds = [...new Set(commentsData?.map(c => c.user_id) || [])];
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
       console.log('User IDs to fetch profiles for:', userIds);
       
       const profilePromises = userIds.map(userId => getProfile(userId));
@@ -61,7 +76,7 @@ export const useHubComments = (postId: string) => {
       console.log('Profile map:', profileMap);
 
       // Transform comments with profile data
-      const commentsWithProfiles = (commentsData || []).map(comment => ({
+      const commentsWithProfiles = commentsData.map(comment => ({
         id: comment.id,
         post_id: comment.post_id,
         user_id: comment.user_id,
@@ -75,17 +90,11 @@ export const useHubComments = (postId: string) => {
         }
       }));
 
-      // Organize comments into parent-child structure
-      const parentComments = commentsWithProfiles.filter(c => !c.parent_id);
-      const childComments = commentsWithProfiles.filter(c => c.parent_id);
+      // Build nested comment tree
+      const nestedComments = buildCommentTree(commentsWithProfiles);
 
-      const organizedComments = parentComments.map(parent => ({
-        ...parent,
-        replies: childComments.filter(child => child.parent_id === parent.id)
-      }));
-
-      console.log('Organized comments:', organizedComments);
-      setComments(organizedComments);
+      console.log('Organized nested comments:', nestedComments);
+      setComments(nestedComments);
     } catch (error: any) {
       console.error('Error fetching comments:', error);
       toast.error('Failed to load comments');
@@ -98,6 +107,8 @@ export const useHubComments = (postId: string) => {
     if (!user || !content.trim()) return;
 
     try {
+      console.log('Adding comment:', { content, parentId, postId, userId: user.id });
+
       const insertData: any = {
         post_id: postId,
         user_id: user.id,
@@ -115,7 +126,7 @@ export const useHubComments = (postId: string) => {
       if (error) throw error;
 
       toast.success('Comment added successfully!');
-      fetchComments();
+      await fetchComments(); // Refresh comments to show the new one
     } catch (error: any) {
       console.error('Error adding comment:', error);
       toast.error('Failed to add comment');
