@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useHubUserProfiles } from '@/hooks/useHubUserProfiles';
@@ -23,23 +23,28 @@ export interface HubComment {
 export const useHubComments = (postId: string) => {
   const [comments, setComments] = useState<HubComment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [lastFetchedPostId, setLastFetchedPostId] = useState<string | null>(null);
   const { user } = useAuth();
   const { getProfile } = useHubUserProfiles();
 
-  // Build nested comment tree recursively
-  const buildCommentTree = (comments: HubComment[], parentId: string | null = null): HubComment[] => {
-    return comments
-      .filter(comment => comment.parent_id === parentId)
-      .map(comment => ({
-        ...comment,
-        replies: buildCommentTree(comments, comment.id)
-      }));
-  };
+  // Memoize the buildCommentTree function to prevent recreation on every render
+  const buildCommentTree = useMemo(() => {
+    return (comments: HubComment[], parentId: string | null = null): HubComment[] => {
+      return comments
+        .filter(comment => comment.parent_id === parentId)
+        .map(comment => ({
+          ...comment,
+          replies: buildCommentTree(comments, comment.id)
+        }));
+    };
+  }, []);
 
   const fetchComments = useCallback(async () => {
-    if (!postId) return;
+    if (!postId || loading || lastFetchedPostId === postId) return;
     
     setLoading(true);
+    setLastFetchedPostId(postId);
+    
     try {
       console.log('Fetching comments for post:', postId);
       
@@ -101,7 +106,7 @@ export const useHubComments = (postId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [postId, getProfile]);
+  }, [postId, getProfile, buildCommentTree, loading, lastFetchedPostId]);
 
   const addComment = async (content: string, parentId?: string) => {
     if (!user || !content.trim()) return;
@@ -126,7 +131,9 @@ export const useHubComments = (postId: string) => {
       if (error) throw error;
 
       toast.success('Comment added successfully!');
-      await fetchComments(); // Refresh comments to show the new one
+      // Reset the last fetched post ID to force a refresh
+      setLastFetchedPostId(null);
+      await fetchComments();
     } catch (error: any) {
       console.error('Error adding comment:', error);
       toast.error('Failed to add comment');
@@ -146,6 +153,7 @@ export const useHubComments = (postId: string) => {
       if (error) throw error;
 
       toast.success('Comment updated successfully!');
+      setLastFetchedPostId(null);
       fetchComments();
     } catch (error: any) {
       console.error('Error updating comment:', error);
@@ -166,6 +174,7 @@ export const useHubComments = (postId: string) => {
       if (error) throw error;
 
       toast.success('Comment deleted successfully!');
+      setLastFetchedPostId(null);
       fetchComments();
     } catch (error: any) {
       console.error('Error deleting comment:', error);
@@ -173,9 +182,19 @@ export const useHubComments = (postId: string) => {
     }
   };
 
+  // Reset comments when postId changes
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    if (postId !== lastFetchedPostId) {
+      setComments([]);
+      setLastFetchedPostId(null);
+    }
+  }, [postId, lastFetchedPostId]);
+
+  useEffect(() => {
+    if (postId && !loading && lastFetchedPostId !== postId) {
+      fetchComments();
+    }
+  }, [postId, fetchComments, loading, lastFetchedPostId]);
 
   return {
     comments,
@@ -183,6 +202,9 @@ export const useHubComments = (postId: string) => {
     addComment,
     updateComment,
     deleteComment,
-    refetch: fetchComments
+    refetch: useCallback(() => {
+      setLastFetchedPostId(null);
+      fetchComments();
+    }, [fetchComments])
   };
 };
