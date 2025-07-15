@@ -40,12 +40,19 @@ export const useHubPosts = () => {
 
       if (error) throw error;
 
-      setPosts(data?.map(post => ({
+      const transformedPosts: HubPost[] = (data || []).map(post => ({
         ...post,
+        likes_count: post.likes_count || 0,
+        comments_count: post.comments_count || 0,
+        poll_options: post.poll_options ? 
+          (Array.isArray(post.poll_options) ? post.poll_options : []) as Array<{ text: string; votes: number; voters?: string[] }> : 
+          undefined,
         user_profile: Array.isArray(post.user_profile) 
           ? post.user_profile[0] 
           : post.user_profile
-      })) || []);
+      }));
+
+      setPosts(transformedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast.error('Failed to load posts');
@@ -194,8 +201,8 @@ export const useHubPosts = () => {
       if (!updatedOptions[optionIndex].voters) {
         updatedOptions[optionIndex].voters = [];
       }
-      updatedOptions[optionIndex].voters.push(user.id);
-      updatedOptions[optionIndex].votes = updatedOptions[optionIndex].voters.length;
+      updatedOptions[optionIndex].voters!.push(user.id);
+      updatedOptions[optionIndex].votes = updatedOptions[optionIndex].voters!.length;
 
       // Update the post in database
       const { error } = await supabase
