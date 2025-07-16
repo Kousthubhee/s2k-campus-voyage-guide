@@ -125,12 +125,12 @@ export const FinanceDashboard = ({
     try {
       setLoading(true);
       
-      // Fetch transactions for selected month/year
       const startDate = `${selectedYear}-${selectedMonth}-01`;
       const endDate = `${selectedYear}-${selectedMonth}-31`;
       
-      console.log('Fetching transactions for date range:', startDate, 'to', endDate);
+      console.log('Fetching data for date range:', startDate, 'to', endDate);
       
+      // Fetch transactions
       const { data: transactions, error: transError } = await supabase
         .from('transactions')
         .select('*')
@@ -139,22 +139,49 @@ export const FinanceDashboard = ({
         .lte('date', endDate)
         .order('date', { ascending: false });
 
-      if (transError) {
-        console.error('Transaction fetch error:', transError);
-        throw transError;
-      }
+      if (transError) throw transError;
 
-      console.log('Fetched transactions:', transactions);
+      // Fetch income sources
+      const { data: incomeData, error: incomeError } = await supabase
+        .from('income_sources')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', startDate)
+        .lte('date', endDate);
 
-      // Calculate stats
-      const income = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const expenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const netBalance = income - expenses;
-      const savingsRate = income > 0 ? (netBalance / income) * 100 : 0;
+      if (incomeError) throw incomeError;
 
-      console.log('Calculated stats:', { income, expenses, netBalance, savingsRate });
+      // Fetch part-time income
+      const { data: partTimeData, error: partTimeError } = await supabase
+        .from('income_sources')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('source_name', 'Part-time Job')
+        .gte('date', startDate)
+        .lte('date', endDate);
 
-      // Fetch emergency fund
+      if (partTimeError) throw partTimeError;
+
+      // Fetch subscriptions
+      const { data: subscriptions, error: subsError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('active', true);
+
+      if (subsError) throw subsError;
+
+      // Fetch shared expenses
+      const { data: sharedExpenses, error: sharedError } = await supabase
+        .from('shared_expenses')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', startDate)
+        .lte('date', endDate);
+
+      if (sharedError) throw sharedError;
+
+      // Fetch emergency fund changes
       const { data: emergencyData, error: emergencyError } = await supabase
         .from('emergency_fund')
         .select('*')
@@ -165,26 +192,79 @@ export const FinanceDashboard = ({
         console.error('Emergency fund error:', emergencyError);
       }
 
-      console.log('Emergency fund data:', emergencyData);
+      console.log('Fetched data:', { 
+        transactions: transactions?.length, 
+        incomeData: incomeData?.length,
+        partTimeData: partTimeData?.length,
+        subscriptions: subscriptions?.length,
+        sharedExpenses: sharedExpenses?.length,
+        emergencyData 
+      });
+
+      // Calculate income from multiple sources
+      const transactionIncome = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const mainIncomeFromSources = incomeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
+      const partTimeIncome = partTimeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
+      
+      const totalIncome = transactionIncome + mainIncomeFromSources + partTimeIncome;
+
+      // Calculate expenses from multiple sources
+      const transactionExpenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+      const subscriptionExpenses = subscriptions?.reduce((sum, s) => sum + Number(s.amount), 0) || 0;
+      const sharedExpensesTotal = sharedExpenses?.reduce((sum, e) => sum + Number(e.your_share), 0) || 0;
+      
+      const totalExpenses = transactionExpenses + subscriptionExpenses + sharedExpensesTotal;
+
+      // Get previous month balance (this would need to be implemented based on your needs)
+      // For now, we'll just calculate current month
+      const netBalance = totalIncome - totalExpenses;
+      const savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
+
+      console.log('Calculated stats:', { 
+        totalIncome, 
+        totalExpenses, 
+        netBalance, 
+        savingsRate,
+        breakdown: {
+          transactionIncome,
+          mainIncomeFromSources,
+          partTimeIncome,
+          transactionExpenses,
+          subscriptionExpenses,
+          sharedExpensesTotal
+        }
+      });
 
       setStats({
-        totalIncome: income,
-        totalExpenses: expenses,
+        totalIncome,
+        totalExpenses,
         netBalance,
         emergencyFund: emergencyData?.current_amount || 0,
         emergencyTarget: emergencyData?.target_amount || 1000,
         savingsRate
       });
 
-      // Set recent transactions (top 5)
-      setRecentTransactions(transactions?.slice(0, 5).map(t => ({
-        id: t.id,
-        description: t.description,
-        amount: Number(t.amount),
-        category: t.category,
-        type: t.type as 'income' | 'expense',
-        date: t.date
-      })) || []);
+      // Set recent transactions (combine from different sources for display)
+      const allTransactions = [
+        ...(transactions || []).map(t => ({
+          id: t.id,
+          description: t.description,
+          amount: Number(t.amount),
+          category: t.category,
+          type: t.type as 'income' | 'expense',
+          date: t.date
+        })),
+        ...(incomeData || []).map(i => ({
+          id: i.id,
+          description: i.source_name,
+          amount: Number(i.amount),
+          category: i.source_name,
+          type: 'income' as const,
+          date: i.date
+        }))
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      setRecentTransactions(allTransactions.slice(0, 5));
 
     } catch (error) {
       console.error('Error fetching finance data:', error);
