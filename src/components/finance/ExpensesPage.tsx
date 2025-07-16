@@ -36,7 +36,11 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
         </TabsContent>
 
         <TabsContent value="subscriptions" className="space-y-6 mt-6">
-          <SubscriptionsPage onDataChange={onDataChange} />
+          <SubscriptionsPage 
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onDataChange={onDataChange} 
+          />
         </TabsContent>
 
         <TabsContent value="income" className="space-y-6 mt-6">
@@ -52,7 +56,11 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
         </TabsContent>
 
         <TabsContent value="shared" className="space-y-6 mt-6">
-          <SharedExpensesPage onDataChange={onDataChange} />
+          <SharedExpensesPage 
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+            onDataChange={onDataChange} 
+          />
         </TabsContent>
       </Tabs>
     </div>
