@@ -87,7 +87,40 @@ export const FinanceDashboard = ({
   const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
   const fetchData = async () => {
-    if (!user) return;
+    console.log('Fetching finance data for user:', user?.id);
+    
+    if (!user) {
+      console.log('No user found, showing demo data');
+      // Show demo data for non-authenticated users
+      setStats({
+        totalIncome: 1200,
+        totalExpenses: 850,
+        netBalance: 350,
+        emergencyFund: 500,
+        emergencyTarget: 1000,
+        savingsRate: 29.2
+      });
+      setRecentTransactions([
+        {
+          id: '1',
+          description: 'Rent Payment',
+          amount: 600,
+          category: 'Rent',
+          type: 'expense',
+          date: '2024-01-15'
+        },
+        {
+          id: '2',
+          description: 'Part-time Job',
+          amount: 800,
+          category: 'Part-time Job',
+          type: 'income',
+          date: '2024-01-14'
+        }
+      ]);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -95,6 +128,8 @@ export const FinanceDashboard = ({
       // Fetch transactions for selected month/year
       const startDate = `${selectedYear}-${selectedMonth}-01`;
       const endDate = `${selectedYear}-${selectedMonth}-31`;
+      
+      console.log('Fetching transactions for date range:', startDate, 'to', endDate);
       
       const { data: transactions, error: transError } = await supabase
         .from('transactions')
@@ -104,13 +139,20 @@ export const FinanceDashboard = ({
         .lte('date', endDate)
         .order('date', { ascending: false });
 
-      if (transError) throw transError;
+      if (transError) {
+        console.error('Transaction fetch error:', transError);
+        throw transError;
+      }
+
+      console.log('Fetched transactions:', transactions);
 
       // Calculate stats
       const income = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const expenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const netBalance = income - expenses;
       const savingsRate = income > 0 ? (netBalance / income) * 100 : 0;
+
+      console.log('Calculated stats:', { income, expenses, netBalance, savingsRate });
 
       // Fetch emergency fund
       const { data: emergencyData, error: emergencyError } = await supabase
@@ -122,6 +164,8 @@ export const FinanceDashboard = ({
       if (emergencyError && emergencyError.code !== 'PGRST116') {
         console.error('Emergency fund error:', emergencyError);
       }
+
+      console.log('Emergency fund data:', emergencyData);
 
       setStats({
         totalIncome: income,
@@ -165,14 +209,6 @@ export const FinanceDashboard = ({
     setShowTransactionForm(false);
     onDataChange();
   };
-
-  if (!user) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        <p>Please log in to view your finance dashboard</p>
-      </div>
-    );
-  }
 
   if (loading) {
     return (

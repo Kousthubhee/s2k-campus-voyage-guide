@@ -33,13 +33,10 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
     promptBeforeLeaving
   } = useUnsavedChanges({
     onSave: async () => {
-      // Finance data is saved automatically to the database,
-      // so this is just for marking the module as having changes
       markAsSaved();
     },
     onDiscard: () => {
       // For finance tracking, we don't need to discard anything
-      // since data is saved to the database immediately
     }
   });
 
@@ -60,6 +57,8 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
       onComplete();
     }
   };
+
+  console.log('FinanceTrackingPage rendering with selectedTab:', selectedTab);
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in">
