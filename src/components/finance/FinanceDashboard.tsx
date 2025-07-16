@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,13 +44,15 @@ interface FinanceDashboardProps {
   selectedYear: string;
   onMonthChange: (month: string) => void;
   onYearChange: (year: string) => void;
+  onDataChange: () => void;
 }
 
 export const FinanceDashboard = ({ 
   selectedMonth, 
   selectedYear, 
   onMonthChange, 
-  onYearChange 
+  onYearChange,
+  onDataChange
 }: FinanceDashboardProps) => {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
@@ -114,7 +117,7 @@ export const FinanceDashboard = ({
         .from('emergency_fund')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (emergencyError && emergencyError.code !== 'PGRST116') {
         console.error('Emergency fund error:', emergencyError);
@@ -156,6 +159,20 @@ export const FinanceDashboard = ({
   }, [user, selectedMonth, selectedYear]);
 
   const emergencyFundPercentage = Math.min((stats.emergencyFund / stats.emergencyTarget) * 100, 100);
+
+  const handleTransactionSuccess = () => {
+    fetchData();
+    setShowTransactionForm(false);
+    onDataChange();
+  };
+
+  if (!user) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p>Please log in to view your finance dashboard</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -329,13 +346,13 @@ export const FinanceDashboard = ({
 
       {/* Quick Action Alerts */}
       {stats.netBalance < 0 && (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-amber-800">
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
               <AlertCircle className="h-5 w-5" />
               <p className="font-medium">Budget Alert</p>
             </div>
-            <p className="text-sm text-amber-700 mt-1">
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
               You've spent €{Math.abs(stats.netBalance).toFixed(2)} more than your income this month. Consider reviewing your expenses.
             </p>
           </CardContent>
@@ -347,10 +364,7 @@ export const FinanceDashboard = ({
         <TransactionForm
           isOpen={showTransactionForm}
           onClose={() => setShowTransactionForm(false)}
-          onSuccess={() => {
-            fetchData();
-            setShowTransactionForm(false);
-          }}
+          onSuccess={handleTransactionSuccess}
         />
       )}
     </div>

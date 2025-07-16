@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { 
   Plus, 
   Search, 
-  Filter, 
   Download, 
   Edit, 
   Trash2,
@@ -33,9 +33,10 @@ interface Transaction {
 interface TransactionsPageProps {
   selectedMonth: string;
   selectedYear: string;
+  onDataChange: () => void;
 }
 
-export const TransactionsPage = ({ selectedMonth, selectedYear }: TransactionsPageProps) => {
+export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: TransactionsPageProps) => {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
@@ -145,6 +146,7 @@ export const TransactionsPage = ({ selectedMonth, selectedYear }: TransactionsPa
       });
 
       fetchTransactions();
+      onDataChange();
     } catch (error) {
       console.error('Error deleting transaction:', error);
       toast({
@@ -158,6 +160,13 @@ export const TransactionsPage = ({ selectedMonth, selectedYear }: TransactionsPa
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
     setShowForm(true);
+  };
+
+  const handleSuccess = () => {
+    fetchTransactions();
+    setShowForm(false);
+    setEditingTransaction(undefined);
+    onDataChange();
   };
 
   const exportTransactions = () => {
@@ -185,6 +194,14 @@ export const TransactionsPage = ({ selectedMonth, selectedYear }: TransactionsPa
   const categories = [...new Set(transactions.map(t => t.category))];
   const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+  if (!user) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p>Please log in to view your transactions</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -378,11 +395,7 @@ export const TransactionsPage = ({ selectedMonth, selectedYear }: TransactionsPa
             setShowForm(false);
             setEditingTransaction(undefined);
           }}
-          onSuccess={() => {
-            fetchTransactions();
-            setShowForm(false);
-            setEditingTransaction(undefined);
-          }}
+          onSuccess={handleSuccess}
           transaction={editingTransaction}
         />
       )}

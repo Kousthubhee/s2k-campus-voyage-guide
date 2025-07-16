@@ -1,9 +1,10 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
-import { TransactionsPage } from '@/components/finance/TransactionsPage';
+import { ExpensesPage } from '@/components/finance/ExpensesPage';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
 
@@ -93,13 +94,10 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-          <TabsTrigger value="income">Part-time Income</TabsTrigger>
-          <TabsTrigger value="emergency">Emergency Fund</TabsTrigger>
-          <TabsTrigger value="shared">Shared Expenses</TabsTrigger>
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6 mt-6">
@@ -108,37 +106,21 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
             selectedYear={selectedYear}
             onMonthChange={setSelectedMonth}
             onYearChange={setSelectedYear}
+            onDataChange={markAsChanged}
           />
         </TabsContent>
 
-        <TabsContent value="transactions" className="space-y-6 mt-6">
-          <TransactionsPage
+        <TabsContent value="expenses" className="space-y-6 mt-6">
+          <ExpensesPage
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
+            onDataChange={markAsChanged}
           />
         </TabsContent>
 
-        <TabsContent value="subscriptions" className="space-y-6 mt-6">
+        <TabsContent value="reports" className="space-y-6 mt-6">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Subscriptions & Bills tracker coming soon...</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="income" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Part-time Income tracker coming soon...</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="emergency" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Emergency Fund tracker coming soon...</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="shared" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Shared Expenses tracker coming soon...</p>
+            <p className="text-muted-foreground">Reports coming soon...</p>
           </div>
         </TabsContent>
       </Tabs>

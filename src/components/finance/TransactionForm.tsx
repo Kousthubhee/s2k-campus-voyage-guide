@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -51,10 +52,58 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !formData.amount || !formData.description || !formData.category) {
+    
+    // Detailed validation with specific error messages
+    if (!formData.amount || formData.amount === '') {
+      toast({
+        title: "Validation Error",
+        description: "Please enter an amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.description || formData.description.trim() === '') {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a description",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.category || formData.category === '') {
+      toast({
+        title: "Validation Error",
+        description: "Please select a category",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.date || formData.date === '') {
+      toast({
+        title: "Validation Error",
+        description: "Please select a date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "You must be logged in to add transactions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amountNumber = parseFloat(formData.amount);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid amount greater than 0",
         variant: "destructive",
       });
       return;
@@ -64,8 +113,8 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
     try {
       const transactionData = {
         user_id: user.id,
-        amount: parseFloat(formData.amount),
-        description: formData.description,
+        amount: amountNumber,
+        description: formData.description.trim(),
         category: formData.category,
         type: formData.type,
         currency: formData.currency,
@@ -104,7 +153,7 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
       console.error('Error saving transaction:', error);
       toast({
         title: "Error",
-        description: "Failed to save transaction",
+        description: `Failed to save transaction: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -163,7 +212,7 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount (€)</Label>
+              <Label htmlFor="amount">Amount (€) *</Label>
               <Input
                 id="amount"
                 type="number"
@@ -177,7 +226,7 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
                 type="date"
@@ -189,10 +238,12 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={formData.category} onValueChange={(value) => 
-              setFormData({ ...formData, category: value })
-            }>
+            <Label htmlFor="category">Category *</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -207,7 +258,7 @@ export const TransactionForm = ({ isOpen, onClose, onSuccess, transaction }: Tra
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               placeholder="Enter transaction description..."
