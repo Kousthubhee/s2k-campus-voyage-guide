@@ -228,36 +228,6 @@ export type Database = {
           },
         ]
       }
-      emergency_fund: {
-        Row: {
-          created_at: string
-          currency: string
-          current_amount: number
-          id: string
-          target_amount: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          currency?: string
-          current_amount?: number
-          id?: string
-          target_amount?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          current_amount?: number
-          id?: string
-          target_amount?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       expense_categories: {
         Row: {
           budgeted: number | null
@@ -536,42 +506,6 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      income_sources: {
-        Row: {
-          amount: number
-          created_at: string
-          currency: string
-          date: string
-          frequency: string
-          id: string
-          source_name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          currency?: string
-          date?: string
-          frequency: string
-          id?: string
-          source_name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          currency?: string
-          date?: string
-          frequency?: string
-          id?: string
-          source_name?: string
           updated_at?: string
           user_id?: string
         }
@@ -862,129 +796,6 @@ export type Database = {
           tuition_fees_text?: string | null
           updated_at?: string | null
           website?: string | null
-        }
-        Relationships: []
-      }
-      shared_expenses: {
-        Row: {
-          created_at: string
-          currency: string
-          date: string
-          description: string
-          id: string
-          participants: Json
-          settled: boolean
-          total_amount: number
-          updated_at: string
-          user_id: string
-          your_share: number
-        }
-        Insert: {
-          created_at?: string
-          currency?: string
-          date?: string
-          description: string
-          id?: string
-          participants: Json
-          settled?: boolean
-          total_amount: number
-          updated_at?: string
-          user_id: string
-          your_share: number
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          date?: string
-          description?: string
-          id?: string
-          participants?: Json
-          settled?: boolean
-          total_amount?: number
-          updated_at?: string
-          user_id?: string
-          your_share?: number
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          active: boolean
-          amount: number
-          billing_cycle: string
-          created_at: string
-          currency: string
-          id: string
-          name: string
-          next_due_date: string
-          reminder_enabled: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          active?: boolean
-          amount: number
-          billing_cycle: string
-          created_at?: string
-          currency?: string
-          id?: string
-          name: string
-          next_due_date: string
-          reminder_enabled?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          active?: boolean
-          amount?: number
-          billing_cycle?: string
-          created_at?: string
-          currency?: string
-          id?: string
-          name?: string
-          next_due_date?: string
-          reminder_enabled?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      transactions: {
-        Row: {
-          amount: number
-          category: string
-          created_at: string
-          currency: string
-          date: string
-          description: string
-          id: string
-          type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          category: string
-          created_at?: string
-          currency?: string
-          date?: string
-          description: string
-          id?: string
-          type: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          category?: string
-          created_at?: string
-          currency?: string
-          date?: string
-          description?: string
-          id?: string
-          type?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
