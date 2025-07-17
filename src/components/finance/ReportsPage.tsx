@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -34,15 +35,37 @@ interface MonthlyComparison {
   incomeChange: number;
 }
 
-interface ReportsPageProps {
-  selectedMonth: string;
-  selectedYear: string;
-}
-
-export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) => {
+export const ReportsPage = () => {
   const { user } = useAuth();
+  
+  // Individual month/year state for reports
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(
+    (currentDate.getMonth() + 1).toString().padStart(2, '0')
+  );
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear().toString());
+  
   const [comparison, setComparison] = useState<MonthlyComparison | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Generate month and year options
+  const months = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' }
+  ];
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
 
   const fetchComparisonData = async () => {
     if (!user) {
@@ -53,20 +76,21 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
     try {
       setLoading(true);
       
-      // Calculate previous month
       const currentDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, 1);
       const previousDate = new Date(currentDate);
       previousDate.setMonth(previousDate.getMonth() - 1);
       
+      // Get the last day of the selected month
+      const lastDay = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0).getDate();
       const currentStartDate = `${selectedYear}-${selectedMonth}-01`;
-      const currentEndDate = `${selectedYear}-${selectedMonth}-31`;
+      const currentEndDate = `${selectedYear}-${selectedMonth}-${lastDay.toString().padStart(2, '0')}`;
       
       const prevYear = previousDate.getFullYear().toString();
       const prevMonth = (previousDate.getMonth() + 1).toString().padStart(2, '0');
+      const prevLastDay = new Date(parseInt(prevYear), parseInt(prevMonth), 0).getDate();
       const previousStartDate = `${prevYear}-${prevMonth}-01`;
-      const previousEndDate = `${prevYear}-${prevMonth}-31`;
+      const previousEndDate = `${prevYear}-${prevMonth}-${prevLastDay.toString().padStart(2, '0')}`;
 
-      // Fetch current month data
       const [currentTransactions, currentIncome, currentSubscriptions, currentSharedExpenses] = await Promise.all([
         supabase.from('transactions').select('*').eq('user_id', user.id).gte('date', currentStartDate).lte('date', currentEndDate),
         supabase.from('income_sources').select('*').eq('user_id', user.id).gte('date', currentStartDate).lte('date', currentEndDate),
@@ -74,14 +98,12 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
         supabase.from('shared_expenses').select('*').eq('user_id', user.id).gte('date', currentStartDate).lte('date', currentEndDate)
       ]);
 
-      // Fetch previous month data
       const [prevTransactions, prevIncome, prevSharedExpenses] = await Promise.all([
         supabase.from('transactions').select('*').eq('user_id', user.id).gte('date', previousStartDate).lte('date', previousEndDate),
         supabase.from('income_sources').select('*').eq('user_id', user.id).gte('date', previousStartDate).lte('date', previousEndDate),
         supabase.from('shared_expenses').select('*').eq('user_id', user.id).gte('date', previousStartDate).lte('date', previousEndDate)
       ]);
 
-      // Calculate current month totals
       const currentTransIncome = currentTransactions.data?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const currentSourceIncome = currentIncome.data?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
       const currentTotalIncome = currentTransIncome + currentSourceIncome;
@@ -91,20 +113,20 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
       const currentSharedExpensesTotal = currentSharedExpenses.data?.reduce((sum, e) => sum + Number(e.your_share), 0) || 0;
       const currentTotalExpenses = currentTransExpenses + currentSubsExpenses + currentSharedExpensesTotal;
 
-      // Calculate previous month totals
       const prevTransIncome = prevTransactions.data?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const prevSourceIncome = prevIncome.data?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
       const prevTotalIncome = prevTransIncome + prevSourceIncome;
 
       const prevTransExpenses = prevTransactions.data?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const prevSharedExpensesTotal = prevSharedExpenses.data?.reduce((sum, e) => sum + Number(e.your_share), 0) || 0;
-      const prevTotalExpenses = prevTransExpenses + currentSubsExpenses + prevSharedExpensesTotal; // Include subscriptions for prev month too
+      const prevTotalExpenses = prevTransExpenses + currentSubsExpenses + prevSharedExpensesTotal;
 
       const currentBalance = currentTotalIncome - currentTotalExpenses;
       const prevBalance = prevTotalIncome - prevTotalExpenses;
 
-      const expenseChange = prevTotalExpenses > 0 ? ((currentTotalExpenses - prevTotalExpenses) / prevTotalExpenses) * 100 : 0;
-      const incomeChange = prevTotalIncome > 0 ? ((currentTotalIncome - prevTotalIncome) / prevTotalIncome) * 100 : 0;
+      // Limit percentage changes to 100%
+      const expenseChange = prevTotalExpenses > 0 ? Math.min(((currentTotalExpenses - prevTotalExpenses) / prevTotalExpenses) * 100, 100) : 0;
+      const incomeChange = prevTotalIncome > 0 ? Math.min(((currentTotalIncome - prevTotalIncome) / prevTotalIncome) * 100, 100) : 0;
 
       let trend: 'up' | 'down' | 'same' = 'same';
       if (Math.abs(expenseChange) > 5) {
@@ -240,6 +262,35 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
 
   return (
     <div className="space-y-6">
+      {/* Month/Year Filters */}
+      <div className="flex gap-4">
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map(month => (
+              <SelectItem key={month.value} value={month.value}>
+                {month.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map(year => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Month-over-Month Comparison */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -395,7 +446,7 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Expense Ratio</span>
-                    <span>{comparison.currentMonth.income > 0 ? ((comparison.currentMonth.expenses / comparison.currentMonth.income) * 100).toFixed(1) : 0}%</span>
+                    <span>{comparison.currentMonth.income > 0 ? Math.min(((comparison.currentMonth.expenses / comparison.currentMonth.income) * 100), 100).toFixed(1) : 0}%</span>
                   </div>
                   <Progress 
                     value={comparison.currentMonth.income > 0 ? Math.min((comparison.currentMonth.expenses / comparison.currentMonth.income) * 100, 100) : 0} 
@@ -405,10 +456,10 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Savings Rate</span>
-                    <span>{comparison.currentMonth.income > 0 ? Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0).toFixed(1) : 0}%</span>
+                    <span>{comparison.currentMonth.income > 0 ? Math.min(Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0), 100).toFixed(1) : 0}%</span>
                   </div>
                   <Progress 
-                    value={comparison.currentMonth.income > 0 ? Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0) : 0} 
+                    value={comparison.currentMonth.income > 0 ? Math.min(Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0), 100) : 0} 
                     className="h-2"
                   />
                 </div>
@@ -427,7 +478,7 @@ export const ReportsPage = ({ selectedMonth, selectedYear }: ReportsPageProps) =
                     comparison.currentMonth.income > 0 && ((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100 >= 20 
                       ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {comparison.currentMonth.income > 0 ? Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0).toFixed(1) : 0}%
+                    {comparison.currentMonth.income > 0 ? Math.min(Math.max(((comparison.currentMonth.income - comparison.currentMonth.expenses) / comparison.currentMonth.income) * 100, 0), 100).toFixed(1) : 0}%
                   </span>
                 </div>
                 <div className="flex justify-between">

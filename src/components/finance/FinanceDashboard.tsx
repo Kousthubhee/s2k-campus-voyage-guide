@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,21 +39,19 @@ interface RecentTransaction {
 }
 
 interface FinanceDashboardProps {
-  selectedMonth: string;
-  selectedYear: string;
-  onMonthChange: (month: string) => void;
-  onYearChange: (year: string) => void;
   onDataChange: () => void;
 }
 
-export const FinanceDashboard = ({ 
-  selectedMonth, 
-  selectedYear, 
-  onMonthChange, 
-  onYearChange,
-  onDataChange
-}: FinanceDashboardProps) => {
+export const FinanceDashboard = ({ onDataChange }: FinanceDashboardProps) => {
   const { user } = useAuth();
+  
+  // Individual month/year state for dashboard
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(
+    (currentDate.getMonth() + 1).toString().padStart(2, '0')
+  );
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear().toString());
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
     totalExpenses: 0,
@@ -91,7 +88,6 @@ export const FinanceDashboard = ({
     
     if (!user) {
       console.log('No user found, showing demo data');
-      // Show demo data for non-authenticated users
       setStats({
         totalIncome: 1200,
         totalExpenses: 850,
@@ -125,12 +121,13 @@ export const FinanceDashboard = ({
     try {
       setLoading(true);
       
+      // Get the last day of the selected month
+      const lastDay = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0).getDate();
       const startDate = `${selectedYear}-${selectedMonth}-01`;
-      const endDate = `${selectedYear}-${selectedMonth}-31`;
+      const endDate = `${selectedYear}-${selectedMonth}-${lastDay.toString().padStart(2, '0')}`;
       
       console.log('Fetching data for date range:', startDate, 'to', endDate);
       
-      // Fetch transactions
       const { data: transactions, error: transError } = await supabase
         .from('transactions')
         .select('*')
@@ -141,7 +138,6 @@ export const FinanceDashboard = ({
 
       if (transError) throw transError;
 
-      // Fetch income sources
       const { data: incomeData, error: incomeError } = await supabase
         .from('income_sources')
         .select('*')
@@ -151,7 +147,6 @@ export const FinanceDashboard = ({
 
       if (incomeError) throw incomeError;
 
-      // Fetch part-time income
       const { data: partTimeData, error: partTimeError } = await supabase
         .from('income_sources')
         .select('*')
@@ -162,7 +157,6 @@ export const FinanceDashboard = ({
 
       if (partTimeError) throw partTimeError;
 
-      // Fetch subscriptions
       const { data: subscriptions, error: subsError } = await supabase
         .from('subscriptions')
         .select('*')
@@ -171,7 +165,6 @@ export const FinanceDashboard = ({
 
       if (subsError) throw subsError;
 
-      // Fetch shared expenses
       const { data: sharedExpenses, error: sharedError } = await supabase
         .from('shared_expenses')
         .select('*')
@@ -181,7 +174,6 @@ export const FinanceDashboard = ({
 
       if (sharedError) throw sharedError;
 
-      // Fetch emergency fund changes
       const { data: emergencyData, error: emergencyError } = await supabase
         .from('emergency_fund')
         .select('*')
@@ -201,22 +193,18 @@ export const FinanceDashboard = ({
         emergencyData 
       });
 
-      // Calculate income from multiple sources
       const transactionIncome = transactions?.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const mainIncomeFromSources = incomeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
       const partTimeIncome = partTimeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
       
       const totalIncome = transactionIncome + mainIncomeFromSources + partTimeIncome;
 
-      // Calculate expenses from multiple sources
       const transactionExpenses = transactions?.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const subscriptionExpenses = subscriptions?.reduce((sum, s) => sum + Number(s.amount), 0) || 0;
       const sharedExpensesTotal = sharedExpenses?.reduce((sum, e) => sum + Number(e.your_share), 0) || 0;
       
       const totalExpenses = transactionExpenses + subscriptionExpenses + sharedExpensesTotal;
 
-      // Get previous month balance (this would need to be implemented based on your needs)
-      // For now, we'll just calculate current month
       const netBalance = totalIncome - totalExpenses;
       const savingsRate = totalIncome > 0 ? (netBalance / totalIncome) * 100 : 0;
 
@@ -244,7 +232,6 @@ export const FinanceDashboard = ({
         savingsRate
       });
 
-      // Set recent transactions (combine from different sources for display)
       const allTransactions = [
         ...(transactions || []).map(t => ({
           id: t.id,
@@ -311,10 +298,10 @@ export const FinanceDashboard = ({
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
+      {/* Month/Year Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex gap-4">
-          <Select value={selectedMonth} onValueChange={onMonthChange}>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Select month" />
             </SelectTrigger>
@@ -327,7 +314,7 @@ export const FinanceDashboard = ({
             </SelectContent>
           </Select>
           
-          <Select value={selectedYear} onValueChange={onYearChange}>
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Select year" />
             </SelectTrigger>

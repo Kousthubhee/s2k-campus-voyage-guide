@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
 import { ExpensesPage } from '@/components/finance/ExpensesPage';
+import { ReportsPage } from '@/components/finance/ReportsPage';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 interface FinanceTrackingPageProps {
@@ -15,13 +16,6 @@ interface FinanceTrackingPageProps {
 
 export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }: FinanceTrackingPageProps) => {
   const [selectedTab, setSelectedTab] = useState('dashboard');
-  
-  // Global month/year state that applies across all tabs
-  const currentDate = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(
-    (currentDate.getMonth() + 1).toString().padStart(2, '0')
-  );
-  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear().toString());
 
   const {
     hasUnsavedChanges,
@@ -85,27 +79,26 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6 mt-6">
           <FinanceDashboard
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
-            onMonthChange={setSelectedMonth}
-            onYearChange={setSelectedYear}
             onDataChange={markAsChanged}
           />
         </TabsContent>
 
         <TabsContent value="expenses" className="space-y-6 mt-6">
           <ExpensesPage
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
             onDataChange={markAsChanged}
           />
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6 mt-6">
+          <ReportsPage />
         </TabsContent>
       </Tabs>
     </div>
