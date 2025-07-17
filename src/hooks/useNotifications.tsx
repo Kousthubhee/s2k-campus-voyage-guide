@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
 // Notification type definition
 export type NotificationType = "success" | "info" | "warning" | "reminder";
