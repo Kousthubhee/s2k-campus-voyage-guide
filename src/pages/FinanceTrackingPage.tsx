@@ -124,23 +124,6 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
         </TabsContent>
       </Tabs>
 
-      {/* Completion CTA */}
-      {!isCompleted && (
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              Ready to complete your finance setup?
-            </h3>
-            <p className="text-blue-700 dark:text-blue-300 mb-4">
-              You've explored the finance tracking tools. Mark this module as complete to earn your key!
-            </p>
-            <Button onClick={handleComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
-              Complete Finance Module
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Save Changes Prompt */}
       <SaveChangesPrompt
         hasUnsavedChanges={hasUnsavedChanges}

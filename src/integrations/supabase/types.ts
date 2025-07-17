@@ -549,6 +549,7 @@ export type Database = {
           date: string
           frequency: string
           id: string
+          is_active: boolean
           source_name: string
           updated_at: string
           user_id: string
@@ -560,6 +561,7 @@ export type Database = {
           date?: string
           frequency: string
           id?: string
+          is_active?: boolean
           source_name: string
           updated_at?: string
           user_id: string
@@ -571,6 +573,7 @@ export type Database = {
           date?: string
           frequency?: string
           id?: string
+          is_active?: boolean
           source_name?: string
           updated_at?: string
           user_id?: string
@@ -915,6 +918,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_paused: boolean
           name: string
           next_due_date: string
           reminder_enabled: boolean
@@ -929,6 +933,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_paused?: boolean
           name: string
           next_due_date: string
           reminder_enabled?: boolean
@@ -943,6 +948,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_paused?: boolean
           name?: string
           next_due_date?: string
           reminder_enabled?: boolean

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TransactionsPage } from './TransactionsPage';
 import { SubscriptionsPage } from './SubscriptionsPage';
-import { PartTimeIncomePage } from './PartTimeIncomePage';
+
 import { EmergencyFundPage } from './EmergencyFundPage';
 import { SharedExpensesPage } from './SharedExpensesPage';
 import { IncomePage } from './IncomePage';
@@ -21,11 +21,10 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-          <TabsTrigger value="part-time">Part-time</TabsTrigger>
           <TabsTrigger value="emergency">Emergency</TabsTrigger>
           <TabsTrigger value="shared">Shared</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -55,13 +54,6 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
           />
         </TabsContent>
 
-        <TabsContent value="part-time" className="space-y-6 mt-6">
-          <PartTimeIncomePage
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
-            onDataChange={onDataChange}
-          />
-        </TabsContent>
 
         <TabsContent value="emergency" className="space-y-6 mt-6">
           <EmergencyFundPage onDataChange={onDataChange} />

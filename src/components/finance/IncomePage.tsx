@@ -10,11 +10,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { 
   Plus, 
-  Search, 
-  Download, 
   Edit, 
   Trash2,
+  Calendar,
+  AlertCircle,
   Euro,
+  Bell,
+  BellOff,
+  X,
+  Play,
+  Pause,
+  Search,
   TrendingUp,
   PiggyBank,
   Briefcase,
@@ -31,6 +37,7 @@ interface IncomeSource {
   frequency: string;
   date: string;
   currency: string;
+  is_active: boolean;
 }
 
 interface IncomePageProps {
@@ -45,6 +52,7 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingIncome, setEditingIncome] = useState<IncomeSource | undefined>();
+  const [showTips, setShowTips] = useState(true);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -189,6 +197,32 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
     }
   };
 
+  const handlePause = async (incomeId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('income_sources')
+        .update({ is_active: !currentStatus })
+        .eq('id', incomeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Income source ${!currentStatus ? 'resumed' : 'paused'} successfully`,
+      });
+
+      fetchIncomes();
+      onDataChange();
+    } catch (error) {
+      console.error('Error updating income status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update income status",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleEdit = (income: IncomeSource) => {
     setEditingIncome(income);
     setFormData({
@@ -221,13 +255,14 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
   return (
     <div className="space-y-6">
       {/* Tips Card */}
+      {showTips && (
       <Card className="bg-green-50 dark:bg-green-950/20 border-green-200">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
               <TrendingUp className="h-4 w-4 text-green-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">💡 Income Ideas</h3>
               <ul className="text-sm text-green-800 dark:text-green-200 space-y-1">
                 <li>• <strong>Job/Salary:</strong> Full-time or part-time employment income</li>
@@ -237,9 +272,18 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
                 <li>• <strong>Freelancing:</strong> Gig work, tutoring, or side projects</li>
               </ul>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-green-600 hover:bg-green-100 dark:hover:bg-green-900"
+              onClick={() => setShowTips(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -429,6 +473,7 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
                   <TableHead>Source</TableHead>
                   <TableHead>Frequency</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -447,8 +492,20 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
                     <TableCell className="text-right font-medium text-green-600">
                       +€{income.amount.toFixed(2)}
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={income.is_active ? 'default' : 'secondary'}>
+                        {income.is_active ? 'Active' : 'Paused'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant={income.is_active ? "secondary" : "default"}
+                          onClick={() => handlePause(income.id, income.is_active)}
+                        >
+                          {income.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"

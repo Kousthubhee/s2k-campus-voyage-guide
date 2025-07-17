@@ -14,7 +14,10 @@ import {
   AlertCircle,
   Euro,
   Bell,
-  BellOff
+  BellOff,
+  X,
+  Play,
+  Pause
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +33,7 @@ interface Subscription {
   next_due_date: string;
   active: boolean;
   reminder_enabled: boolean;
+  is_paused: boolean;
 }
 
 interface SubscriptionsPageProps {
@@ -43,6 +47,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showTips, setShowTips] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
@@ -148,6 +153,32 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
     }
   };
 
+  const handlePause = async (subscriptionId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ is_paused: !currentStatus })
+        .eq('id', subscriptionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Subscription ${currentStatus ? 'paused' : 'resumed'} successfully`,
+      });
+
+      fetchSubscriptions();
+      onDataChange();
+    } catch (error) {
+      console.error('Error updating subscription status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subscription status",
+        variant: "destructive",
+      });
+    }
+  };
+
   const totalMonthly = subscriptions
     .filter(s => s.active)
     .reduce((sum, s) => {
@@ -213,13 +244,14 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
       </div>
 
       {/* Tips Card */}
+      {showTips && (
       <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
               <AlertCircle className="h-4 w-4 text-blue-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">💡 Tips for Subscriptions & Bills</h3>
               <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                 <li>• Add recurring expenses like rent, utilities, insurance premiums</li>
@@ -228,9 +260,18 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                 <li>• Set start dates to calculate total cost over time</li>
               </ul>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900"
+              onClick={() => setShowTips(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Subscriptions List */}
       <Card>
@@ -344,20 +385,29 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                     <TableCell>{new Date(subscription.next_due_date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Badge variant={subscription.active ? 'default' : 'destructive'}>
-                          {subscription.active ? 'Active' : 'Inactive'}
+                        <Badge variant={subscription.active && !subscription.is_paused ? 'default' : 'destructive'}>
+                          {subscription.active && !subscription.is_paused ? 'Active' : subscription.is_paused ? 'Paused' : 'Inactive'}
                         </Badge>
                         {subscription.reminder_enabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(subscription.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant={subscription.is_paused ? "default" : "secondary"}
+                          onClick={() => handlePause(subscription.id, subscription.is_paused)}
+                        >
+                          {subscription.is_paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(subscription.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

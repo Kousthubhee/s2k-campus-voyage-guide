@@ -13,12 +13,14 @@ import {
   Edit, 
   Trash2,
   Calendar,
-  Euro
+  Euro,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TransactionForm } from './TransactionForm';
+import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
 
 interface Transaction {
   id: string;
@@ -45,6 +47,11 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>();
   const [additionalIncome, setAdditionalIncome] = useState(0);
   const [partTimeIncome, setPartTimeIncome] = useState(0);
+  const [showTips, setShowTips] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<{open: boolean, transactionId: string}>({
+    open: false,
+    transactionId: ''
+  });
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -160,13 +167,15 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   }, [transactions, searchTerm, categoryFilter, typeFilter, dateRange]);
 
   const handleDelete = async (transactionId: string) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) return;
+    setDeleteDialog({ open: true, transactionId });
+  };
 
+  const confirmDelete = async () => {
     try {
       const { error } = await supabase
         .from('transactions')
         .delete()
-        .eq('id', transactionId);
+        .eq('id', deleteDialog.transactionId);
 
       if (error) throw error;
 
@@ -184,6 +193,8 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         description: "Failed to delete transaction",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialog({ open: false, transactionId: '' });
     }
   };
 
@@ -240,13 +251,14 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   return (
     <div className="space-y-6">
       {/* Tips Card */}
+      {showTips && (
       <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">
               <Euro className="h-4 w-4 text-purple-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">💡 Transaction Tips</h3>
               <ul className="text-sm text-purple-800 dark:text-purple-200 space-y-1">
                 <li>• <strong>Expenses:</strong> Groceries, dining out, transport, shopping, utilities</li>
@@ -255,9 +267,18 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
                 <li>• Categorize consistently for better reports</li>
               </ul>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900"
+              onClick={() => setShowTips(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -462,6 +483,15 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
           transaction={editingTransaction}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, transactionId: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Transaction"
+        description="Are you sure you want to delete this transaction? This action cannot be undone."
+      />
     </div>
   );
 };
