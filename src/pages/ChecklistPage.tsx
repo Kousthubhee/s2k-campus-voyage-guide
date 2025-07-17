@@ -1,124 +1,150 @@
 
-import React, { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { ChecklistModule } from '@/components/ChecklistModule';
-import checklistModules from '@/constants/checklistModules';
-import { useModuleProgress } from '@/hooks/useModuleProgress';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Key, Lock, CheckCircle, ArrowRight, Timer, BookOpen, Users } from 'lucide-react';
+import { checklistModules } from '@/constants/checklistModules';
 
 interface ChecklistPageProps {
-  userProgress: any;
-  setUserProgress: (progress: any) => void;
-  onSchoolSelect: (school: any) => void;
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
+  userProgress?: any;
+  setUserProgress?: (progress: any) => void;
+  onSchoolSelect?: (school: any) => void;
+  currentPage?: string;
+  setCurrentPage?: (page: string) => void;
 }
 
-export const ChecklistPage = ({
-  userProgress,
-  setUserProgress,
+export const ChecklistPage = ({ 
+  userProgress: propUserProgress, 
+  setUserProgress: propSetUserProgress, 
   onSchoolSelect,
   currentPage,
-  setCurrentPage
+  setCurrentPage 
 }: ChecklistPageProps) => {
-  const { 
-    completions, 
-    markModuleComplete, 
-    markModuleIncomplete, 
-    isModuleComplete, 
-    loading,
-    saveAllChanges,
-    discardChanges,
-    hasUnsavedChanges
-  } = useModuleProgress();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [localUserProgress, setLocalUserProgress, resetProgress] = useLocalStorageProgress();
+  
+  // Use props if available, otherwise use local state
+  const userProgress = propUserProgress || localUserProgress;
+  const setUserProgress = propSetUserProgress || setLocalUserProgress;
 
-  const {
-    hasUnsavedChanges: hasChanges,
-    isSaving,
-    markAsChanged,
-    saveChanges,
-    promptBeforeLeaving
-  } = useUnsavedChanges({
-    onSave: saveAllChanges,
-    onDiscard: discardChanges
-  });
-
-  // Sync database completions with local state
-  useEffect(() => {
-    if (!loading) {
-      const dbCompletedModules = completions.map(c => c.module_id);
-      console.log('Syncing completions to local state:', dbCompletedModules);
-      
-      setUserProgress(prevProgress => ({
-        ...prevProgress,
-        completedModules: dbCompletedModules
-      }));
-    }
-  }, [completions, loading, setUserProgress]);
-
-  // Enhanced userProgress with database tracking and save functionality
-  const enhancedUserProgress = {
-    ...userProgress,
-    completedModules: completions.map(c => c.module_id),
-    markComplete: async (moduleId: string) => {
-      console.log('Enhanced markComplete called for:', moduleId);
-      await markModuleComplete(moduleId);
-      markAsChanged();
-    },
-    markIncomplete: async (moduleId: string) => {
-      console.log('Enhanced markIncomplete called for:', moduleId);
-      await markModuleIncomplete(moduleId);
-      markAsChanged();
-    },
-    isComplete: (moduleId: string) => {
-      return isModuleComplete(moduleId);
+  const handleModuleClick = (moduleId: string) => {
+    console.log('Module clicked:', moduleId);
+    
+    // Navigate to the appropriate route
+    if (moduleId === 'finance') {
+      navigate('/finance-tracking');
+    } else if (moduleId === 'school') {
+      navigate('/school-insights');
+    } else {
+      navigate(`/${moduleId}`);
     }
   };
 
-  // Prompt before navigation
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges()) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
+  const handleProgressUpdate = (newProgress: any) => {
+    setUserProgress(newProgress);
+  };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  const isModuleCompleted = (moduleId: string) => {
+    return userProgress?.completedModules?.includes(moduleId) || false;
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading your progress...</div>
-      </div>
-    );
-  }
+  const isModuleUnlocked = (moduleId: string) => {
+    return userProgress?.unlockedModules?.includes(moduleId) || true;
+  };
+
+  const completedCount = userProgress?.completedModules?.length || 0;
+  const totalModules = checklistModules.length;
+  const progressPercentage = (completedCount / totalModules) * 100;
 
   return (
-    <>
-      <ChecklistModule
-        modules={checklistModules}
-        userProgress={enhancedUserProgress}
-        setUserProgress={setUserProgress}
-        onSchoolSelect={onSchoolSelect}
-        currentPage={currentPage}
-        setCurrentPage={async (page: string) => {
-          await promptBeforeLeaving();
-          setCurrentPage(page);
-        }}
-      />
-      
-      <SaveChangesPrompt
-        hasUnsavedChanges={hasUnsavedChanges() || hasChanges}
-        isSaving={isSaving}
-        onSave={saveChanges}
-        onDiscard={() => {
-          discardChanges();
-          markAsChanged();
-        }}
-      />
-    </>
+    <div className="max-w-7xl mx-auto animate-fade-in">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-4">
+          📝 Your Study Abroad Checklist
+        </h1>
+        <p className="text-lg text-muted-foreground mb-6">
+          Complete these modules to earn keys and unlock advanced features
+        </p>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <Key className="h-5 w-5 text-yellow-500" />
+            <span className="text-lg font-semibold">
+              {userProgress?.keys || 0} Keys Earned
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="text-lg">
+              {completedCount}/{totalModules} Modules Completed
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
+          <div 
+            className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {checklistModules.map((module) => (
+          <ChecklistModule
+            key={module.id}
+            module={module}
+            isCompleted={isModuleCompleted(module.id)}
+            isUnlocked={isModuleUnlocked(module.id)}
+            onModuleClick={handleModuleClick}
+            userProgress={userProgress}
+            onProgressUpdate={handleProgressUpdate}
+          />
+        ))}
+      </div>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            Premium Features
+          </CardTitle>
+          <CardDescription>
+            Unlock these advanced features by completing modules and earning keys
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Timer className="h-5 w-5 text-blue-500" />
+              <div>
+                <p className="font-medium">Document Tracking</p>
+                <p className="text-sm text-gray-600">Requires 1 key</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <BookOpen className="h-5 w-5 text-green-500" />
+              <div>
+                <p className="font-medium">AI Q&A Assistant</p>
+                <p className="text-sm text-gray-600">Requires 1 key</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Users className="h-5 w-5 text-purple-500" />
+              <div>
+                <p className="font-medium">Community Hub</p>
+                <p className="text-sm text-gray-600">Requires 1 key</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
