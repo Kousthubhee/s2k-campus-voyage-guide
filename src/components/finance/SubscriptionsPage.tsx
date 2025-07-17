@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,9 @@ import {
   BellOff,
   X,
   Play,
-  Pause,
+  Pause
+} from 'lucide-react';
+import { 
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -27,7 +28,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction
-} from 'lucide-react';
+} from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -108,7 +109,11 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
 
       if (error) throw error;
       
-      const currentSubscriptions = data || [];
+      // Map the data to include is_automatic field (default to true if missing)
+      const currentSubscriptions = (data || []).map(sub => ({
+        ...sub,
+        is_automatic: sub.is_automatic ?? true
+      }));
       setSubscriptions(currentSubscriptions);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
