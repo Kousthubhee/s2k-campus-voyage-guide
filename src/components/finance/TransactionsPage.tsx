@@ -43,8 +43,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>();
-  const [additionalIncome, setAdditionalIncome] = useState(0);
-  const [partTimeIncome, setPartTimeIncome] = useState(0);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,7 +59,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
       const startDate = `${selectedYear}-${selectedMonth}-01`;
       const endDate = `${selectedYear}-${selectedMonth}-31`;
       
-      // Fetch transactions
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
@@ -71,16 +68,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         .order('date', { ascending: false });
 
       if (error) throw error;
-
-      // Fetch additional income from income sources
-      const { data: incomeData, error: incomeError } = await supabase
-        .from('income_sources')
-        .select('amount')
-        .eq('user_id', user.id)
-        .gte('date', startDate)
-        .lte('date', endDate);
-
-      if (incomeError) throw incomeError;
 
       const formattedTransactions = data?.map(t => ({
         id: t.id,
@@ -92,24 +79,7 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         currency: t.currency
       })) || [];
 
-      const additionalIncomeTotal = incomeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
-      
-      // Get part-time income separately (if it exists in income_sources)
-      const { data: partTimeData, error: partTimeError } = await supabase
-        .from('income_sources')
-        .select('amount')
-        .eq('user_id', user.id)
-        .eq('source_name', 'Part-time Job')
-        .gte('date', startDate)
-        .lte('date', endDate);
-
-      if (partTimeError) throw partTimeError;
-      
-      const partTimeTotal = partTimeData?.reduce((sum, i) => sum + Number(i.amount), 0) || 0;
-
       setTransactions(formattedTransactions);
-      setAdditionalIncome(additionalIncomeTotal);
-      setPartTimeIncome(partTimeTotal);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
@@ -222,12 +192,8 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   };
 
   const categories = [...new Set(transactions.map(t => t.category))];
-  const transactionIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  
-  // Total income includes transactions + additional income sources + part-time income
-  const totalIncome = transactionIncome + additionalIncome + partTimeIncome;
-  const netBalance = totalIncome - totalExpenses;
 
   if (!user) {
     return (
@@ -247,9 +213,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Income</p>
                 <p className="text-2xl font-bold text-green-600">€{totalIncome.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Transactions: €{transactionIncome.toFixed(2)} + Other: €{(additionalIncome + partTimeIncome).toFixed(2)}
-                </p>
               </div>
               <Euro className="h-8 w-8 text-green-600" />
             </div>
@@ -262,9 +225,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
                 <p className="text-2xl font-bold text-red-600">€{totalExpenses.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  From transactions only
-                </p>
               </div>
               <Euro className="h-8 w-8 text-red-600" />
             </div>
@@ -276,11 +236,8 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Net Balance</p>
-                <p className={`text-2xl font-bold ${netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  €{netBalance.toFixed(2)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Including all income sources
+                <p className={`text-2xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  €{(totalIncome - totalExpenses).toFixed(2)}
                 </p>
               </div>
               <Euro className="h-8 w-8 text-blue-600" />
