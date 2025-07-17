@@ -623,6 +623,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                           variant="outline"
                           onClick={() => handlePayment(subscription)}
                           title="Mark as paid"
+                          disabled={subscription.is_automatic}
                         >
                           €
                         </Button>
