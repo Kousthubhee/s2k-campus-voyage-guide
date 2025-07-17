@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TransactionForm } from './TransactionForm';
 import { DeleteConfirmationDialog } from '@/components/ui/delete-confirmation-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 
 interface Transaction {
   id: string;
@@ -57,7 +58,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   const fetchTransactions = async () => {
     if (!user) return;
@@ -65,8 +65,11 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
     try {
       setLoading(true);
       
+      // Get days in month
+      const daysInMonth = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0).getDate();
+      
       const startDate = `${selectedYear}-${selectedMonth}-01`;
-      const endDate = `${selectedYear}-${selectedMonth}-31`;
+      const endDate = `${selectedYear}-${selectedMonth}-${daysInMonth}`;
       
       // Fetch transactions
       const { data, error } = await supabase
@@ -84,10 +87,22 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         .from('income_sources')
         .select('amount')
         .eq('user_id', user.id)
+        .eq('is_active', true)
         .gte('date', startDate)
         .lte('date', endDate);
 
       if (incomeError) throw incomeError;
+
+      // Fetch active subscriptions that are not paused
+      const { data: activeSubscriptions, error: subsError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('active', true)
+        .eq('is_paused', false)
+        .lte('start_date', endDate);
+
+      if (subsError) throw subsError;
 
       const formattedTransactions = data?.map(t => ({
         id: t.id,
@@ -107,6 +122,7 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         .select('amount')
         .eq('user_id', user.id)
         .eq('source_name', 'Part-time Job')
+        .eq('is_active', true)
         .gte('date', startDate)
         .lte('date', endDate);
 
@@ -155,16 +171,8 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
       filtered = filtered.filter(t => t.type === typeFilter);
     }
 
-    // Date range filter
-    if (dateRange.start) {
-      filtered = filtered.filter(t => t.date >= dateRange.start);
-    }
-    if (dateRange.end) {
-      filtered = filtered.filter(t => t.date <= dateRange.end);
-    }
-
     setFilteredTransactions(filtered);
-  }, [transactions, searchTerm, categoryFilter, typeFilter, dateRange]);
+  }, [transactions, searchTerm, categoryFilter, typeFilter]);
 
   const handleDelete = async (transactionId: string) => {
     setDeleteDialog({ open: true, transactionId });
@@ -349,7 +357,7 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
         </CardHeader>
         <CardContent>
           {/* Filter Controls */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="relative">
               <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
               <Input
@@ -382,20 +390,6 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
                 ))}
               </SelectContent>
             </Select>
-            
-            <Input
-              type="date"
-              placeholder="Start date"
-              value={dateRange.start}
-              onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-            />
-            
-            <Input
-              type="date"
-              placeholder="End date"
-              value={dateRange.end}
-              onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-            />
           </div>
 
           {/* Transactions Table */}
@@ -485,13 +479,22 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
       )}
 
       {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        isOpen={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, transactionId: '' })}
-        onConfirm={confirmDelete}
-        title="Delete Transaction"
-        description="Are you sure you want to delete this transaction? This action cannot be undone."
-      />
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, transactionId: '' })}>
+        <AlertDialogContent className="max-w-md mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

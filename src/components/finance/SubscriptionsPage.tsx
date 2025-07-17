@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Plus, 
   Edit, 
@@ -17,11 +18,28 @@ import {
   BellOff,
   X,
   Play,
-  Pause
+  Pause,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter 
+} from '@/components/ui/dialog';
+import { format } from 'date-fns';
 
 interface Subscription {
   id: string;
@@ -34,6 +52,7 @@ interface Subscription {
   active: boolean;
   reminder_enabled: boolean;
   is_paused: boolean;
+  is_automatic: boolean;
 }
 
 interface SubscriptionsPageProps {
@@ -48,12 +67,27 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showTips, setShowTips] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean, subscriptionId: string }>({
+    open: false,
+    subscriptionId: ''
+  });
+  const [paymentDialog, setPaymentDialog] = useState<{ 
+    open: boolean, 
+    subscription: Subscription | null,
+    addToTransactions: boolean 
+  }>({
+    open: false,
+    subscription: null,
+    addToTransactions: true
+  });
+  
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
     billing_cycle: 'monthly',
     start_date: '',
-    next_due_date: ''
+    next_due_date: '',
+    is_automatic: true
   });
 
   const fetchSubscriptions = async () => {
@@ -64,6 +98,8 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
 
     try {
       setLoading(true);
+      
+      // Get current month's subscriptions
       const { data, error } = await supabase
         .from('subscriptions')
         .select('*')
@@ -71,7 +107,9 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
         .order('name');
 
       if (error) throw error;
-      setSubscriptions(data || []);
+      
+      const currentSubscriptions = data || [];
+      setSubscriptions(currentSubscriptions);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({
@@ -86,7 +124,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
 
   useEffect(() => {
     fetchSubscriptions();
-  }, [user]);
+  }, [user, selectedMonth, selectedYear]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +139,8 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
           amount: parseFloat(formData.amount),
           billing_cycle: formData.billing_cycle,
           start_date: formData.start_date,
-          next_due_date: formData.next_due_date
+          next_due_date: formData.next_due_date,
+          is_automatic: formData.is_automatic
         });
 
       if (error) throw error;
@@ -111,7 +150,14 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
         description: "Subscription added successfully",
       });
 
-      setFormData({ name: '', amount: '', billing_cycle: 'monthly', start_date: '', next_due_date: '' });
+      setFormData({ 
+        name: '', 
+        amount: '', 
+        billing_cycle: 'monthly', 
+        start_date: '', 
+        next_due_date: '',
+        is_automatic: true
+      });
       setShowForm(false);
       fetchSubscriptions();
       onDataChange();
@@ -126,13 +172,15 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this subscription?')) return;
+    setDeleteDialog({ open: true, subscriptionId: id });
+  };
 
+  const confirmDelete = async () => {
     try {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', id);
+        .eq('id', deleteDialog.subscriptionId);
 
       if (error) throw error;
 
@@ -150,6 +198,8 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
         description: "Failed to delete subscription",
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialog({ open: false, subscriptionId: '' });
     }
   };
 
@@ -178,9 +228,161 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
       });
     }
   };
+  
+  const handlePayment = (subscription: Subscription) => {
+    setPaymentDialog({
+      open: true,
+      subscription,
+      addToTransactions: true
+    });
+  };
+  
+  const confirmPayment = async () => {
+    try {
+      if (!paymentDialog.subscription || !user) return;
+      
+      if (paymentDialog.addToTransactions) {
+        // Add to transactions
+        const { error } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: user.id,
+            type: 'expense',
+            category: 'Subscription',
+            description: paymentDialog.subscription.name,
+            amount: paymentDialog.subscription.amount,
+            currency: paymentDialog.subscription.currency,
+            date: new Date().toISOString().split('T')[0]
+          });
+  
+        if (error) throw error;
+      }
+      
+      // Update next due date
+      let nextDueDate = new Date(paymentDialog.subscription.next_due_date);
+      if (paymentDialog.subscription.billing_cycle === 'monthly') {
+        nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+      } else if (paymentDialog.subscription.billing_cycle === 'yearly') {
+        nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+      } else {
+        // Weekly
+        nextDueDate.setDate(nextDueDate.getDate() + 7);
+      }
+      
+      const { error: updateError } = await supabase
+        .from('subscriptions')
+        .update({
+          next_due_date: nextDueDate.toISOString().split('T')[0]
+        })
+        .eq('id', paymentDialog.subscription.id);
+        
+      if (updateError) throw updateError;
+  
+      toast({
+        title: "Success",
+        description: `Payment recorded${paymentDialog.addToTransactions ? ' and added to transactions' : ''}`,
+      });
+  
+      fetchSubscriptions();
+      onDataChange();
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process payment",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentDialog({ open: false, subscription: null, addToTransactions: true });
+    }
+  };
+
+  // Process automatic subscriptions for current month
+  const processAutomaticSubscriptions = async () => {
+    if (!user) return;
+    
+    try {
+      // Get start and end dates for current month
+      const currentYear = parseInt(selectedYear);
+      const currentMonth = parseInt(selectedMonth);
+      const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+      
+      const startDate = `${selectedYear}-${selectedMonth}-01`;
+      const endDate = `${selectedYear}-${selectedMonth}-${daysInMonth}`;
+      
+      // Find active, automatic, non-paused subscriptions
+      const activeSubscriptions = subscriptions.filter(sub => 
+        sub.active && 
+        !sub.is_paused && 
+        sub.is_automatic && 
+        new Date(sub.next_due_date) >= new Date(startDate) && 
+        new Date(sub.next_due_date) <= new Date(endDate)
+      );
+      
+      if (activeSubscriptions.length === 0) {
+        toast({
+          title: "Information",
+          description: "No automatic subscriptions due for this month",
+        });
+        return;
+      }
+      
+      // Add each subscription to transactions
+      for (const sub of activeSubscriptions) {
+        const { error } = await supabase
+          .from('transactions')
+          .insert({
+            user_id: user.id,
+            type: 'expense',
+            category: 'Subscription',
+            description: sub.name,
+            amount: sub.amount,
+            currency: sub.currency,
+            date: sub.next_due_date
+          });
+          
+        if (error) throw error;
+        
+        // Update next due date
+        let nextDueDate = new Date(sub.next_due_date);
+        if (sub.billing_cycle === 'monthly') {
+          nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+        } else if (sub.billing_cycle === 'yearly') {
+          nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+        } else {
+          // Weekly
+          nextDueDate.setDate(nextDueDate.getDate() + 7);
+        }
+        
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            next_due_date: nextDueDate.toISOString().split('T')[0]
+          })
+          .eq('id', sub.id);
+          
+        if (updateError) throw updateError;
+      }
+      
+      toast({
+        title: "Success",
+        description: `Processed ${activeSubscriptions.length} automatic subscription(s) for ${format(new Date(currentYear, currentMonth - 1), 'MMMM yyyy')}`,
+      });
+      
+      fetchSubscriptions();
+      onDataChange();
+    } catch (error) {
+      console.error('Error processing automatic subscriptions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process automatic subscriptions",
+        variant: "destructive",
+      });
+    }
+  };
 
   const totalMonthly = subscriptions
-    .filter(s => s.active)
+    .filter(s => s.active && !s.is_paused)
     .reduce((sum, s) => {
       const monthlyAmount = s.billing_cycle === 'yearly' ? s.amount / 12 : s.amount;
       return sum + monthlyAmount;
@@ -191,7 +393,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
     const today = new Date();
     const nextWeek = new Date();
     nextWeek.setDate(today.getDate() + 7);
-    return dueDate >= today && dueDate <= nextWeek && s.active;
+    return dueDate >= today && dueDate <= nextWeek && s.active && !s.is_paused;
   });
 
   if (!user) {
@@ -223,7 +425,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
-                <p className="text-2xl font-bold">{subscriptions.filter(s => s.active).length}</p>
+                <p className="text-2xl font-bold">{subscriptions.filter(s => s.active && !s.is_paused).length}</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-600" />
             </div>
@@ -258,6 +460,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                 <li>• Include streaming services like Netflix, Spotify, gym memberships</li>
                 <li>• Track phone bills, internet, and other monthly services</li>
                 <li>• Set start dates to calculate total cost over time</li>
+                <li>• Mark subscriptions as automatic to add them to transactions</li>
               </ul>
             </div>
             <Button
@@ -276,12 +479,17 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
       {/* Subscriptions List */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-4">
             <CardTitle>Subscriptions & Bills</CardTitle>
-            <Button onClick={() => setShowForm(!showForm)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Subscription
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={processAutomaticSubscriptions}>
+                Process Automatic
+              </Button>
+              <Button onClick={() => setShowForm(!showForm)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Subscription
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -317,6 +525,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                     <SelectContent>
                       <SelectItem value="monthly">Monthly</SelectItem>
                       <SelectItem value="yearly">Yearly</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -337,6 +546,21 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                     onChange={(e) => setFormData({ ...formData, next_due_date: e.target.value })}
                     required
                   />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="automatic" 
+                    checked={formData.is_automatic}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_automatic: checked === true })
+                    }
+                  />
+                  <label 
+                    htmlFor="automatic"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Automatic (add to transactions when due)
+                  </label>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -367,9 +591,9 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Billing Cycle</TableHead>
-                  <TableHead>Start Date</TableHead>
                   <TableHead>Next Due</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -381,22 +605,32 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                     <TableCell>
                       <Badge variant="secondary">{subscription.billing_cycle}</Badge>
                     </TableCell>
-                    <TableCell>{new Date(subscription.start_date).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(subscription.next_due_date).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={subscription.active && !subscription.is_paused ? 'default' : 'destructive'}>
-                          {subscription.active && !subscription.is_paused ? 'Active' : subscription.is_paused ? 'Paused' : 'Inactive'}
-                        </Badge>
-                        {subscription.reminder_enabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-                      </div>
+                      <Badge variant={subscription.active && !subscription.is_paused ? 'default' : 'destructive'}>
+                        {subscription.active && !subscription.is_paused ? 'Active' : subscription.is_paused ? 'Paused' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={subscription.is_automatic ? 'outline' : 'secondary'}>
+                        {subscription.is_automatic ? 'Automatic' : 'Manual'}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
                         <Button
                           size="sm"
+                          variant="outline"
+                          onClick={() => handlePayment(subscription)}
+                          title="Mark as paid"
+                        >
+                          €
+                        </Button>
+                        <Button
+                          size="sm"
                           variant={subscription.is_paused ? "default" : "secondary"}
                           onClick={() => handlePause(subscription.id, subscription.is_paused)}
+                          title={subscription.is_paused ? "Resume" : "Pause"}
                         >
                           {subscription.is_paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
                         </Button>
@@ -416,6 +650,74 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !open && setDeleteDialog({ open: false, subscriptionId: '' })}
+      >
+        <AlertDialogContent className="max-w-md mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Subscription</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this subscription? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive text-destructive-foreground"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Payment Dialog */}
+      <Dialog 
+        open={paymentDialog.open}
+        onOpenChange={(open) => !open && setPaymentDialog({ open: false, subscription: null, addToTransactions: true })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Record Payment</DialogTitle>
+            <DialogDescription>
+              Record payment for {paymentDialog.subscription?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="addToTransactions" 
+                checked={paymentDialog.addToTransactions}
+                onCheckedChange={(checked) => 
+                  setPaymentDialog({ ...paymentDialog, addToTransactions: checked === true })
+                }
+              />
+              <label 
+                htmlFor="addToTransactions"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Add this payment to transactions
+              </label>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => 
+              setPaymentDialog({ open: false, subscription: null, addToTransactions: true })
+            }>
+              Cancel
+            </Button>
+            <Button onClick={confirmPayment}>
+              Confirm Payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

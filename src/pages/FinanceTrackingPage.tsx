@@ -6,7 +6,6 @@ import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { FinanceDashboard } from '@/components/finance/FinanceDashboard';
 import { ExpensesPage } from '@/components/finance/ExpensesPage';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
 
 interface FinanceTrackingPageProps {
   onBack: () => void;
@@ -51,13 +50,6 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
     setSelectedTab(value);
   };
 
-  const handleComplete = () => {
-    if (onComplete) {
-      markAsSaved();
-      onComplete();
-    }
-  };
-
   console.log('FinanceTrackingPage rendering with selectedTab:', selectedTab);
 
   return (
@@ -93,10 +85,9 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6 mt-6">
@@ -116,21 +107,7 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
             onDataChange={markAsChanged}
           />
         </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6 mt-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Reports coming soon...</p>
-          </div>
-        </TabsContent>
       </Tabs>
-
-      {/* Save Changes Prompt */}
-      <SaveChangesPrompt
-        hasUnsavedChanges={hasUnsavedChanges}
-        isSaving={isSaving}
-        onSave={saveChanges}
-        onDiscard={() => markAsSaved()}
-      />
     </div>
   );
 };

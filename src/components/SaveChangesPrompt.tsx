@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Save, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface SaveChangesPromptProps {
   hasUnsavedChanges: boolean;
@@ -17,7 +18,10 @@ export const SaveChangesPrompt: React.FC<SaveChangesPromptProps> = ({
   onSave,
   onDiscard
 }) => {
-  if (!hasUnsavedChanges) return null;
+  const location = useLocation();
+  
+  // Don't show the prompt in finance tracking module
+  if (location.pathname.includes('finance-tracking') || !hasUnsavedChanges) return null;
 
   return (
     <Card className="fixed bottom-4 right-4 z-50 bg-yellow-50 border-yellow-200 shadow-lg">
