@@ -239,6 +239,26 @@ export const TransactionsPage = ({ selectedMonth, selectedYear, onDataChange }: 
 
   return (
     <div className="space-y-6">
+      {/* Tips Card */}
+      <Card className="bg-purple-50 dark:bg-purple-950/20 border-purple-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">
+              <Euro className="h-4 w-4 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">💡 Transaction Tips</h3>
+              <ul className="text-sm text-purple-800 dark:text-purple-200 space-y-1">
+                <li>• <strong>Expenses:</strong> Groceries, dining out, transport, shopping, utilities</li>
+                <li>• <strong>Income:</strong> Salary, freelance work, gifts, refunds, cashbacks</li>
+                <li>• Use clear descriptions to track spending patterns</li>
+                <li>• Categorize consistently for better reports</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>

@@ -7,6 +7,7 @@ import { PartTimeIncomePage } from './PartTimeIncomePage';
 import { EmergencyFundPage } from './EmergencyFundPage';
 import { SharedExpensesPage } from './SharedExpensesPage';
 import { IncomePage } from './IncomePage';
+import { ReportsPage } from './ReportsPage';
 
 interface ExpensesPageProps {
   selectedMonth: string;
@@ -20,13 +21,14 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
           <TabsTrigger value="part-time">Part-time</TabsTrigger>
           <TabsTrigger value="emergency">Emergency</TabsTrigger>
           <TabsTrigger value="shared">Shared</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="transactions" className="space-y-6 mt-6">
@@ -70,6 +72,13 @@ export const ExpensesPage = ({ selectedMonth, selectedYear, onDataChange }: Expe
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             onDataChange={onDataChange} 
+          />
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6 mt-6">
+          <ReportsPage
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
           />
         </TabsContent>
       </Tabs>

@@ -918,6 +918,7 @@ export type Database = {
           name: string
           next_due_date: string
           reminder_enabled: boolean
+          start_date: string
           updated_at: string
           user_id: string
         }
@@ -931,6 +932,7 @@ export type Database = {
           name: string
           next_due_date: string
           reminder_enabled?: boolean
+          start_date?: string
           updated_at?: string
           user_id: string
         }
@@ -944,6 +946,7 @@ export type Database = {
           name?: string
           next_due_date?: string
           reminder_enabled?: boolean
+          start_date?: string
           updated_at?: string
           user_id?: string
         }

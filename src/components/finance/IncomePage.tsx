@@ -220,6 +220,27 @@ export const IncomePage = ({ selectedMonth, selectedYear, onDataChange }: Income
 
   return (
     <div className="space-y-6">
+      {/* Tips Card */}
+      <Card className="bg-green-50 dark:bg-green-950/20 border-green-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">💡 Income Ideas</h3>
+              <ul className="text-sm text-green-800 dark:text-green-200 space-y-1">
+                <li>• <strong>Job/Salary:</strong> Full-time or part-time employment income</li>
+                <li>• <strong>Student Loan:</strong> Education loan disbursements</li>
+                <li>• <strong>Family Support:</strong> Money from parents or relatives</li>
+                <li>• <strong>Scholarships:</strong> Academic or merit-based funding</li>
+                <li>• <strong>Freelancing:</strong> Gig work, tutoring, or side projects</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>

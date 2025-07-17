@@ -26,6 +26,7 @@ interface Subscription {
   amount: number;
   currency: string;
   billing_cycle: string;
+  start_date: string;
   next_due_date: string;
   active: boolean;
   reminder_enabled: boolean;
@@ -46,6 +47,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
     name: '',
     amount: '',
     billing_cycle: 'monthly',
+    start_date: '',
     next_due_date: ''
   });
 
@@ -93,6 +95,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
           name: formData.name,
           amount: parseFloat(formData.amount),
           billing_cycle: formData.billing_cycle,
+          start_date: formData.start_date,
           next_due_date: formData.next_due_date
         });
 
@@ -103,7 +106,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
         description: "Subscription added successfully",
       });
 
-      setFormData({ name: '', amount: '', billing_cycle: 'monthly', next_due_date: '' });
+      setFormData({ name: '', amount: '', billing_cycle: 'monthly', start_date: '', next_due_date: '' });
       setShowForm(false);
       fetchSubscriptions();
       onDataChange();
@@ -209,6 +212,26 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
         </Card>
       </div>
 
+      {/* Tips Card */}
+      <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">💡 Tips for Subscriptions & Bills</h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <li>• Add recurring expenses like rent, utilities, insurance premiums</li>
+                <li>• Include streaming services like Netflix, Spotify, gym memberships</li>
+                <li>• Track phone bills, internet, and other monthly services</li>
+                <li>• Set start dates to calculate total cost over time</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Subscriptions List */}
       <Card>
         <CardHeader>
@@ -257,6 +280,15 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                   </Select>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium mb-2">Start Date</label>
+                  <Input
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium mb-2">Next Due Date</label>
                   <Input
                     type="date"
@@ -294,6 +326,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Billing Cycle</TableHead>
+                  <TableHead>Start Date</TableHead>
                   <TableHead>Next Due</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -307,6 +340,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
                     <TableCell>
                       <Badge variant="secondary">{subscription.billing_cycle}</Badge>
                     </TableCell>
+                    <TableCell>{new Date(subscription.start_date).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(subscription.next_due_date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
