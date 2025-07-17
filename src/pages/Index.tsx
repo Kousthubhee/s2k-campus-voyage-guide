@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -42,6 +41,7 @@ import { SuggestionsPage } from './SuggestionsPage';
 import { AskMeAnythingPage } from './AskMeAnythingPage';
 import { ChatbotPage } from './ChatbotPage';
 import { HomePage } from '@/components/HomePage';
+import { ErrorBoundary } from "react-error-boundary";
 
 console.log("[Index.tsx] TOP OF FILE");
 
