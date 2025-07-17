@@ -1,39 +1,11 @@
-// ADDED: Top of file log
-console.log("[App.tsx] TOP OF FILE");
 
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotFound from "./NotFound";
-import { NotificationProvider } from "@/hooks/useNotifications";
-import React, { useState, useEffect } from "react";
-
-// Simple error boundary for root app
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {
-  constructor(props: {children: React.ReactNode}) {
-    super(props);
-    this.state = { hasError: false, error: undefined };
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error: Error, info: any) {
-    console.error("Uncaught error in App:", error, info);
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div style={{color: "red", padding: 32, fontSize: 20}}>
-        <b>Critical Error:</b> {this.state.error?.message}
-        <br />
-        <small>See console for details.</small>
-      </div>
-    }
-    return this.props.children;
-  }
-}
-
 import { AuthProvider } from '@/hooks/useAuth';
 import { useLocalStorageProgress } from "@/hooks/useLocalStorageProgress";
 import { Button } from '@/components/ui/button';
@@ -48,10 +20,30 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import MainRouter from './MainRouter';
-import { FloatingChatbot } from '@/components/FloatingChatbot';
 import { ResetPasswordPage } from '@/components/ResetPasswordPage';
+import NotFound from "./NotFound";
+import { ChecklistPage } from "./ChecklistPage";
+import { DocumentsPage } from '@/components/DocumentsPage';
+import { HubPage } from './HubPage';
+import { NewsPage } from './NewsPage';
+import { AffiliationPage } from '@/components/AffiliationPage';
+import { LanguagePage } from './LanguagePage';
+import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
+import { TranslatePage } from './TranslatePage';
+import { ContactPage } from './ContactPage';
+import { SchoolInsightsPage } from './SchoolInsightsPage';
+import { PreArrival1Page } from './PreArrival1Page';
+import { PreArrival2Page } from './PreArrival2Page';
+import { PostArrivalPage } from './PostArrivalPage';
+import { FinanceTrackingPage } from './FinanceTrackingPage';
+import { NotificationsPage } from './NotificationsPage';
+import { QAPage } from './QAPage';
+import { SuggestionsPage } from './SuggestionsPage';
+import { AskMeAnythingPage } from './AskMeAnythingPage';
+import { ChatbotPage } from './ChatbotPage';
+import { HomePage } from '@/components/HomePage';
 
-console.log("App.tsx is rendering");
+console.log("[Index.tsx] TOP OF FILE");
 
 interface UserProfile {
   id: string;
@@ -93,6 +85,8 @@ const Index = () => {
   const [showAuth, setShowAuth] = useState(false);
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Load user profile when user is available
   useEffect(() => {
@@ -101,15 +95,11 @@ const Index = () => {
     }
   }, [user]);
 
-  // Ensure home page loads first - remove any stored page navigation on initial load
+  // Set the currentPage based on the URL path
   useEffect(() => {
-    const storedPage = localStorage.getItem('currentPage');
-    if (storedPage && storedPage !== 'home') {
-      console.log('Clearing stored page, defaulting to home');
-      localStorage.removeItem('currentPage');
-      setCurrentPage('home');
-    }
-  }, []);
+    const path = location.pathname.substring(1) || 'home';
+    setCurrentPage(path);
+  }, [location.pathname]);
 
   // Check for reset password token on load - Updated to properly detect password recovery
   useEffect(() => {
@@ -135,6 +125,7 @@ const Index = () => {
     if ((accessToken && type === 'recovery') || (queryAccessToken && queryType === 'recovery') || resetParam === 'true') {
       console.log('Password recovery detected, showing reset password page');
       setCurrentPage('reset-password');
+      navigate('/reset-password');
     }
   }, []);
 
@@ -197,16 +188,17 @@ const Index = () => {
       alert('You need at least 1 key to access this page. Complete modules to earn keys!');
       return;
     }
+
     console.log('Navigating to page:', page);
     setCurrentPage(page);
-    localStorage.setItem('currentPage', page); // Store the page navigation
+    navigate(`/${page === 'home' ? '' : page}`);
   };
 
   const handleResetProgress = () => {
     resetProgress();
     setShowConfirm(false);
     setCurrentPage('home'); // Reset to home page
-    localStorage.removeItem('currentPage');
+    navigate('/');
     toast({
       title: "Progress Reset",
       description: "Your checklist progress has been reset.",
@@ -234,11 +226,17 @@ const Index = () => {
   }
 
   if (showAuth) {
-    return <AuthPage onBack={() => setShowAuth(false)} />;
+    return <AuthPage onBack={() => {
+      setShowAuth(false);
+      navigate('/');
+    }} />;
   }
 
   if (currentPage === 'reset-password') {
-    return <ResetPasswordPage onBack={() => setCurrentPage('home')} />;
+    return <ResetPasswordPage onBack={() => {
+      setCurrentPage('home');
+      navigate('/');
+    }} />;
   }
 
   return (
@@ -274,36 +272,84 @@ const Index = () => {
           </header>
           <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
             <div className="max-w-5xl mx-auto animate-fade-in section-padding">
-              {currentPage === "profile" ? (
-                <ProfilePage 
-                  userProfile={userProfile} 
-                  setUserProfile={setUserProfile} 
-                  setCurrentPage={setCurrentPage}
-                />
-              ) : currentPage === "qa" ? (
-                <div className="space-y-6">
-                  <h1 className="text-3xl font-bold">AI Assistant</h1>
-                  <ChatInterface />
-                </div>
-              ) : (
-                <MainRouter
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                  userProfile={userProfile}
-                  userProgress={userProgress}
-                  setUserProgress={setUserProgress}
-                  selectedSchool={selectedSchool}
-                  setSelectedSchool={setSelectedSchool}
-                  handleProgressUpdate={handleProgressUpdate}
-                  profile={userProfile}
-                  setUserProfile={setUserProfile}
-                />
-              )}
+              <Routes>
+                <Route path="/" element={
+                  <HomePage 
+                    onGetStarted={() => handlePageNavigation('checklist')} 
+                    onPageNavigation={handlePageNavigation} 
+                  />
+                } />
+                <Route path="/checklist" element={
+                  <ChecklistPage 
+                    userProgress={userProgress}
+                    setUserProgress={setUserProgress}
+                    onSchoolSelect={setSelectedSchool}
+                    currentPage={currentPage}
+                    setCurrentPage={handlePageNavigation}
+                  />
+                } />
+                <Route path="/documents" element={<DocumentsPage />} />
+                <Route path="/hub" element={<HubPage />} />
+                <Route path="/news" element={<NewsPage />} />
+                <Route path="/affiliation" element={<AffiliationPage />} />
+                <Route path="/language" element={<LanguagePage />} />
+                <Route path="/integration" element={
+                  <FrenchIntegrationPage onBack={() => handlePageNavigation('checklist')} />
+                } />
+                <Route path="/translate" element={<TranslatePage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/profile" element={
+                  <ProfilePage 
+                    userProfile={userProfile} 
+                    setUserProfile={setUserProfile} 
+                    setCurrentPage={handlePageNavigation}
+                  />
+                } />
+                <Route path="/qa" element={
+                  <div className="space-y-6">
+                    <h1 className="text-3xl font-bold">AI Assistant</h1>
+                    <ChatInterface />
+                  </div>
+                } />
+                <Route path="/school-insights" element={
+                  <SchoolInsightsPage onBack={() => handlePageNavigation('checklist')} />
+                } />
+                <Route path="/pre-arrival-1" element={
+                  <PreArrival1Page 
+                    onBack={() => handlePageNavigation('checklist')} 
+                    onComplete={() => {}} 
+                    isCompleted={false} 
+                    profile={userProfile} 
+                  />
+                } />
+                <Route path="/pre-arrival-2" element={
+                  <PreArrival2Page 
+                    onBack={() => handlePageNavigation('checklist')} 
+                  />
+                } />
+                <Route path="/post-arrival" element={
+                  <PostArrivalPage 
+                    onBack={() => handlePageNavigation('checklist')} 
+                    onComplete={() => {}} 
+                    isCompleted={false} 
+                  />
+                } />
+                <Route path="/finance-tracking" element={
+                  <FinanceTrackingPage onBack={() => handlePageNavigation('checklist')} />
+                } />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/suggestions" element={
+                  <SuggestionsPage onBack={() => handlePageNavigation('checklist')} />
+                } />
+                <Route path="/ask-me-anything" element={<AskMeAnythingPage />} />
+                <Route path="/chatbot" element={<ChatbotPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </div>
           </main>
           <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
             <div className="text-center text-gray-600">
-              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">  Kousthubhee Krishna K</span> , <span className="text-cyan-600 font-semibold">Srivatsava CK</span> , <span className="text-blue-600 font-semibold"> Manibalan </span>
+              🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">Kousthubhee Krishna K</span>, <span className="text-cyan-600 font-semibold">Srivatsava CK</span>, <span className="text-blue-600 font-semibold">Manibalan</span>
             </div>
             <Button 
               variant="destructive"
@@ -341,9 +387,6 @@ const Index = () => {
             )}
           </footer>
         </SidebarInset>
-        
-        {/* Floating Chatbot - visible on all pages */}
-        <FloatingChatbot currentModule={currentPage} />
       </div>
     </SidebarProvider>
   );

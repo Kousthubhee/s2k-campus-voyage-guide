@@ -236,6 +236,10 @@ interface FloatingChatbotProps {
 }
 
 export function FloatingChatbot({ currentModule = 'general' }: FloatingChatbotProps) {
+  // TEMPORARILY DISABLED - will return null
+  return null;
+
+  // Original code is preserved below but not rendered
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {

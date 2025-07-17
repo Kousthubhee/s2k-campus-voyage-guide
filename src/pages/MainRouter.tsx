@@ -1,28 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { HomePage } from '@/components/HomePage';
-import { ChecklistPage } from './ChecklistPage';
-import { DocumentsPage } from '@/components/DocumentsPage';
-import { HubPage } from './HubPage';
-import { NewsPage } from './NewsPage';
-import { AffiliationPage } from '@/components/AffiliationPage';
-import { LanguagePage } from './LanguagePage';
-import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
-import { TranslatePage } from './TranslatePage';
-import { ContactPage } from './ContactPage';
-import { ProfilePage } from './ProfilePage';
-import { SchoolInsightsPage } from './SchoolInsightsPage';
-import { PreArrival1Page } from './PreArrival1Page';
-import { PreArrival2Page } from './PreArrival2Page';
-import { PostArrivalPage } from './PostArrivalPage';
-import { FinanceTrackingPage } from './FinanceTrackingPage';
-import { NotificationsPage } from './NotificationsPage';
-import { QAPage } from './QAPage';
-import { SuggestionsPage } from './SuggestionsPage';
-import { AskMeAnythingPage } from './AskMeAnythingPage';
-import { ChatbotPage } from './ChatbotPage';
-import { AuthPage } from '@/components/AuthPage';
+import { Navigate } from 'react-router-dom';
 
 interface MainRouterProps {
   currentPage: string;
@@ -55,92 +34,12 @@ const MainRouter = ({
     return <div>Loading...</div>;
   }
 
-  const renderCurrentPage = () => {
-    console.log('Current page in MainRouter:', currentPage);
-    
-    switch (currentPage) {
-      case 'home':
-        return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
-      case 'checklist':
-        return (
-          <ChecklistPage 
-            userProgress={userProgress}
-            setUserProgress={setUserProgress}
-            onSchoolSelect={setSelectedSchool}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-        );
-      case 'documents':
-        return <DocumentsPage />;
-      case 'hub':
-        return <HubPage />;
-      case 'news':
-        return <NewsPage />;
-      case 'affiliation':
-        return <AffiliationPage />;
-      case 'language':
-        return <LanguagePage />;
-      case 'integration':
-        return <FrenchIntegrationPage onBack={() => setCurrentPage('checklist')} />;
-      case 'translate':
-        return <TranslatePage />;
-      case 'contact':
-        return <ContactPage />;
-      case 'profile':
-        return <ProfilePage userProfile={userProfile} setUserProfile={setUserProfile} setCurrentPage={setCurrentPage} />;
-      case 'auth':
-        return <AuthPage onBack={() => setCurrentPage('home')} />;
-      case 'school':
-      case 'school-insights':
-        return <SchoolInsightsPage onBack={() => setCurrentPage('checklist')} />;
-      case 'pre-arrival-1':
-        return (
-          <PreArrival1Page 
-            onBack={() => setCurrentPage('checklist')} 
-            onComplete={() => {}} 
-            isCompleted={false} 
-            profile={profile} 
-          />
-        );
-      case 'pre-arrival-2':
-        return (
-          <PreArrival2Page 
-            onBack={() => setCurrentPage('checklist')} 
-          />
-        );
-      case 'post-arrival':
-        return (
-          <PostArrivalPage 
-            onBack={() => setCurrentPage('checklist')} 
-            onComplete={() => {}} 
-            isCompleted={false} 
-          />
-        );
-      case 'finance':
-      case 'finance-tracking':
-        return <FinanceTrackingPage onBack={() => setCurrentPage('checklist')} />;
-      case 'notifications':
-        return <NotificationsPage />;
-      case 'qa':
-        return <QAPage />;
-      case 'ask-me-anything':
-        return <AskMeAnythingPage />;
-      case 'suggestions':
-        return <SuggestionsPage onBack={() => setCurrentPage('checklist')} />;
-      case 'chatbot':
-        return <ChatbotPage />;
-      default:
-        console.log('Unknown page:', currentPage, '- defaulting to home');
-        return <HomePage onGetStarted={() => setCurrentPage('checklist')} onPageNavigation={setCurrentPage} />;
-    }
-  };
-
-  return (
-    <>
-      {renderCurrentPage()}
-    </>
-  );
+  // This component is now a legacy router used to support old code
+  // The actual routing happens in Index.tsx with React Router
+  // This function serves as a compatibility layer
+  console.log('MainRouter is now just a compatibility layer - routing happens in Index.tsx');
+  
+  return null;
 };
 
 export default MainRouter;

@@ -1,3 +1,4 @@
+
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
