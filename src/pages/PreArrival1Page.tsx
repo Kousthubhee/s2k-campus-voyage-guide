@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +28,7 @@ interface PreArrival1PageProps {
   onBack: () => void;
   onComplete: () => void;
   isCompleted: boolean;
-  profile?: ProfileType | null;
+  profile: ProfileType | null;
 }
 
 interface ReminderItem {
@@ -35,7 +36,7 @@ interface ReminderItem {
   note: string;
 }
 
-export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile = null }: PreArrival1PageProps) => {
+export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: PreArrival1PageProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [reminders, setReminders] = useState<{ [id: string]: ReminderItem[] }>({});
@@ -73,169 +74,175 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile = nul
   };
   const personalizationAlerts = personalizedDocs(profile);
 
+  // Checklist items with comprehensive processes (removed accommodation-note)
   const checklistItems = [
-    {
-      id: 'campus-france',
-      title: "Campus France Registration",
-      description: "Complete your Campus France application and interview - MANDATORY first step",
-      urgency: "high",
-      timeline: "3-4 months before departure",
-      documents: (() => {
-        const docs = [
-          "Degree/diploma certificates (original + copy)",
-          "Academic transcripts (all years)",
-          "Resume (CV) in French or English",
-          "Cover letter explaining study motivation",
-          "Admission letter from French institution",
-          "Passport copy (all pages)",
-          "Recent passport-size photographs (35mm x 45mm)",
-          "Campus France fee payment receipt",
-          "Language proficiency certificate (if required)"
-        ];
-        if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
-          docs.splice(4, 0, "Experience letters from employers");
-          docs.push("Gap year explanation letter (if applicable)");
-        }
-        return docs;
-      })(),
-      process: [
-        "Create account on Etudes en France portal (www.campusfrance.org) https://www.campusfrance.org/fr",
-        "Fill out personal information and academic history",
-        "Upload all required documents in PDF format",
-        "Pay Campus France processing fee (varies by country)",
-        "Submit complete application online",
-        "Wait for appointment scheduling email",
-        "Attend Campus France interview at nearest center",
-        "Receive Campus France registration number and NOC (No Objection Certificate)"
-      ]
-    },
-    {
-      id: 'vfs',
-      title: "VFS Visa Application",
-      description: "Submit visa documents and attend biometric appointment at VFS Global center",
-      urgency: "high",
-      timeline: "2-3 months before departure (after Campus France approval)",
-      documents: (() => {
-        const docs = [
-          "Long-stay visa application form (filled and signed)",
-          "Passport (valid for 3+ months beyond stay) + all pages copy",
-          "2 recent passport-size photos (35mm x 45mm, white background)",
-          "Campus France registration number + NOC certificate",
-          "Original admission letter from French institution",
-          "Tuition fee payment proof or fee exemption certificate",
-          "Proof of accommodation in France",
-          "Proof of financial means (bank statements, scholarship letters)",
-          "Detailed cover letter explaining study plans",
-          "Travel insurance (minimum 3 months, 30,000€ coverage)",
-          "Flight booking confirmation (can be dummy ticket)",
-          "Birth certificate (original + copy)",
-          "SOP (Statement of Purpose), expense calculation sheet, CA statement (recommended)"
-        ];
-        if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
-          docs.splice(5, 0, "Work experience certificates and letters");
-          docs.push("Explanation letter for career gap (if applicable)");
-        }
-        return docs;
-      })(),
-      process: [
-        "Gather all required documents (check VFS website for latest requirements)",
-        "Book VFS appointment online at vfsglobal.com",
-        "Pay visa application fee online",
-        "Visit VFS center on appointment date with original documents",
-        "Submit documents and provide biometric data (fingerprints + photo)",
-        "Receive tracking number for application status",
-        "Wait for visa processing (typically 15-20 working days)",
-        "Collect passport with visa or opt for courier delivery"
-      ]
-    },
-    {
-      id: 'documents',
-      title: "Document Translation & Legalization",
-      description: "Get official translations and apostille/attestation of academic documents",
-      urgency: "medium",
-      timeline: "2-3 months before departure",
-      documents: [
-        "Academic certificates and transcripts",
-        "Birth certificate",
-        "Experience letters and employment certificates",
-        "Medical certificates (if required)",
-        "Police clearance certificate (if required)",
-        "Any non-English/French official documents"
-      ],
-      process: [
-        "Identify all documents needing translation",
-        "Get apostille/attestation from respective authorities",
-        "Use certified translator recognized by French authorities",
-        "Ensure translations are signed and stamped",
-        "Keep both originals and translated copies",
-        "Get additional copies as backup"
-      ]
-    },
-    {
-      id: 'insurance',
-      title: "Travel & Health Insurance",
-      description: "Purchase comprehensive travel and health insurance as per Schengen requirements",
-      urgency: "medium",
-      timeline: "1-2 months before departure",
-      documents: [
-        "Passport copy for insurance application",
-        "Insurance certificate with full name and dates",
-        "Coverage details showing minimum 30,000€ medical coverage",
-        "Policy document in English or French"
-      ],
-      process: [
-        "Research Schengen-compliant insurance providers",
-        "Purchase policy with minimum 30,000€ medical coverage",
-        "Ensure coverage includes repatriation and emergency evacuation",
-        "Get policy certificate with your exact name as in passport",
-        "Keep digital and physical copies of insurance documents",
-        "Consider extending coverage beyond initial 3 months"
-      ]
-    },
-    {
-      id: 'flight',
-      title: "Flight Booking & Travel Arrangements",
-      description: "Book flights and arrange travel logistics for departure",
-      urgency: "low",
-      timeline: "1 month before departure",
-      documents: [
-        "Flight booking confirmation",
-        "Travel itinerary",
-        "Airport transfer arrangements"
-      ],
-      process: [
-        "For visa application: book refundable ticket or get dummy ticket",
-        "After visa approval: book confirmed flight tickets",
-        "Arrange airport pickup or public transport to accommodation",
-        "Plan arrival during weekdays for easier administrative tasks",
-        "Inform institution about arrival date and time",
-        "Keep all travel documents easily accessible during journey"
-      ]
-    },
-    {
-      id: 'preparation',
-      title: "Pre-Departure Preparation",
-      description: "Final preparations before traveling to France",
-      urgency: "medium",
-      timeline: "2-4 weeks before departure",
-      documents: [
-        "All original documents in organized folder",
-        "Digital copies on cloud storage",
-        "Emergency contact list",
-        "Institution contact details",
-        "Accommodation confirmation"
-      ],
-      process: [
-        "Inform bank about international travel to avoid card blocks",
-        "Get international roaming plan or French SIM card info",
-        "Research about your destination city and nearest services",
-        "Pack essential items and documents in carry-on luggage",
-        "Exchange some currency to Euros for initial expenses",
-        "Download offline maps and translation apps",
-        "Prepare for cultural orientation and language basics"
-      ]
-    }
-  ];
+  {
+    id: 'campus-france',
+    title: "Campus France Registration",
+    description: "Complete your Campus France application and interview - MANDATORY first step",
+    urgency: "high",
+    timeline: "3-4 months before departure",
+    documents: (() => {
+      const docs = [
+        "Degree/diploma certificates (original + copy)",
+        "Academic transcripts (all years)",
+        "Resume (CV) in French or English",
+        "Cover letter explaining study motivation",
+        "Admission letter from French institution",
+        "Passport copy (all pages)",
+        "Recent passport-size photographs (35mm x 45mm)",
+        "Campus France fee payment receipt",
+        "Language proficiency certificate (if required)"
+      ];
+      if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
+        docs.splice(4, 0, "Experience letters from employers");
+        docs.push("Gap year explanation letter (if applicable)");
+      }
+      return docs;
+    })(),
+    process: [
+      "Create account on Etudes en France portal (www.campusfrance.org) https://www.campusfrance.org/fr",
+      "Fill out personal information and academic history",
+      "Upload all required documents in PDF format",
+      "Pay Campus France processing fee (varies by country)",
+      "Submit complete application online",
+      "Wait for appointment scheduling email",
+      "Attend Campus France interview at nearest center",
+      "Receive Campus France registration number and NOC (No Objection Certificate)"
+    ]
+  },
+
+  {
+    id: 'vfs',
+    title: "VFS Visa Application",
+    description: "Submit visa documents and attend biometric appointment at VFS Global center",
+    urgency: "high",
+    timeline: "2-3 months before departure (after Campus France approval)",
+    documents: (() => {
+      const docs = [
+        "Long-stay visa application form (filled and signed)",
+        "Passport (valid for 3+ months beyond stay) + all pages copy",
+        "2 recent passport-size photos (35mm x 45mm, white background)",
+        "Campus France registration number + NOC certificate",
+        "Original admission letter from French institution",
+        "Tuition fee payment proof or fee exemption certificate",
+        "Proof of accommodation in France",
+        "Proof of financial means (bank statements, scholarship letters)",
+        "Detailed cover letter explaining study plans",
+        "Travel insurance (minimum 3 months, 30,000€ coverage)",
+        "Flight booking confirmation (can be dummy ticket)",
+        "Birth certificate (original + copy)",
+        "SOP (Statement of Purpose), expense calculation sheet, CA statement (recommended)"
+      ];
+      if (profile && ((profile.age && Number(profile.age) >= 23) || (profile.workExperience && profile.workExperience.trim().toLowerCase() !== 'n/a' && profile.workExperience.trim().toLowerCase() !== 'no'))) {
+        docs.splice(5, 0, "Work experience certificates and letters");
+        docs.push("Explanation letter for career gap (if applicable)");
+      }
+      return docs;
+    })(),
+    process: [
+      "Gather all required documents (check VFS website for latest requirements)",
+      "Book VFS appointment online at vfsglobal.com",
+      "Pay visa application fee online",
+      "Visit VFS center on appointment date with original documents",
+      "Submit documents and provide biometric data (fingerprints + photo)",
+      "Receive tracking number for application status",
+      "Wait for visa processing (typically 15-20 working days)",
+      "Collect passport with visa or opt for courier delivery"
+    ]
+  },
+
+  {
+    id: 'documents',
+    title: "Document Translation & Legalization",
+    description: "Get official translations and apostille/attestation of academic documents",
+    urgency: "medium",
+    timeline: "2-3 months before departure",
+    documents: [
+      "Academic certificates and transcripts",
+      "Birth certificate",
+      "Experience letters and employment certificates",
+      "Medical certificates (if required)",
+      "Police clearance certificate (if required)",
+      "Any non-English/French official documents"
+    ],
+    process: [
+      "Identify all documents needing translation",
+      "Get apostille/attestation from respective authorities",
+      "Use certified translator recognized by French authorities",
+      "Ensure translations are signed and stamped",
+      "Keep both originals and translated copies",
+      "Get additional copies as backup"
+    ]
+  },
+
+  {
+    id: 'insurance',
+    title: "Travel & Health Insurance",
+    description: "Purchase comprehensive travel and health insurance as per Schengen requirements",
+    urgency: "medium",
+    timeline: "1-2 months before departure",
+    documents: [
+      "Passport copy for insurance application",
+      "Insurance certificate with full name and dates",
+      "Coverage details showing minimum 30,000€ medical coverage",
+      "Policy document in English or French"
+    ],
+    process: [
+      "Research Schengen-compliant insurance providers",
+      "Purchase policy with minimum 30,000€ medical coverage",
+      "Ensure coverage includes repatriation and emergency evacuation",
+      "Get policy certificate with your exact name as in passport",
+      "Keep digital and physical copies of insurance documents",
+      "Consider extending coverage beyond initial 3 months"
+    ]
+  },
+
+  {
+    id: 'flight',
+    title: "Flight Booking & Travel Arrangements",
+    description: "Book flights and arrange travel logistics for departure",
+    urgency: "low",
+    timeline: "1 month before departure",
+    documents: [
+      "Flight booking confirmation",
+      "Travel itinerary",
+      "Airport transfer arrangements"
+    ],
+    process: [
+      "For visa application: book refundable ticket or get dummy ticket",
+      "After visa approval: book confirmed flight tickets",
+      "Arrange airport pickup or public transport to accommodation",
+      "Plan arrival during weekdays for easier administrative tasks",
+      "Inform institution about arrival date and time",
+      "Keep all travel documents easily accessible during journey"
+    ]
+  },
+
+  {
+    id: 'preparation',
+    title: "Pre-Departure Preparation",
+    description: "Final preparations before traveling to France",
+    urgency: "medium",
+    timeline: "2-4 weeks before departure",
+    documents: [
+      "All original documents in organized folder",
+      "Digital copies on cloud storage",
+      "Emergency contact list",
+      "Institution contact details",
+      "Accommodation confirmation"
+    ],
+    process: [
+      "Inform bank about international travel to avoid card blocks",
+      "Get international roaming plan or French SIM card info",
+      "Research about your destination city and nearest services",
+      "Pack essential items and documents in carry-on luggage",
+      "Exchange some currency to Euros for initial expenses",
+      "Download offline maps and translation apps",
+      "Prepare for cultural orientation and language basics"
+    ]
+  }
+];
 
   const handleDocumentCheck = (itemId: string, docIndex: number, checked: boolean) => {
     const key = `${itemId}-${docIndex}`;
