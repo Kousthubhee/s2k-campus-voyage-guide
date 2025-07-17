@@ -109,12 +109,7 @@ export const SubscriptionsPage = ({ selectedMonth, selectedYear, onDataChange }:
 
       if (error) throw error;
       
-      // Map the data to include is_automatic field (default to true if missing)
-      const currentSubscriptions = (data || []).map(sub => ({
-        ...sub,
-        is_automatic: sub.is_automatic ?? true
-      }));
-      setSubscriptions(currentSubscriptions);
+      setSubscriptions(data || []);
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
       toast({

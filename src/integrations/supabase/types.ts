@@ -918,6 +918,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          is_automatic: boolean
           is_paused: boolean
           name: string
           next_due_date: string
@@ -933,6 +934,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_automatic?: boolean
           is_paused?: boolean
           name: string
           next_due_date: string
@@ -948,6 +950,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          is_automatic?: boolean
           is_paused?: boolean
           name?: string
           next_due_date?: string
