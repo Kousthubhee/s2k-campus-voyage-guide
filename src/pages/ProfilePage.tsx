@@ -6,9 +6,10 @@ import { User, Mail, Calendar, MapPin, Edit, Award, Trophy, Target, CheckCircle2
 import { ProfileEditDialog } from '@/components/ProfileEditDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfilePageProps {
-  userProfile: {
+  userProfile?: {
     id: string;
     name: string;
     email: string;
@@ -19,13 +20,15 @@ interface ProfilePageProps {
     prevEducation: string;
     workExperience: string;
   } | null;
-  setUserProfile: (profile: any) => void;
-  setCurrentPage: (page: string) => void;
+  setUserProfile?: (profile: any) => void;
+  setCurrentPage?: (page: string) => void;
 }
 
 export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: ProfilePageProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [localProfile, setLocalProfile] = useState(userProfile);
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const loadProfileData = async () => {
@@ -56,7 +59,10 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
             workExperience: fetchedProfile.work_experience || 'Add your work experience'
           };
           
-          setUserProfile(profileData);
+          setLocalProfile(profileData);
+          if (setUserProfile) {
+            setUserProfile(profileData);
+          }
         }
       } catch (error) {
         console.error('Error loading profile data:', error);
@@ -78,7 +84,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
             <p className="text-gray-600 mb-6">
               Please sign in to view and manage your profile, track your progress, and unlock all features.
             </p>
-            <Button onClick={() => setCurrentPage('auth')}>
+            <Button onClick={() => navigate('/auth')}>
               Sign In to Continue
             </Button>
           </CardContent>
@@ -87,7 +93,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
     );
   }
   
-  const profile = userProfile || {
+  const profile = localProfile || userProfile || {
     id: user.id || '',
     name: user.email || 'New User',
     email: user.email || 'user@example.com',
@@ -123,7 +129,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
     { action: 'Complete your profile next!', time: 'Pending', icon: User }
   ];
 
-  const handleSave = async (updatedProfile: typeof userProfile) => {
+  const handleSave = async (updatedProfile: typeof profile) => {
     console.log("📌 handleSave in ProfilePage.tsx triggered");
     console.log("📌 updatedProfile:", updatedProfile);
     console.log("📌 user.id:", user?.id);
@@ -154,10 +160,15 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
 
       console.log('✅ Supabase update success:', data);
 
-      setUserProfile({
+      const newProfile = {
         ...updatedProfile,
         id: user.id,
-      });
+      };
+
+      setLocalProfile(newProfile);
+      if (setUserProfile) {
+        setUserProfile(newProfile);
+      }
 
       setIsEditing(false);
     } catch (err) {
@@ -334,7 +345,7 @@ export const ProfilePage = ({ userProfile, setUserProfile, setCurrentPage }: Pro
                 <p className="text-gray-600 mb-4">
                   Complete modules, organize documents, and engage with the community to earn more achievements and unlock features.
                 </p>
-                <Button onClick={() => setCurrentPage('checklist')}>
+                <Button onClick={() => navigate('/checklist')}>
                   Start Your Journey
                 </Button>
               </div>

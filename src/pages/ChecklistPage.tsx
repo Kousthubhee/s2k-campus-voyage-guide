@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Key, Lock, CheckCircle, ArrowRight, Timer, BookOpen, Users } from 'lucide-react';
-import { checklistModules } from '@/constants/checklistModules';
+import checklistModules from '@/constants/checklistModules';
 
 interface ChecklistPageProps {
   userProgress?: any;
@@ -99,12 +99,12 @@ export const ChecklistPage = ({
         {checklistModules.map((module) => (
           <ChecklistModule
             key={module.id}
-            module={module}
-            isCompleted={isModuleCompleted(module.id)}
-            isUnlocked={isModuleUnlocked(module.id)}
-            onModuleClick={handleModuleClick}
+            modules={[module]}
             userProgress={userProgress}
-            onProgressUpdate={handleProgressUpdate}
+            setUserProgress={setUserProgress}
+            onSchoolSelect={onSchoolSelect || (() => {})}
+            currentPage={currentPage || 'checklist'}
+            setCurrentPage={setCurrentPage || (() => {})}
           />
         ))}
       </div>
