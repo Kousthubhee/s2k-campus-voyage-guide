@@ -17,26 +17,26 @@ interface DocumentPreviewDialogProps {
 export const DocumentPreviewDialog: React.FC<DocumentPreviewDialogProps> = ({
   isOpen,
   onClose,
-  document
+  document: doc
 }) => {
-  if (!document) return null;
+  if (!doc) return null;
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = document.url;
-    link.download = document.name;
+    link.href = doc.url;
+    link.download = doc.name;
     link.click();
   };
 
-  const isPdf = document.type === 'application/pdf';
-  const isImage = document.type.startsWith('image/');
+  const isPdf = doc.type === 'application/pdf';
+  const isImage = doc.type.startsWith('image/');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{document.name}</span>
+            <span>{doc.name}</span>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -61,16 +61,16 @@ export const DocumentPreviewDialog: React.FC<DocumentPreviewDialogProps> = ({
         <div className="flex-1 overflow-auto">
           {isPdf && (
             <iframe
-              src={document.url}
+              src={doc.url}
               className="w-full h-[70vh] border rounded"
-              title={document.name}
+              title={doc.name}
             />
           )}
           
           {isImage && (
             <img
-              src={document.url}
-              alt={document.name}
+              src={doc.url}
+              alt={doc.name}
               className="max-w-full h-auto mx-auto"
             />
           )}
