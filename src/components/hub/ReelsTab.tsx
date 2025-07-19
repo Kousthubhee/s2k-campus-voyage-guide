@@ -48,7 +48,10 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        const stream = canvas.captureStream(30); // 30 FPS
+        // Create a MediaStream from canvas
+        const stream = canvas.captureStream(30);
+        
+        // Use MediaRecorder to record the silent video
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: 'video/webm;codecs=vp8'
         });
@@ -69,23 +72,31 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
           resolve(processedFile);
         };
         
-        mediaRecorder.start();
+        let frameCount = 0;
+        const fps = 30;
+        const duration = video.duration * 1000; // Convert to milliseconds
+        const totalFrames = Math.floor(duration / (1000 / fps));
         
         const drawFrame = () => {
-          if (!video.ended && !video.paused) {
+          if (frameCount < totalFrames && !video.ended) {
             ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+            frameCount++;
+            video.currentTime = frameCount / fps;
             requestAnimationFrame(drawFrame);
           } else {
             mediaRecorder.stop();
           }
         };
         
-        video.play();
+        mediaRecorder.start();
+        video.currentTime = 0;
         drawFrame();
       };
       
       video.onerror = () => reject(new Error('Failed to process video'));
+      video.muted = true; // Ensure video is muted during processing
       video.src = URL.createObjectURL(file);
+      video.load();
     });
   };
 
@@ -109,10 +120,12 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         toast.info('Processing video to remove sound...');
         try {
           fileToUpload = await processVideoWithoutSound(file);
+          console.log('Video processed successfully, sound removed');
         } catch (error) {
           console.error('Error processing video:', error);
-          toast.error('Failed to process video, uploading original');
-          fileToUpload = file;
+          toast.error('Failed to process video. Please try again.');
+          setProcessingVideo(false);
+          return;
         }
       }
       
@@ -154,6 +167,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
       
       // Call the parent handler
       onReelUpload(syntheticEvent as any);
+      
+      toast.success('Video uploaded successfully!');
       
     } catch (error) {
       console.error('Error uploading video:', error);
@@ -198,6 +213,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
                 id="remove-sound" 
                 checked={removeSound}
                 onCheckedChange={(checked) => setRemoveSound(checked as boolean)}
+                disabled={processingVideo}
               />
               <label htmlFor="remove-sound" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Remove sound from video
@@ -213,6 +229,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
                   style={{ maxHeight: '400px' }}
                   preload="metadata"
                   playsInline
+                  muted={removeSound}
                   onError={(e) => {
                     console.error('Video failed to load:', newReel, e);
                   }}
@@ -232,6 +249,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
               placeholder="Add a caption..."
               value={newReelCaption}
               onChange={(e) => onChangeCaption(e.target.value)}
+              disabled={processingVideo}
             />
             
             <Button 
