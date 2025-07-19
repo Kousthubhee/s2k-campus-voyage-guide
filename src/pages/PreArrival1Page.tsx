@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -8,10 +8,13 @@ import { ReminderButton } from "@/components/ReminderButton";
 import { VisaSchedulerDialog } from "@/components/VisaSchedulerDialog";
 import { PageTitle } from "@/components/PageTitle";
 import { CheckboxItem } from "@/components/CheckboxItem";
-import { DocumentUploadButton } from "@/components/DocumentUploadButton";
+import { EnhancedDocumentUploadButton } from "@/components/EnhancedDocumentUploadButton";
+import { DocumentPreviewDialog } from "@/components/DocumentPreviewDialog";
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProfileType {
   name: string;
@@ -36,17 +39,56 @@ interface ReminderItem {
   note: string;
 }
 
+interface UploadedDocument {
+  name: string;
+  url: string;
+  type: string;
+}
+
+interface PageProgress {
+  completedSteps: string[];
+  documentUploads: { [key: string]: UploadedDocument[] };
+  documentChecks: { [key: string]: boolean };
+}
+
 export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: PreArrival1PageProps) => {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [openSections, setOpenSections] = useState<string[]>([]);
   const [reminders, setReminders] = useState<{ [id: string]: ReminderItem[] }>({});
   const [appointments, setAppointments] = useState<{ [id: string]: { date: string; location: string } }>({});
   const [documentChecks, setDocumentChecks] = useState<{ [key: string]: boolean }>({});
-  const [uploadedDocs, setUploadedDocs] = useState<{ [key: string]: boolean }>({});
+  const [documentUploads, setDocumentUploads] = useState<{ [key: string]: UploadedDocument[] }>({});
   const [showReminderDialog, setShowReminderDialog] = useState<string | null>(null);
   const [newReminderDate, setNewReminderDate] = useState('');
   const [newReminderNote, setNewReminderNote] = useState('');
+  const [previewDocument, setPreviewDocument] = useState<UploadedDocument | null>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem(`preArrival1Progress_${user?.id || 'guest'}`);
+    if (savedProgress) {
+      try {
+        const progress: PageProgress = JSON.parse(savedProgress);
+        setCompletedSteps(progress.completedSteps || []);
+        setDocumentUploads(progress.documentUploads || {});
+        setDocumentChecks(progress.documentChecks || {});
+      } catch (error) {
+        console.error('Error loading progress:', error);
+      }
+    }
+  }, [user]);
+
+  // Save progress to localStorage whenever state changes
+  useEffect(() => {
+    const progress: PageProgress = {
+      completedSteps,
+      documentUploads,
+      documentChecks
+    };
+    localStorage.setItem(`preArrival1Progress_${user?.id || 'guest'}`, JSON.stringify(progress));
+  }, [completedSteps, documentUploads, documentChecks, user]);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => 
@@ -249,14 +291,23 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
     setDocumentChecks(prev => ({ ...prev, [key]: checked }));
   };
 
-  const handleDocumentUpload = (itemId: string, docIndex: number, fileName: string) => {
+  const handleDocumentUpload = (itemId: string, docIndex: number, documents: UploadedDocument[]) => {
     const key = `${itemId}-${docIndex}`;
-    setUploadedDocs(prev => ({ ...prev, [key]: true }));
+    setDocumentUploads(prev => ({ ...prev, [key]: documents }));
+    
+    // Auto-check the checkbox when documents are uploaded
+    if (documents.length > 0) {
+      setDocumentChecks(prev => ({ ...prev, [key]: true }));
+    }
   };
 
-  const handleStepComplete = (stepId: string) => {
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps([...completedSteps, stepId]);
+  const handleStepComplete = (stepId: string, isCompleted: boolean) => {
+    if (isCompleted) {
+      if (!completedSteps.includes(stepId)) {
+        setCompletedSteps([...completedSteps, stepId]);
+      }
+    } else {
+      setCompletedSteps(completedSteps.filter(id => id !== stepId));
     }
   };
 
@@ -277,6 +328,10 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
       ...prev,
       [itemId]: prev[itemId]?.filter((_, i) => i !== index) || []
     }));
+  };
+
+  const handlePreviewDocument = (document: UploadedDocument) => {
+    setPreviewDocument(document);
   };
 
   const allStepsCompleted = completedSteps.length === checklistItems.length;
@@ -435,7 +490,7 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                           <div className="space-y-3">
                             {item.documents.map((doc, docIndex) => {
                               const docKey = `${item.id}-${docIndex}`;
-                              const isUploaded = uploadedDocs[docKey];
+                              const uploadedDocs = documentUploads[docKey] || [];
                               return (
                                 <div key={docIndex} className="flex items-center justify-between p-3 border rounded-lg bg-white">
                                   <div className="flex items-center flex-1">
@@ -450,10 +505,11 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                                   </div>
                                   {/* Only show upload button if NOT preparation step */}
                                   {item.id !== 'preparation' && (
-                                    <DocumentUploadButton
+                                    <EnhancedDocumentUploadButton
                                       documentType={doc}
-                                      onUploadComplete={(fileName) => handleDocumentUpload(item.id, docIndex, fileName)}
-                                      isUploaded={isUploaded}
+                                      onUploadComplete={(documents) => handleDocumentUpload(item.id, docIndex, documents)}
+                                      uploadedDocuments={uploadedDocs}
+                                      onPreview={handlePreviewDocument}
                                     />
                                   )}
                                 </div>
@@ -493,17 +549,14 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                           onSet={val => setAppointments(a => ({ ...a, [item.id]: val }))}
                         />
                       )}
-                      {!isStepCompleted && (
-                        <Button 
-                          size="sm"
-                          onClick={() => handleStepComplete(item.id)}
-                        >
-                          Mark Complete
-                        </Button>
-                      )}
-                      {isStepCompleted && (
-                        <span className="text-green-600 text-sm font-medium">Completed ✓</span>
-                      )}
+                      <Button 
+                        size="sm"
+                        variant={isStepCompleted ? "outline" : "default"}
+                        onClick={() => handleStepComplete(item.id, !isStepCompleted)}
+                        className={isStepCompleted ? "text-green-600 border-green-600 hover:bg-green-50" : ""}
+                      >
+                        {isStepCompleted ? "Completed ✓" : "Mark Complete"}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -550,6 +603,13 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Document Preview Dialog */}
+      <DocumentPreviewDialog
+        isOpen={previewDocument !== null}
+        onClose={() => setPreviewDocument(null)}
+        document={previewDocument}
+      />
 
       {allStepsCompleted && !isCompleted && (
         <Card className="mt-8 bg-green-50 border-green-200">
