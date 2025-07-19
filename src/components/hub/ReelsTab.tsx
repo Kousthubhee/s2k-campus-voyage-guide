@@ -48,8 +48,15 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        // Create a MediaStream from canvas
-        const stream = canvas.captureStream(30);
+        // Create a MediaStream from canvas (this naturally excludes audio)
+        const stream = canvas.captureStream(25); // Reduced FPS for better performance
+        
+        // Ensure the stream has no audio tracks
+        const audioTracks = stream.getAudioTracks();
+        audioTracks.forEach(track => {
+          stream.removeTrack(track);
+          track.stop();
+        });
         
         // Use MediaRecorder to record the silent video
         const mediaRecorder = new MediaRecorder(stream, {
@@ -66,30 +73,29 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         
         mediaRecorder.onstop = () => {
           const blob = new Blob(chunks, { type: 'video/webm' });
-          const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webm'), {
+          const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '_no_sound.webm'), {
             type: 'video/webm'
           });
           resolve(processedFile);
         };
         
-        let frameCount = 0;
-        const fps = 30;
-        const duration = video.duration * 1000; // Convert to milliseconds
-        const totalFrames = Math.floor(duration / (1000 / fps));
+        let currentTime = 0;
+        const fps = 25;
+        const frameInterval = 1 / fps;
+        const duration = video.duration;
         
         const drawFrame = () => {
-          if (frameCount < totalFrames && !video.ended) {
+          if (currentTime < duration) {
+            video.currentTime = currentTime;
             ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-            frameCount++;
-            video.currentTime = frameCount / fps;
-            requestAnimationFrame(drawFrame);
+            currentTime += frameInterval;
+            setTimeout(drawFrame, 1000 / fps);
           } else {
             mediaRecorder.stop();
           }
         };
         
         mediaRecorder.start();
-        video.currentTime = 0;
         drawFrame();
       };
       
