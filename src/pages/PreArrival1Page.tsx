@@ -98,24 +98,34 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
         if (documents && documents.length > 0) {
           const documentsByType: { [key: string]: UploadedDocument[] } = {};
           
-          documents.forEach(doc => {
-            // Get public URL for each document
-            const { data: { publicUrl } } = supabase.storage
-              .from('documents')
-              .getPublicUrl(doc.file_url || '');
+          // Process documents and get signed URLs
+          for (const doc of documents) {
+            try {
+              // Get signed URL for each document
+              const { data: signedUrlData, error: urlError } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(doc.file_url || '', 3600); // 1 hour expiry
 
-            const uploadedDoc: UploadedDocument = {
-              name: doc.file_name || doc.name,
-              url: publicUrl,
-              type: doc.file_name?.split('.').pop()?.toLowerCase() === 'pdf' ? 'application/pdf' : 'image/jpeg'
-            };
+              if (urlError) {
+                console.error('Error creating signed URL for', doc.file_name, ':', urlError);
+                continue;
+              }
 
-            // Group by document type
-            if (!documentsByType[doc.type]) {
-              documentsByType[doc.type] = [];
+              const uploadedDoc: UploadedDocument = {
+                name: doc.file_name || doc.name,
+                url: signedUrlData.signedUrl,
+                type: doc.file_name?.split('.').pop()?.toLowerCase() === 'pdf' ? 'application/pdf' : 'image/jpeg'
+              };
+
+              // Group by document type
+              if (!documentsByType[doc.type]) {
+                documentsByType[doc.type] = [];
+              }
+              documentsByType[doc.type].push(uploadedDoc);
+            } catch (docError) {
+              console.error('Error processing document:', doc.file_name, docError);
             }
-            documentsByType[doc.type].push(uploadedDoc);
-          });
+          }
 
           setDocumentUploads(documentsByType);
         }

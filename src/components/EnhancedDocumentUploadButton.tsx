@@ -72,6 +72,24 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
     await uploadFiles(files);
   };
 
+  const getSignedUrl = async (filePath: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        throw error;
+      }
+
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Failed to get signed URL:', error);
+      throw error;
+    }
+  };
+
   const uploadFiles = async (files: File[]) => {
     setUploading(true);
     const uploadedDocs: UploadedDocument[] = [];
@@ -90,10 +108,8 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
           throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
         }
 
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('documents')
-          .getPublicUrl(fileName);
+        // Get signed URL for preview
+        const signedUrl = await getSignedUrl(fileName);
 
         // Save to database
         const { error: dbError } = await supabase
@@ -116,7 +132,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
 
         uploadedDocs.push({
           name: file.name,
-          url: publicUrl,
+          url: signedUrl,
           type: file.type
         });
       }
@@ -190,6 +206,32 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
     }
   };
 
+  const handlePreview = async (doc: UploadedDocument) => {
+    try {
+      // Get fresh signed URL for preview
+      const { data: documents } = await supabase
+        .from('user_documents')
+        .select('file_url')
+        .eq('user_id', user!.id)
+        .eq('type', documentType)
+        .eq('file_name', doc.name)
+        .single();
+
+      if (documents?.file_url) {
+        const freshSignedUrl = await getSignedUrl(documents.file_url);
+        const updatedDoc = { ...doc, url: freshSignedUrl };
+        onPreview?.(updatedDoc);
+      }
+    } catch (error) {
+      console.error('Error getting preview URL:', error);
+      toast({
+        title: "Preview error",
+        description: "Failed to load document preview.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
@@ -229,7 +271,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onPreview?.(doc)}
+                onClick={() => handlePreview(doc)}
                 className="p-0 h-auto text-blue-600 hover:text-blue-800 hover:underline font-normal"
               >
                 <Eye className="h-3 w-3 mr-1" />
