@@ -1,7 +1,6 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Upload, Check, X, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,12 +26,9 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
   onPreview
 }) => {
   const [uploading, setUploading] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-
-  const hasUploads = uploadedDocuments.length > 0;
 
   const handleUploadClick = () => {
     if (!user) {
@@ -73,11 +69,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       return;
     }
 
-    if (files.length === 1) {
-      await uploadFiles(files);
-    } else {
-      setPendingFiles(files);
-    }
+    await uploadFiles(files);
   };
 
   const uploadFiles = async (files: File[]) => {
@@ -132,7 +124,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       // Combine with existing documents instead of replacing
       const allDocuments = [...uploadedDocuments, ...uploadedDocs];
       onUploadComplete?.(allDocuments);
-      setPendingFiles([]);
       
       toast({
         title: "Upload successful",
@@ -148,14 +139,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
     } finally {
       setUploading(false);
     }
-  };
-
-  const confirmMultipleUpload = () => {
-    uploadFiles(pendingFiles);
-  };
-
-  const cancelMultipleUpload = () => {
-    setPendingFiles([]);
   };
 
   const handleRemove = async (docToRemove: UploadedDocument) => {
@@ -204,7 +187,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <input
           ref={fileInputRef}
@@ -226,7 +209,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
           {uploading ? 'Uploading...' : 'Upload Files'}
         </Button>
 
-        {hasUploads && (
+        {uploadedDocuments.length > 0 && (
           <div className="flex items-center gap-1 text-green-600 text-sm">
             <Check className="h-4 w-4" />
             <span>{uploadedDocuments.length} file(s) uploaded</span>
@@ -234,71 +217,33 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
         )}
       </div>
 
-      {/* Show uploaded files */}
-      {hasUploads && (
-        <div className="space-y-2 mt-3 p-3 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-700">Uploaded Files:</h4>
-          <div className="space-y-2">
-            {uploadedDocuments.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
-                <span className="text-sm text-gray-700 truncate flex-1">{doc.name}</span>
-                <div className="flex items-center gap-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onPreview?.(doc)}
-                    className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-                    title={`Preview ${doc.name}`}
-                  >
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemove(doc)}
-                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                    title={`Remove ${doc.name}`}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Show uploaded files directly below */}
+      {uploadedDocuments.length > 0 && (
+        <div className="space-y-1 ml-6">
+          {uploadedDocuments.map((doc, index) => (
+            <div key={index} className="flex items-center gap-2 text-sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPreview?.(doc)}
+                className="p-0 h-auto text-blue-600 hover:text-blue-800 hover:underline font-normal"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                {doc.name}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRemove(doc)}
+                className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                title={`Remove ${doc.name}`}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
         </div>
       )}
-
-      {/* Multiple Upload Confirmation Dialog */}
-      <Dialog open={pendingFiles.length > 0} onOpenChange={() => setPendingFiles([])}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Multiple Upload</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>You selected {pendingFiles.length} file(s):</p>
-            <ul className="list-disc ml-4 space-y-1 max-h-32 overflow-y-auto">
-              {pendingFiles.map((file, index) => (
-                <li key={index} className="text-sm">{file.name}</li>
-              ))}
-            </ul>
-            <p>Do you want to upload all these files?</p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={cancelMultipleUpload}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmMultipleUpload}
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading...' : 'Upload All'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
