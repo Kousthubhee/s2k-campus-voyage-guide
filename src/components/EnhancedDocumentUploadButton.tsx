@@ -138,6 +138,10 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       });
     } finally {
       setUploading(false);
+      // Clear the file input to allow uploading the same file again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
