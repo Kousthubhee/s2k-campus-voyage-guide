@@ -27,8 +27,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
   onPreview
 }) => {
   const [uploading, setUploading] = useState(false);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [uploadMode, setUploadMode] = useState<'single' | 'multiple' | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -45,12 +43,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       });
       return;
     }
-    setShowUploadDialog(true);
-  };
-
-  const handleUploadModeSelect = (mode: 'single' | 'multiple') => {
-    setUploadMode(mode);
-    setShowUploadDialog(false);
     fileInputRef.current?.click();
   };
 
@@ -81,9 +73,9 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       return;
     }
 
-    if (uploadMode === 'single' && files.length === 1) {
+    if (files.length === 1) {
       await uploadFiles(files);
-    } else if (uploadMode === 'multiple') {
+    } else {
       setPendingFiles(files);
     }
   };
@@ -102,7 +94,8 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
           .upload(fileName, file);
 
         if (uploadError) {
-          throw new Error('Failed to upload file to storage');
+          console.error('Storage upload error:', uploadError);
+          throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
         }
 
         // Get public URL
@@ -124,8 +117,9 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
           });
 
         if (dbError) {
+          console.error('Database insert error:', dbError);
           await supabase.storage.from('documents').remove([fileName]);
-          throw new Error('Failed to save document information');
+          throw new Error(`Failed to save ${file.name} information`);
         }
 
         uploadedDocs.push({
@@ -135,7 +129,9 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
         });
       }
 
-      onUploadComplete?.(uploadedDocs);
+      // Combine with existing documents instead of replacing
+      const allDocuments = [...uploadedDocuments, ...uploadedDocs];
+      onUploadComplete?.(allDocuments);
       setPendingFiles([]);
       
       toast({
@@ -151,7 +147,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
       });
     } finally {
       setUploading(false);
-      setUploadMode(null);
     }
   };
 
@@ -161,7 +156,6 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
 
   const cancelMultipleUpload = () => {
     setPendingFiles([]);
-    setUploadMode(null);
   };
 
   const handleRemove = async (docToRemove: UploadedDocument) => {
@@ -210,96 +204,69 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        multiple={uploadMode === 'multiple'}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      
-      {hasUploads ? (
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-green-600 text-sm">
-            <Check className="h-4 w-4" />
-            <span>{uploadedDocuments.length} file(s)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {uploadedDocuments.map((doc, index) => (
-              <div key={index} className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onPreview?.(doc)}
-                  className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-                  title={`Preview ${doc.name}`}
-                >
-                  <Eye className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(doc)}
-                  className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                  title={`Remove ${doc.name}`}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleUploadClick}
-            disabled={uploading}
-            className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-            title="Add more documents"
-          >
-            <Upload className="h-3 w-3" />
-          </Button>
-        </div>
-      ) : (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        
         <Button
           variant="ghost"
           size="sm"
           onClick={handleUploadClick}
           disabled={uploading}
-          className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
-          title={`Upload ${documentType}`}
+          className="flex items-center gap-1 text-blue-500 hover:text-blue-700"
         >
-          <Upload className="h-3 w-3" />
+          <Upload className="h-4 w-4" />
+          {uploading ? 'Uploading...' : 'Upload Files'}
         </Button>
-      )}
 
-      {/* Upload Mode Selection Dialog */}
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Choose Upload Mode</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>Do you want to upload single or multiple files?</p>
-            <div className="flex gap-4">
-              <Button
-                onClick={() => handleUploadModeSelect('single')}
-                className="flex-1"
-              >
-                Single File
-              </Button>
-              <Button
-                onClick={() => handleUploadModeSelect('multiple')}
-                variant="outline"
-                className="flex-1"
-              >
-                Multiple Files
-              </Button>
-            </div>
+        {hasUploads && (
+          <div className="flex items-center gap-1 text-green-600 text-sm">
+            <Check className="h-4 w-4" />
+            <span>{uploadedDocuments.length} file(s) uploaded</span>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
+
+      {/* Show uploaded files */}
+      {hasUploads && (
+        <div className="space-y-2 mt-3 p-3 bg-gray-50 rounded-lg">
+          <h4 className="text-sm font-medium text-gray-700">Uploaded Files:</h4>
+          <div className="space-y-2">
+            {uploadedDocuments.map((doc, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                <span className="text-sm text-gray-700 truncate flex-1">{doc.name}</span>
+                <div className="flex items-center gap-1 ml-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onPreview?.(doc)}
+                    className="h-6 w-6 p-0 text-blue-500 hover:text-blue-700"
+                    title={`Preview ${doc.name}`}
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemove(doc)}
+                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                    title={`Remove ${doc.name}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Multiple Upload Confirmation Dialog */}
       <Dialog open={pendingFiles.length > 0} onOpenChange={() => setPendingFiles([])}>
@@ -309,7 +276,7 @@ export const EnhancedDocumentUploadButton: React.FC<EnhancedDocumentUploadButton
           </DialogHeader>
           <div className="space-y-4">
             <p>You selected {pendingFiles.length} file(s):</p>
-            <ul className="list-disc ml-4 space-y-1">
+            <ul className="list-disc ml-4 space-y-1 max-h-32 overflow-y-auto">
               {pendingFiles.map((file, index) => (
                 <li key={index} className="text-sm">{file.name}</li>
               ))}

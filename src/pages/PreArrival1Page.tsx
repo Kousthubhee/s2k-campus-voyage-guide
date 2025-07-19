@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +77,54 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
         console.error('Error loading progress:', error);
       }
     }
+  }, [user]);
+
+  // Load existing documents from Supabase on mount
+  useEffect(() => {
+    const loadExistingDocuments = async () => {
+      if (!user) return;
+
+      try {
+        const { data: documents, error } = await supabase
+          .from('user_documents')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error loading documents:', error);
+          return;
+        }
+
+        if (documents && documents.length > 0) {
+          const documentsByType: { [key: string]: UploadedDocument[] } = {};
+          
+          documents.forEach(doc => {
+            // Get public URL for each document
+            const { data: { publicUrl } } = supabase.storage
+              .from('documents')
+              .getPublicUrl(doc.file_url || '');
+
+            const uploadedDoc: UploadedDocument = {
+              name: doc.file_name || doc.name,
+              url: publicUrl,
+              type: doc.file_name?.split('.').pop()?.toLowerCase() === 'pdf' ? 'application/pdf' : 'image/jpeg'
+            };
+
+            // Group by document type
+            if (!documentsByType[doc.type]) {
+              documentsByType[doc.type] = [];
+            }
+            documentsByType[doc.type].push(uploadedDoc);
+          });
+
+          setDocumentUploads(documentsByType);
+        }
+      } catch (error) {
+        console.error('Error loading existing documents:', error);
+      }
+    };
+
+    loadExistingDocuments();
   }, [user]);
 
   // Save progress to localStorage whenever state changes
@@ -492,31 +539,34 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                               const docKey = `${item.id}-${docIndex}`;
                               const uploadedDocs = documentUploads[docKey] || [];
                               return (
-                                <div key={docIndex} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                                  <div className="flex items-center flex-1">
-                                    <CheckboxItem
-                                      id={`${item.id}-doc-${docIndex}`}
-                                      checked={documentChecks[docKey] || false}
-                                      onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
-                                      className="text-blue-800 mr-3"
-                                    >
-                                      {doc}
-                                    </CheckboxItem>
+                                <div key={docIndex} className="space-y-2">
+                                  <div className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                                    <div className="flex items-center flex-1">
+                                      <CheckboxItem
+                                        id={`${item.id}-doc-${docIndex}`}
+                                        checked={documentChecks[docKey] || false}
+                                        onCheckedChange={(checked) => handleDocumentCheck(item.id, docIndex, checked)}
+                                        className="text-blue-800 mr-3"
+                                      >
+                                        {doc}
+                                      </CheckboxItem>
+                                    </div>
+                                    {/* Show upload button for all steps except preparation */}
+                                    {item.id !== 'preparation' && (
+                                      <EnhancedDocumentUploadButton
+                                        documentType={docKey}
+                                        onUploadComplete={(documents) => handleDocumentUpload(item.id, docIndex, documents)}
+                                        uploadedDocuments={uploadedDocs}
+                                        onPreview={handlePreviewDocument}
+                                      />
+                                    )}
                                   </div>
-                                  {/* Only show upload button if NOT preparation step */}
-                                  {item.id !== 'preparation' && (
-                                    <EnhancedDocumentUploadButton
-                                      documentType={doc}
-                                      onUploadComplete={(documents) => handleDocumentUpload(item.id, docIndex, documents)}
-                                      uploadedDocuments={uploadedDocs}
-                                      onPreview={handlePreviewDocument}
-                                    />
-                                  )}
                                 </div>
                               );
                             })}
                           </div>
                         </div>
+                        
                         <div className="bg-green-50 p-4 rounded-lg">
                           <h4 className="font-semibold text-green-900 mb-3">🔄 Step-by-Step Process:</h4>
                           <ol className="space-y-2">
@@ -551,11 +601,11 @@ export const PreArrival1Page = ({ onBack, onComplete, isCompleted, profile }: Pr
                       )}
                       <Button 
                         size="sm"
-                        variant={isStepCompleted ? "outline" : "default"}
+                        variant={isStepCompleted ? "default" : "outline"}
                         onClick={() => handleStepComplete(item.id, !isStepCompleted)}
-                        className={isStepCompleted ? "text-green-600 border-green-600 hover:bg-green-50" : ""}
+                        className={isStepCompleted ? "bg-green-600 hover:bg-green-700 text-white" : "border-green-600 text-green-600 hover:bg-green-50"}
                       >
-                        {isStepCompleted ? "Completed ✓" : "Mark Complete"}
+                        {isStepCompleted ? "✓ Completed" : "Mark Complete"}
                       </Button>
                     </div>
                   </div>
