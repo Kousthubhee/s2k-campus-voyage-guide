@@ -49,33 +49,42 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
       
       // Create a unique filename
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      // Upload to Supabase storage
+      // Upload to the new hub-media bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(`videos/${fileName}`, file, {
+        .from('hub-media')
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        toast.error('Failed to upload video');
+        toast.error('Failed to upload video: ' + uploadError.message);
         return;
       }
 
       console.log('Upload successful:', uploadData);
 
-      // Get the public URL
+      // Get the public URL since hub-media bucket is public
       const { data: urlData } = supabase.storage
-        .from('documents')
-        .getPublicUrl(`videos/${fileName}`);
+        .from('hub-media')
+        .getPublicUrl(fileName);
 
       console.log('Public URL:', urlData.publicUrl);
       
-      // Call the parent handler with the original event
-      onReelUpload(e);
+      // Create a synthetic event to pass the URL back
+      const syntheticEvent = {
+        ...e,
+        target: {
+          ...e.target,
+          files: [Object.assign(file, { uploadedUrl: urlData.publicUrl })]
+        }
+      };
+      
+      // Call the parent handler
+      onReelUpload(syntheticEvent as any);
       
     } catch (error) {
       console.error('Error uploading video:', error);

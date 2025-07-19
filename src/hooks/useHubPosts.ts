@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -156,32 +157,58 @@ export const useHubPosts = () => {
     }
 
     try {
+      console.log('Attempting to like post:', postId, 'by user:', user.id);
+
       // Check if user already liked the post
-      const { data: existingLike } = await supabase
+      const { data: existingLike, error: checkError } = await supabase
         .from('hub_likes')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
 
       if (existingLike) {
         // Unlike the post
-        await supabase
+        console.log('Removing like...');
+        const { error: deleteError } = await supabase
           .from('hub_likes')
           .delete()
           .eq('post_id', postId)
           .eq('user_id', user.id);
+
+        if (deleteError) throw deleteError;
+        console.log('Like removed successfully');
       } else {
         // Like the post
-        await supabase
+        console.log('Adding like...');
+        const { error: insertError } = await supabase
           .from('hub_likes')
-          .insert({ post_id: postId, user_id: user.id });
+          .insert({ 
+            post_id: postId, 
+            user_id: user.id 
+          });
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
+        }
+        console.log('Like added successfully');
       }
 
       await fetchPosts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error liking post:', error);
-      toast.error('Failed to update like');
+      if (error.message?.includes('duplicate key')) {
+        // Handle duplicate key error gracefully
+        console.log('Like already exists, trying to refresh posts...');
+        await fetchPosts();
+      } else {
+        toast.error('Failed to update like');
+      }
     }
   };
 

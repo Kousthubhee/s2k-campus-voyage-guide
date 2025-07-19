@@ -130,9 +130,17 @@ export const HubPage = () => {
   const handleReelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      const videoUrl = URL.createObjectURL(file);
-      console.log('Video uploaded, creating URL:', videoUrl);
-      setNewReel(videoUrl);
+      // Check if the file has uploadedUrl from our upload handler
+      const uploadedUrl = (file as any).uploadedUrl;
+      if (uploadedUrl) {
+        console.log('Video uploaded, using URL:', uploadedUrl);
+        setNewReel(uploadedUrl);
+      } else {
+        // Fallback to creating object URL for preview
+        const videoUrl = URL.createObjectURL(file);
+        console.log('Video uploaded, creating URL:', videoUrl);
+        setNewReel(videoUrl);
+      }
     }
   };
 
