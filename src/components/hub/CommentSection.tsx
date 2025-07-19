@@ -44,14 +44,6 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
       );
     }
 
-    if (comments.length === 0) {
-      return (
-        <div className="text-center text-gray-500 py-4">
-          No comments yet. Be the first to comment!
-        </div>
-      );
-    }
-
     return comments.map((comment) => (
       <HubCommentItem
         key={comment.id}
@@ -66,9 +58,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   return (
     <div className="space-y-4">
       {/* Comments List */}
-      <div className="space-y-3">
-        {commentsList}
-      </div>
+      {comments.length > 0 && (
+        <div className="space-y-3">
+          {commentsList}
+        </div>
+      )}
       
       {/* Add Comment */}
       <div className="flex gap-2">

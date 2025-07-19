@@ -51,10 +51,34 @@ export const useHubPosts = () => {
         profilesMap.set(profile.user_id, profile);
       });
 
+      // Get actual like counts for each post
+      const postIds = postsData?.map(post => post.id) || [];
+      const { data: likesData } = await supabase
+        .from('hub_likes')
+        .select('post_id')
+        .in('post_id', postIds);
+
+      // Get actual comment counts for each post
+      const { data: commentsData } = await supabase
+        .from('hub_comments')
+        .select('post_id')
+        .in('post_id', postIds);
+
+      // Create count maps
+      const likeCounts = new Map();
+      likesData?.forEach(like => {
+        likeCounts.set(like.post_id, (likeCounts.get(like.post_id) || 0) + 1);
+      });
+
+      const commentCounts = new Map();
+      commentsData?.forEach(comment => {
+        commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
+      });
+
       const transformedPosts: HubPost[] = (postsData || []).map(post => ({
         ...post,
-        likes_count: post.likes_count || 0,
-        comments_count: post.comments_count || 0,
+        likes_count: likeCounts.get(post.id) || 0,
+        comments_count: commentCounts.get(post.id) || 0,
         poll_options: post.poll_options ? 
           (Array.isArray(post.poll_options) ? post.poll_options : []) as Array<{ text: string; votes: number; voters?: string[] }> : 
           undefined,
@@ -199,16 +223,11 @@ export const useHubPosts = () => {
         console.log('Like added successfully');
       }
 
+      // Force refresh posts to get updated counts
       await fetchPosts();
     } catch (error: any) {
       console.error('Error liking post:', error);
-      if (error.message?.includes('duplicate key')) {
-        // Handle duplicate key error gracefully
-        console.log('Like already exists, trying to refresh posts...');
-        await fetchPosts();
-      } else {
-        toast.error('Failed to update like');
-      }
+      toast.error('Failed to update like');
     }
   };
 

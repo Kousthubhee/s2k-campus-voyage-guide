@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { CommentSection } from './CommentSection';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ReelsTabProps {
   reels: HubPost[];
@@ -34,6 +35,59 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   onDelete
 }) => {
   const { user } = useAuth();
+  const [removeSound, setRemoveSound] = useState(false);
+  const [processingVideo, setProcessingVideo] = useState(false);
+
+  const processVideoWithoutSound = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const stream = canvas.captureStream(30); // 30 FPS
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'video/webm;codecs=vp8'
+        });
+        
+        const chunks: BlobPart[] = [];
+        
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webm'), {
+            type: 'video/webm'
+          });
+          resolve(processedFile);
+        };
+        
+        mediaRecorder.start();
+        
+        const drawFrame = () => {
+          if (!video.ended && !video.paused) {
+            ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(drawFrame);
+          } else {
+            mediaRecorder.stop();
+          }
+        };
+        
+        video.play();
+        drawFrame();
+      };
+      
+      video.onerror = () => reject(new Error('Failed to process video'));
+      video.src = URL.createObjectURL(file);
+    });
+  };
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,16 +99,31 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
     }
 
     try {
+      setProcessingVideo(true);
       console.log('Uploading video file:', file.name, file.size);
       
+      let fileToUpload = file;
+      
+      // Process video to remove sound if requested
+      if (removeSound) {
+        toast.info('Processing video to remove sound...');
+        try {
+          fileToUpload = await processVideoWithoutSound(file);
+        } catch (error) {
+          console.error('Error processing video:', error);
+          toast.error('Failed to process video, uploading original');
+          fileToUpload = file;
+        }
+      }
+      
       // Create a unique filename
-      const fileExt = file.name.split('.').pop();
+      const fileExt = fileToUpload.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      // Upload to the new hub-media bucket
+      // Upload to the hub-media bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('hub-media')
-        .upload(fileName, file, {
+        .upload(fileName, fileToUpload, {
           cacheControl: '3600',
           upsert: false
         });
@@ -79,7 +148,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         ...e,
         target: {
           ...e.target,
-          files: [Object.assign(file, { uploadedUrl: urlData.publicUrl })]
+          files: [Object.assign(fileToUpload, { uploadedUrl: urlData.publicUrl })]
         }
       };
       
@@ -89,6 +158,8 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
     } catch (error) {
       console.error('Error uploading video:', error);
       toast.error('Failed to upload video');
+    } finally {
+      setProcessingVideo(false);
     }
   };
 
@@ -111,13 +182,25 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
                 onChange={handleVideoUpload}
                 className="hidden"
                 id="video-upload"
+                disabled={processingVideo}
               />
               <label
                 htmlFor="video-upload"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors"
+                className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${processingVideo ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Upload className="h-4 w-4" />
-                Upload Video
+                {processingVideo ? 'Processing...' : 'Upload Video'}
+              </label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="remove-sound" 
+                checked={removeSound}
+                onCheckedChange={(checked) => setRemoveSound(checked as boolean)}
+              />
+              <label htmlFor="remove-sound" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Remove sound from video
               </label>
             </div>
             
@@ -153,7 +236,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
             
             <Button 
               onClick={onPublish} 
-              disabled={!newReel || !newReelCaption.trim()}
+              disabled={!newReel || !newReelCaption.trim() || processingVideo}
               className="w-full"
             >
               Share Reel
