@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -138,10 +139,17 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
+      {/* Dynamic background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/15 to-pink-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 right-1/3 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+      
       {/* Hero Section */}
-      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center bg-white">
-        <div className="max-w-6xl mx-auto text-center w-full">
+      <section className="px-4 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6 text-sm font-medium">
             <Heart className="h-4 w-4 mr-2 text-red-500" />
             Built by Indian Students, for Indian Students
@@ -185,7 +193,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Stats Section */}
-      <section className="px-4 py-12 bg-gray-50">
+      <section className="px-4 py-12 bg-white/50">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -205,7 +213,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Features Section */}
-      <section className="px-4 py-16 bg-white">
+      <section className="px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
@@ -236,7 +244,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Why Students Trust Us Section */}
-      <section className="px-4 py-16 bg-gray-50">
+      <section className="px-4 py-16 bg-white/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Students Trust Us</h2>
@@ -264,7 +272,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Live Journey Snapshots Section */}
-      <section className="px-4 py-16 bg-white">
+      <section className="px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Journey Snapshots</h2>
@@ -294,7 +302,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="px-4 py-16 bg-gray-50">
+      <section className="px-4 py-16 bg-white/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Students Say</h2>
@@ -325,7 +333,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-16 pb-24 bg-white">
+      <section className="px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
           <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 text-white">
             <CardContent className="py-12">

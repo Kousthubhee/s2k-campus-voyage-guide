@@ -71,20 +71,20 @@ export const PostArrivalPage = ({ onBack, onComplete, isCompleted }: PostArrival
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-background min-h-screen">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center mb-6">
         <Button
           variant="ghost"
           onClick={handleBack}
-          className="mr-4 text-foreground hover:bg-accent hover:text-accent-foreground"
+          className="mr-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Checklist
         </Button>
-        <h1 className="text-3xl font-bold text-foreground">Post-Arrival Tasks</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Post-Arrival Tasks</h1>
       </div>
       
-      <p className="text-lg text-muted-foreground mb-8">
+      <p className="text-lg text-gray-600 mb-8">
         Essential tasks to complete after arriving in France to ensure a smooth transition.
       </p>
 

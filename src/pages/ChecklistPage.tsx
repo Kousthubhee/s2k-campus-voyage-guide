@@ -90,14 +90,14 @@ export const ChecklistPage = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-lg text-foreground">Loading your progress...</div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading your progress...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-background min-h-screen">
+    <>
       <ChecklistModule
         modules={checklistModules}
         userProgress={enhancedUserProgress}
@@ -119,6 +119,6 @@ export const ChecklistPage = ({
           markAsChanged();
         }}
       />
-    </div>
+    </>
   );
 };
