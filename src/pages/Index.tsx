@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -308,7 +307,7 @@ const Index = () => {
                   } />
                   <Route path="/qa" element={
                     <div className="space-y-6">
-                      <h1 className="text-3xl font-bold">AI Assistant</h1>
+                      <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
                       <ChatInterface />
                     </div>
                   } />
