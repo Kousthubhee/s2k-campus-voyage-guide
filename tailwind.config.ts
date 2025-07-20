@@ -62,6 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for the dark theme
+				'dark-bg': '220 13% 8%',
+				'dark-card': '220 13% 12%',
+				'violet': {
+					DEFAULT: '262 83% 58%',
+					light: '262 83% 68%',
+					dark: '262 83% 48%'
+				},
+				'blue': {
+					DEFAULT: '220 91% 54%',
+					light: '220 91% 64%',
+					dark: '220 91% 44%'
 				}
 			},
 			fontFamily: {

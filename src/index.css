@@ -46,42 +46,42 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 220 13% 8%;
     --foreground: 0 0% 98%;
     
-    --card: 240 10% 3.9%;
+    --card: 220 13% 12%;
     --card-foreground: 0 0% 98%;
     
-    --popover: 240 10% 3.9%;
+    --popover: 220 13% 12%;
     --popover-foreground: 0 0% 98%;
     
-    --primary: 262 83% 58%;
+    --primary: 262 83% 68%;
     --primary-foreground: 0 0% 98%;
     
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 220 13% 16%;
     --secondary-foreground: 0 0% 98%;
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 220 13% 16%;
+    --muted-foreground: 0 0% 85%;
     
-    --accent: 240 3.7% 15.9%;
+    --accent: 220 13% 16%;
     --accent-foreground: 0 0% 98%;
     
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262 83% 58%;
+    --border: 220 13% 20%;
+    --input: 220 13% 16%;
+    --ring: 262 83% 68%;
 
-    --sidebar-background: 240 10% 3.9%;
+    --sidebar-background: 220 13% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary: 262 83% 68%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 220 13% 16%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-border: 220 13% 20%;
+    --sidebar-ring: 262 83% 68%;
   }
 }
 
@@ -100,6 +100,31 @@
     height: 100%;
     min-height: 100vh;
     @apply bg-background text-foreground;
+  }
+
+  /* Dark mode specific improvements */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  .dark * {
+    @apply border-border;
+  }
+  
+  /* Ensure all text is readable in dark mode */
+  .dark .text-gray-500,
+  .dark .text-gray-600,
+  .dark .text-gray-700,
+  .dark .text-muted-foreground {
+    @apply text-foreground/80;
+  }
+  
+  .dark .text-gray-400 {
+    @apply text-foreground/70;
+  }
+  
+  .dark .text-gray-300 {
+    @apply text-foreground/90;
   }
 }
 
@@ -155,9 +180,9 @@
   @apply bg-background;
 }
 
-/* Dark mode specific text colors */
+/* Dark mode text color overrides for better visibility */
 .dark .text-primary-violet {
-  color: hsl(262 83% 70%);
+  color: hsl(262 83% 75%);
 }
 
 .dark .text-white {
@@ -167,4 +192,27 @@
 /* Light mode primary violet */
 .text-primary-violet {
   color: hsl(262 83% 58%);
+}
+
+/* Force text colors in dark mode */
+.dark h1, 
+.dark h2, 
+.dark h3, 
+.dark h4, 
+.dark h5, 
+.dark h6 {
+  @apply text-foreground;
+}
+
+.dark p {
+  @apply text-foreground/90;
+}
+
+/* Card improvements for dark mode */
+.dark .bg-white {
+  @apply bg-card;
+}
+
+.dark .text-black {
+  @apply text-foreground;
 }
