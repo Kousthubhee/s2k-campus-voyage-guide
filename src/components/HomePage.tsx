@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -148,7 +147,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </div>
       
       {/* Hero Section */}
-      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center">
+      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-6xl mx-auto text-center w-full">
           <Badge variant="secondary" className="mb-6 text-sm font-medium">
             <Heart className="h-4 w-4 mr-2 text-red-500" />
@@ -193,7 +192,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Stats Section */}
-      <section className="px-4 py-12 bg-white/50">
+      <section className="px-4 py-12 bg-white/70 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -213,7 +212,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Features Section */}
-      <section className="px-4 py-16">
+      <section className="px-4 py-16 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
@@ -244,7 +243,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Why Students Trust Us Section */}
-      <section className="px-4 py-16 bg-white/50">
+      <section className="px-4 py-16 bg-white/70 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Students Trust Us</h2>
@@ -272,7 +271,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Live Journey Snapshots Section */}
-      <section className="px-4 py-16">
+      <section className="px-4 py-16 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Journey Snapshots</h2>
@@ -302,7 +301,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="px-4 py-16 bg-white/50">
+      <section className="px-4 py-16 bg-white/70 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Students Say</h2>
@@ -333,7 +332,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-16 pb-24">
+      <section className="px-4 py-16 pb-24 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-4xl mx-auto text-center">
           <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 text-white">
             <CardContent className="py-12">
