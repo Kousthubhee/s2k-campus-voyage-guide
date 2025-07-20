@@ -9,9 +9,6 @@ import { CommentSection } from './CommentSection';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 interface ReelsTabProps {
   reels: HubPost[];
@@ -37,67 +34,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   onDelete
 }) => {
   const { user } = useAuth();
-  const [removeSound, setRemoveSound] = useState(false);
   const [processingVideo, setProcessingVideo] = useState(false);
-  const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
-
-  const initializeFFmpeg = async (): Promise<FFmpeg> => {
-    if (ffmpeg && ffmpeg.loaded) {
-      return ffmpeg;
-    }
-
-    const ffmpegInstance = new FFmpeg();
-    
-    try {
-      const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm';
-      await ffmpegInstance.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
-      });
-      
-      setFfmpeg(ffmpegInstance);
-      return ffmpegInstance;
-    } catch (error) {
-      console.error('Failed to load FFmpeg:', error);
-      throw new Error('Failed to initialize video processor');
-    }
-  };
-
-  const removeAudioFromVideo = async (file: File): Promise<File> => {
-    try {
-      const ffmpegInstance = await initializeFFmpeg();
-      
-      // Write input file
-      const inputFileName = 'input.mp4';
-      const outputFileName = 'output_no_audio.mp4';
-      
-      await ffmpegInstance.writeFile(inputFileName, await fetchFile(file));
-      
-      // Remove audio track using FFmpeg
-      await ffmpegInstance.exec([
-        '-i', inputFileName,
-        '-c:v', 'copy',  // Copy video stream as-is
-        '-an',           // Remove audio stream
-        outputFileName
-      ]);
-      
-      // Read the output file
-      const data = await ffmpegInstance.readFile(outputFileName);
-      const outputBlob = new Blob([data], { type: 'video/mp4' });
-      
-      // Clean up
-      await ffmpegInstance.deleteFile(inputFileName);
-      await ffmpegInstance.deleteFile(outputFileName);
-      
-      return new File([outputBlob], file.name.replace(/\.[^/.]+$/, '_no_sound.mp4'), {
-        type: 'video/mp4'
-      });
-    } catch (error) {
-      console.error('Error removing audio:', error);
-      throw new Error('Failed to remove audio from video');
-    }
-  };
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,30 +49,14 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
       setProcessingVideo(true);
       console.log('Uploading video file:', file.name, file.size);
       
-      let fileToUpload = file;
-      
-      // Process video to remove sound if requested
-      if (removeSound) {
-        toast.info('Processing video to remove sound...');
-        try {
-          fileToUpload = await removeAudioFromVideo(file);
-          console.log('Video processed successfully, sound removed');
-        } catch (error) {
-          console.error('Error processing video:', error);
-          toast.error('Failed to process video. Please try again.');
-          setProcessingVideo(false);
-          return;
-        }
-      }
-      
       // Create a unique filename
-      const fileExt = fileToUpload.name.split('.').pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
       // Upload to the hub-media bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('hub-media')
-        .upload(fileName, fileToUpload, {
+        .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
@@ -160,7 +81,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
         ...e,
         target: {
           ...e.target,
-          files: [Object.assign(fileToUpload, { uploadedUrl: urlData.publicUrl })]
+          files: [Object.assign(file, { uploadedUrl: urlData.publicUrl })]
         }
       };
       
@@ -203,19 +124,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
                 className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${processingVideo ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Upload className="h-4 w-4" />
-                {processingVideo ? 'Processing...' : 'Upload Video'}
-              </label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="remove-sound" 
-                checked={removeSound}
-                onCheckedChange={(checked) => setRemoveSound(checked as boolean)}
-                disabled={processingVideo}
-              />
-              <label htmlFor="remove-sound" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Remove sound from video
+                {processingVideo ? 'Uploading...' : 'Upload Video'}
               </label>
             </div>
             
@@ -228,7 +137,6 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
                   style={{ maxHeight: '400px' }}
                   preload="metadata"
                   playsInline
-                  muted={removeSound}
                   onError={(e) => {
                     console.error('Video failed to load:', newReel, e);
                   }}
