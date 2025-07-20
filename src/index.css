@@ -81,14 +81,20 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
-    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+  html {
+    height: 100%;
     min-height: 100vh;
   }
 
+  body {
+    @apply bg-background text-foreground;
+    height: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+  }
+
   /* Ensure full viewport coverage */
-  html, body, #root {
+  #root {
     height: 100%;
     min-height: 100vh;
     background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
@@ -145,5 +151,6 @@
 
 /* Ensure the entire page maintains the gradient background */
 [data-sidebar="inset"] {
+  min-height: 100vh;
   background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
 }

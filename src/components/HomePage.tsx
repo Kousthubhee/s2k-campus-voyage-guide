@@ -148,8 +148,8 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </div>
       
       {/* Hero Section */}
-      <section className="px-4 py-16 md:py-24">
-        <div className="max-w-6xl mx-auto text-center">
+      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center">
+        <div className="max-w-6xl mx-auto text-center w-full">
           <Badge variant="secondary" className="mb-6 text-sm font-medium">
             <Heart className="h-4 w-4 mr-2 text-red-500" />
             Built by Indian Students, for Indian Students
@@ -333,7 +333,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-16">
+      <section className="px-4 py-16 pb-24">
         <div className="max-w-4xl mx-auto text-center">
           <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 text-white">
             <CardContent className="py-12">
