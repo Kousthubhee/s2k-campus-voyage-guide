@@ -82,7 +82,7 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
         </Button>
       </div>
 
-      <div className={`bg-gradient-to-r ${module.color} rounded-lg p-8 text-white mb-8`}>
+      <div className={`bg-gradient-to-r ${module.color} dark:bg-card rounded-lg p-8 text-white dark:text-white mb-8`}>
         <div className="flex items-center mb-4">
           <div className="text-6xl mr-4">{module.icon}</div>
           <div>
@@ -92,7 +92,7 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
         </div>
         
         {isCompleted && (
-          <div className="mt-4 bg-white bg-opacity-20 p-3 rounded-lg">
+          <div className="mt-4 bg-white bg-opacity-20 dark:bg-emerald-green/20 p-3 rounded-lg">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 mr-2" />
               <span>Module Completed! You earned a key 🗝️</span>
@@ -106,20 +106,20 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
           const isStepCompleted = completedSteps.includes(step.id);
           
           return (
-            <Card key={step.id} className={`${isStepCompleted ? 'ring-2 ring-green-500' : ''}`}>
+            <Card key={step.id} className={`${isStepCompleted ? 'ring-2 ring-green-500 dark:ring-emerald-green' : ''}`}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
                       isStepCompleted 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-gray-200 text-gray-600'
+                        ? 'bg-green-500 dark:bg-emerald-green text-white' 
+                        : 'bg-gray-200 dark:bg-slate-gray text-gray-600 dark:text-white'
                     }`}>
                       {isStepCompleted ? <CheckCircle className="h-4 w-4" /> : index + 1}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{step.title}</h3>
-                      <p className="text-sm text-gray-600">{step.description}</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{step.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-white/80">{step.description}</p>
                     </div>
                   </div>
                   
@@ -133,7 +133,7 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
                       </Button>
                     )}
                     {isStepCompleted && (
-                      <span className="text-green-600 text-sm font-medium">Completed</span>
+                      <span className="text-green-600 dark:text-emerald-green text-sm font-medium">Completed</span>
                     )}
                   </div>
                 </div>
@@ -145,19 +145,19 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
 
       <div className="mt-8 text-center">
         {completedSteps.length === steps.length && !isCompleted && (
-          <Card className="bg-green-50 border-green-200">
+          <Card className="bg-green-50 dark:bg-emerald-green/20 border-green-200 dark:border-emerald-green/50">
             <CardContent className="p-6">
               <div className="text-center">
-                <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-green-900 mb-2">
+                <CheckCircle className="h-12 w-12 text-green-600 dark:text-emerald-green mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-green-900 dark:text-white mb-2">
                   All Steps Completed!
                 </h3>
-                <p className="text-green-700 mb-4">
+                <p className="text-green-700 dark:text-white/80 mb-4">
                   Great job! You've finished all steps in this module.
                 </p>
                 <Button 
                   onClick={handleModuleComplete}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-emerald-green dark:hover:bg-emerald-green/90"
                 >
                  Module Completed! You earned a key 🗝️
                 </Button>
@@ -166,7 +166,7 @@ export const ModuleContent = ({ module, onBack, onComplete, isCompleted, onToast
           </Card>
         )}
         
-        <div className="mt-4 text-sm text-gray-500">
+        <div className="mt-4 text-sm text-gray-500 dark:text-white/80">
           Progress: {completedSteps.length} of {steps.length} steps completed
         </div>
       </div>

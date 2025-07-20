@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ModuleContent } from './ModuleContent';
 import { ModuleCard } from './ModuleCard';
@@ -27,10 +26,10 @@ interface ChecklistModuleProps {
 const ChecklistHeader = () => {
   return (
     <div className="text-center mb-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
         Your French Study Journey
       </h1>
-      <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+      <p className="text-xl text-gray-600 dark:text-white max-w-3xl mx-auto">
         Complete these essential modules to unlock resources and earn keys. 
         Each completed module helps you progress toward your study goals in France.
       </p>
@@ -50,30 +49,30 @@ const ProgressSection = ({
   const progressPercentage = Math.round((completedModulesCount / modules.length) * 100);
 
   return (
-    <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6">
+    <div className="mt-8 bg-gradient-to-r from-blue-50 to-cyan-50 dark:bg-card rounded-lg p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Progress</h3>
-          <p className="text-gray-600">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your Progress</h3>
+          <p className="text-gray-600 dark:text-white">
             {completedModulesCount} of {modules.length} modules completed
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-blue-600 dark:text-white">
             {progressPercentage}%
           </div>
-          <div className="text-sm text-gray-500">Complete</div>
+          <div className="text-sm text-gray-500 dark:text-white/80">Complete</div>
         </div>
       </div>
 
-      <div className="mt-4 bg-gray-200 rounded-full h-2">
+      <div className="mt-4 bg-gray-200 dark:bg-slate-gray rounded-full h-2">
         <div
-          className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500"
+          className="bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-primary dark:to-primary/80 h-2 rounded-full transition-all duration-500"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
 
-      <div className="mt-4 text-sm text-blue-700 font-medium">
+      <div className="mt-4 text-sm text-blue-700 dark:text-primary font-medium">
         🔑 Keys Earned: {keys}
       </div>
     </div>

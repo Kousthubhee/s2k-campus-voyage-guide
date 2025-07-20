@@ -66,8 +66,8 @@ export default {
 				// Dark theme specific colors
 				'rich-black': 'hsl(var(--rich-black))',
 				'charcoal-gray': 'hsl(var(--charcoal-gray))',
-				'soft-white': 'hsl(var(--soft-white))',
-				'cool-gray': 'hsl(var(--cool-gray))',
+				'pure-white': 'hsl(var(--pure-white))',
+				'off-white': 'hsl(var(--off-white))',
 				'slate-gray': 'hsl(var(--slate-gray))',
 				'soft-violet': 'hsl(var(--soft-violet))',
 				'light-lavender': 'hsl(var(--light-lavender))',
