@@ -138,7 +138,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Dynamic background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
@@ -147,7 +147,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </div>
       
       {/* Hero Section */}
-      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center bg-gradient-to-br from-slate-50 to-blue-50">
+      <section className="px-4 py-16 md:py-24 min-h-screen flex items-center bg-white">
         <div className="max-w-6xl mx-auto text-center w-full">
           <Badge variant="secondary" className="mb-6 text-sm font-medium">
             <Heart className="h-4 w-4 mr-2 text-red-500" />
@@ -192,7 +192,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Stats Section */}
-      <section className="px-4 py-12 bg-white/70 backdrop-blur-sm">
+      <section className="px-4 py-12 bg-gray-50">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -212,7 +212,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Features Section */}
-      <section className="px-4 py-16 bg-gradient-to-br from-slate-50 to-blue-50">
+      <section className="px-4 py-16 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
@@ -243,7 +243,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Why Students Trust Us Section */}
-      <section className="px-4 py-16 bg-white/70 backdrop-blur-sm">
+      <section className="px-4 py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Students Trust Us</h2>
@@ -271,7 +271,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Live Journey Snapshots Section */}
-      <section className="px-4 py-16 bg-gradient-to-br from-slate-50 to-blue-50">
+      <section className="px-4 py-16 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Journey Snapshots</h2>
@@ -301,7 +301,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="px-4 py-16 bg-white/70 backdrop-blur-sm">
+      <section className="px-4 py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What Students Say</h2>
@@ -332,7 +332,7 @@ export const HomePage = ({ onGetStarted, onPageNavigation }: HomePageProps) => {
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-16 pb-24 bg-gradient-to-br from-slate-50 to-blue-50">
+      <section className="px-4 py-16 pb-24 bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 text-white">
             <CardContent className="py-12">

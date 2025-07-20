@@ -84,7 +84,7 @@
   html {
     height: 100%;
     min-height: 100vh;
-    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+    background: white;
   }
 
   body {
@@ -93,14 +93,14 @@
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+    background: white;
   }
 
   /* Ensure full viewport coverage */
   #root {
     height: 100%;
     min-height: 100vh;
-    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+    background: white;
   }
 }
 
@@ -143,17 +143,17 @@
 .main-area {
   @apply px-2 py-2 md:px-7 md:py-5;
   min-height: calc(100vh - 120px);
-  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+  background: white;
 }
 
 /* Ensure sidebar and main content area maintain full height */
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+  background: white;
 }
 
-/* Ensure the entire page maintains the gradient background */
+/* Ensure the entire page maintains the solid background */
 [data-sidebar="inset"] {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+  background: white;
 }
