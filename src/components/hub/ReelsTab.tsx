@@ -10,6 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 interface ReelsTabProps {
   reels: HubPost[];
@@ -37,73 +39,64 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
   const { user } = useAuth();
   const [removeSound, setRemoveSound] = useState(false);
   const [processingVideo, setProcessingVideo] = useState(false);
+  const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
 
-  const processVideoWithoutSound = async (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+  const initializeFFmpeg = async (): Promise<FFmpeg> => {
+    if (ffmpeg && ffmpeg.loaded) {
+      return ffmpeg;
+    }
+
+    const ffmpegInstance = new FFmpeg();
+    
+    try {
+      const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm';
+      await ffmpegInstance.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+      });
       
-      video.onloadedmetadata = () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Create a MediaStream from canvas (this naturally excludes audio)
-        const stream = canvas.captureStream(25); // Reduced FPS for better performance
-        
-        // Ensure the stream has no audio tracks
-        const audioTracks = stream.getAudioTracks();
-        audioTracks.forEach(track => {
-          stream.removeTrack(track);
-          track.stop();
-        });
-        
-        // Use MediaRecorder to record the silent video
-        const mediaRecorder = new MediaRecorder(stream, {
-          mimeType: 'video/webm;codecs=vp8'
-        });
-        
-        const chunks: BlobPart[] = [];
-        
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
-        
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
-          const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '_no_sound.webm'), {
-            type: 'video/webm'
-          });
-          resolve(processedFile);
-        };
-        
-        let currentTime = 0;
-        const fps = 25;
-        const frameInterval = 1 / fps;
-        const duration = video.duration;
-        
-        const drawFrame = () => {
-          if (currentTime < duration) {
-            video.currentTime = currentTime;
-            ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-            currentTime += frameInterval;
-            setTimeout(drawFrame, 1000 / fps);
-          } else {
-            mediaRecorder.stop();
-          }
-        };
-        
-        mediaRecorder.start();
-        drawFrame();
-      };
+      setFfmpeg(ffmpegInstance);
+      return ffmpegInstance;
+    } catch (error) {
+      console.error('Failed to load FFmpeg:', error);
+      throw new Error('Failed to initialize video processor');
+    }
+  };
+
+  const removeAudioFromVideo = async (file: File): Promise<File> => {
+    try {
+      const ffmpegInstance = await initializeFFmpeg();
       
-      video.onerror = () => reject(new Error('Failed to process video'));
-      video.muted = true; // Ensure video is muted during processing
-      video.src = URL.createObjectURL(file);
-      video.load();
-    });
+      // Write input file
+      const inputFileName = 'input.mp4';
+      const outputFileName = 'output_no_audio.mp4';
+      
+      await ffmpegInstance.writeFile(inputFileName, await fetchFile(file));
+      
+      // Remove audio track using FFmpeg
+      await ffmpegInstance.exec([
+        '-i', inputFileName,
+        '-c:v', 'copy',  // Copy video stream as-is
+        '-an',           // Remove audio stream
+        outputFileName
+      ]);
+      
+      // Read the output file
+      const data = await ffmpegInstance.readFile(outputFileName);
+      const outputBlob = new Blob([data], { type: 'video/mp4' });
+      
+      // Clean up
+      await ffmpegInstance.deleteFile(inputFileName);
+      await ffmpegInstance.deleteFile(outputFileName);
+      
+      return new File([outputBlob], file.name.replace(/\.[^/.]+$/, '_no_sound.mp4'), {
+        type: 'video/mp4'
+      });
+    } catch (error) {
+      console.error('Error removing audio:', error);
+      throw new Error('Failed to remove audio from video');
+    }
   };
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +118,7 @@ export const ReelsTab: React.FC<ReelsTabProps> = ({
       if (removeSound) {
         toast.info('Processing video to remove sound...');
         try {
-          fileToUpload = await processVideoWithoutSound(file);
+          fileToUpload = await removeAudioFromVideo(file);
           console.log('Video processed successfully, sound removed');
         } catch (error) {
           console.error('Error processing video:', error);
