@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Dark theme specific colors
+				'rich-black': 'hsl(var(--rich-black))',
+				'charcoal-gray': 'hsl(var(--charcoal-gray))',
+				'soft-white': 'hsl(var(--soft-white))',
+				'cool-gray': 'hsl(var(--cool-gray))',
+				'slate-gray': 'hsl(var(--slate-gray))',
+				'soft-violet': 'hsl(var(--soft-violet))',
+				'light-lavender': 'hsl(var(--light-lavender))',
+				'emerald-green': 'hsl(var(--emerald-green))',
+				'coral-red': 'hsl(var(--coral-red))'
 			},
 			fontFamily: {
 				// Add Calibri with fallback to system sans-serif
