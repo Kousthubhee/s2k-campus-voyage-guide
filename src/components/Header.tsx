@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfileEditDialog } from './ProfileEditDialog';
-import { Key, Bell, User, LogIn, LogOut } from 'lucide-react';
+import { Key, Bell, User, LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 
 interface HeaderProps {
   currentPage: string;
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleNotificationClick = () => {
     setCurrentPage('notifications');
@@ -45,6 +47,20 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className="flex items-center gap-4">
+      {/* Dark Mode Toggle */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={toggleTheme}
+        className="relative"
+      >
+        {theme === 'light' ? (
+          <Moon className="h-5 w-5" />
+        ) : (
+          <Sun className="h-5 w-5" />
+        )}
+      </Button>
+
       {/* Notification Icon */}
       <Button
         variant="ghost"
@@ -59,9 +75,9 @@ export const Header: React.FC<HeaderProps> = ({
       </Button>
 
       {/* Keys Counter */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
-        <Key className="h-4 w-4 text-yellow-600" />
-        <span className="text-sm font-semibold text-yellow-800">
+      <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg border border-primary/20">
+        <Key className="h-4 w-4 text-primary" />
+        <span className="text-sm font-semibold text-primary">
           {userProgress?.keys || 0} Keys
         </span>
       </div>
@@ -92,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleSignOut}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
+            className="flex items-center gap-2 text-destructive hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
