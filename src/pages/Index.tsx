@@ -41,7 +41,6 @@ import { AskMeAnythingPage } from './AskMeAnythingPage';
 import { ChatbotPage } from './ChatbotPage';
 import { HomePage } from '@/components/HomePage';
 import { ErrorBoundary } from "react-error-boundary";
-import { Moon, Sun } from "lucide-react";
 
 console.log("[Index.tsx] TOP OF FILE");
 
@@ -78,56 +77,38 @@ const queryClient = new QueryClient();
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('home'); // Default to home page
   const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark' || 
-             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    }
-    return false;
-  });
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Apply dark mode class to document
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDarkMode) {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
+  // Load user profile when user is available
   useEffect(() => {
     if (user && !userProfile) {
       loadUserProfile();
     }
   }, [user]);
 
+  // Set the currentPage based on the URL path
   useEffect(() => {
     const path = location.pathname.substring(1) || 'home';
     setCurrentPage(path);
   }, [location.pathname]);
 
+  // Check for reset password token on load - Updated to properly detect password recovery
   useEffect(() => {
+    // Check for URL hash parameters (Supabase sends token in hash)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
     const resetParam = hashParams.get('reset-password');
     
+    // Also check query parameters as backup
     const urlParams = new URLSearchParams(window.location.search);
     const queryAccessToken = urlParams.get('access_token');
     const queryType = urlParams.get('type');
@@ -215,7 +196,7 @@ const Index = () => {
   const handleResetProgress = () => {
     resetProgress();
     setShowConfirm(false);
-    setCurrentPage('home');
+    setCurrentPage('home'); // Reset to home page
     navigate('/');
     toast({
       title: "Progress Reset",
@@ -224,6 +205,7 @@ const Index = () => {
     });
   };
 
+  // DEBUG: Confirm at least Index renders before returning full JSX
   if (!window["IndexDebugOnce"]) {
     window["IndexDebugOnce"] = true;
     console.log("[Index.tsx] Index component did mount");
@@ -231,12 +213,12 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2 text-foreground">
-            pas<span className="text-primary">S</span>2<span className="text-primary">K</span>ampus
+          <div className="text-2xl font-bold mb-2">
+            pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
           </div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -257,9 +239,9 @@ const Index = () => {
   }
 
   return (
-    <ErrorBoundary fallback={<div className="text-foreground bg-background">Something went wrong</div>}>
+    <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <SidebarProvider>
-        <div className="min-h-screen bg-background flex w-full app-container">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
           <AppSidebar
             currentPage={currentPage}
             setCurrentPage={handlePageNavigation}
@@ -267,42 +249,28 @@ const Index = () => {
             userAvatarUrl=""
           />
           <SidebarInset>
-            <header className="bg-card border-b border-border sticky top-0 z-40 w-full shadow-sm">
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
               <div className="flex h-16 shrink-0 items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <div className="flex flex-1 justify-between items-center">
                   <div 
-                    className="text-2xl font-bold cursor-pointer text-foreground hover:text-primary transition-colors"
+                    className="text-2xl font-bold cursor-pointer"
                     onClick={() => handlePageNavigation('home')}
                   >
-                    pas<span className="text-primary">S</span>2<span className="text-primary">K</span>ampus
+                    pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={toggleDarkMode}
-                      className="rounded-xl hover:bg-accent"
-                    >
-                      {isDarkMode ? (
-                        <Sun className="h-4 w-4" />
-                      ) : (
-                        <Moon className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Header 
-                      currentPage={currentPage} 
-                      setCurrentPage={handlePageNavigation}
-                      userProgress={userProgress}
-                      userProfile={userProfile}
-                      setUserProfile={setUserProfile}
-                      showAuth={!user}
-                    />
-                  </div>
+                  <Header 
+                    currentPage={currentPage} 
+                    setCurrentPage={handlePageNavigation}
+                    userProgress={userProgress}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    showAuth={!user}
+                  />
                 </div>
               </div>
             </header>
-            <main className="flex-1 main-area overflow-auto">
+            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
               <div className="max-w-5xl mx-auto animate-fade-in section-padding">
                 <Routes>
                   <Route path="/" element={
@@ -339,7 +307,7 @@ const Index = () => {
                   } />
                   <Route path="/qa" element={
                     <div className="space-y-6">
-                      <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
+                      <h1 className="text-3xl font-bold">AI Assistant</h1>
                       <ChatInterface />
                     </div>
                   } />
@@ -379,30 +347,29 @@ const Index = () => {
                 </Routes>
               </div>
             </main>
-            <footer className="bg-card border-t border-border py-6 px-6 flex flex-col items-center gap-3 animate-fade-in shadow-lg">
-              <div className="text-center text-muted-foreground">
-                🎓 © {new Date().getFullYear()} <span className="text-primary font-semibold">Kousthubhee Krishna K</span>, <span className="text-primary font-semibold">Srivatsava CK</span>, <span className="text-primary font-semibold">Manibalan</span>
+            <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
+              <div className="text-center text-gray-600">
+                🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">Kousthubhee Krishna K</span>, <span className="text-cyan-600 font-semibold">Srivatsava CK</span>, <span className="text-blue-600 font-semibold">Manibalan</span>
               </div>
               <Button 
                 variant="destructive"
                 size="sm"
-                className="mt-1 rounded-xl"
+                className="mt-1"
                 onClick={() => setShowConfirm(true)}
               >
                 Reset Progress
               </Button>
               {showConfirm && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 backdrop-blur-sm">
-                  <div className="bg-card rounded-2xl shadow-2xl p-6 max-w-xs w-full border border-border flex flex-col items-center animate-fade-in">
-                    <div className="font-semibold text-lg mb-2 text-foreground">Reset Progress?</div>
-                    <div className="text-muted-foreground text-sm mb-4 text-center">
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
+                    <div className="font-semibold text-lg mb-2">Reset Progress?</div>
+                    <div className="text-gray-700 text-sm mb-4 text-center">
                       This will erase your checklist progress. Are you sure?
                     </div>
                     <div className="flex gap-3 justify-center">
                       <Button 
                         variant="destructive"
                         size="sm"
-                        className="rounded-xl"
                         onClick={handleResetProgress}
                       >
                         Yes, Reset
@@ -410,7 +377,6 @@ const Index = () => {
                       <Button 
                         variant="outline"
                         size="sm"
-                        className="rounded-xl"
                         onClick={() => setShowConfirm(false)}
                       >
                         Cancel

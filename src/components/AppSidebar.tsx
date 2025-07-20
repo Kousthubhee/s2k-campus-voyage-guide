@@ -47,6 +47,7 @@ export const AppSidebar = ({
   const { state, setOpen } = useSidebar();
   const [isFullyCollapsed, setIsFullyCollapsed] = useState(false);
   
+  // Load sidebar state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem('sidebar-fully-collapsed');
     if (savedState === 'true') {
@@ -54,6 +55,7 @@ export const AppSidebar = ({
     }
   }, []);
 
+  // Save sidebar state to localStorage
   const toggleFullCollapse = () => {
     const newState = !isFullyCollapsed;
     setIsFullyCollapsed(newState);
@@ -62,6 +64,7 @@ export const AppSidebar = ({
 
   const isCollapsed = state === 'collapsed';
   
+  // Cleaned logic: "Hello, Stranger!" if no name, else Hello, [Name]!
   const cleanedName = typeof userName === "string" && userName.trim() !== "" ? userName : null;
   const avatarUrl = userAvatarUrl ?? "";
 
@@ -86,7 +89,7 @@ export const AppSidebar = ({
           variant="outline"
           size="sm"
           onClick={toggleFullCollapse}
-          className="bg-card shadow-xl hover:shadow-2xl transition-all duration-200 border-border rounded-xl"
+          className="bg-white shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Menu className="h-4 w-4" />
         </Button>
@@ -95,19 +98,19 @@ export const AppSidebar = ({
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border transition-all duration-300 bg-sidebar">
-      <SidebarHeader className="border-b border-sidebar-border pb-4">
+    <Sidebar collapsible="icon" className="border-r border-gray-200 transition-all duration-300">
+      <SidebarHeader className="border-b border-gray-100 pb-4">
         <div className="flex items-center justify-between px-3 py-2">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-primary-foreground font-bold text-sm">KS</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">KS</span>
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <h2 className="font-semibold text-sidebar-foreground truncate">
-                  pas<span className="text-primary">S</span>2<span className="text-primary">K</span>ampus
+                <h2 className="font-semibold text-gray-900 truncate">
+                  pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
                 </h2>
-                <p className="text-xs text-sidebar-foreground/70 truncate">Your guide to French education</p>
+                <p className="text-xs text-gray-500 truncate">Your guide to French education</p>
               </div>
             )}
           </div>
@@ -115,7 +118,7 @@ export const AppSidebar = ({
             variant="ghost"
             size="sm"
             onClick={toggleFullCollapse}
-            className="h-8 w-8 p-0 hover:bg-sidebar-accent rounded-xl"
+            className="h-8 w-8 p-0 hover:bg-gray-100"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -125,7 +128,7 @@ export const AppSidebar = ({
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           {!isCollapsed && (
-            <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wide px-3 mb-2">
+            <SidebarGroupLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               Navigation
             </SidebarGroupLabel>
           )}
@@ -140,20 +143,17 @@ export const AppSidebar = ({
                     <SidebarMenuButton
                       onClick={() => setCurrentPage(item.id)}
                       className={`
-                        flex items-center gap-3 w-full px-3 py-3 rounded-xl transition-all duration-200
-                        hover:bg-sidebar-accent group relative
-                        ${isActive 
-                          ? 'bg-primary text-primary-foreground font-medium shadow-lg' 
-                          : 'text-sidebar-foreground hover:text-sidebar-foreground'
-                        }
+                        flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200
+                        hover:bg-gray-50 group relative
+                        ${isActive ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:text-gray-900'}
                       `}
                       title={item.tooltip}
                     >
                       <div className={`
-                        p-2 rounded-lg transition-colors flex-shrink-0
+                        p-2 rounded-md transition-colors flex-shrink-0
                         ${isActive 
-                          ? 'bg-primary-foreground/20 text-primary-foreground' 
-                          : 'bg-sidebar-accent text-primary'
+                          ? 'bg-cyan-100 text-cyan-600' 
+                          : 'bg-blue-50 text-blue-400'
                         }
                       `}>
                         <Icon className="h-4 w-4" />
@@ -162,9 +162,6 @@ export const AppSidebar = ({
                         <span className="truncate">
                           {item.label}
                         </span>
-                      )}
-                      {isActive && (
-                        <div className="absolute right-2 w-2 h-2 bg-primary-foreground rounded-full opacity-60" />
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -175,21 +172,21 @@ export const AppSidebar = ({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
+      <SidebarFooter className="border-t border-gray-100 p-4">
         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          <div className="w-8 h-8 bg-sidebar-accent rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-xl" />
+              <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full" />
             ) : (
-              <User className="h-4 w-4 text-sidebar-foreground" />
+              <User className="h-4 w-4 text-gray-500" />
             )}
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
+              <p className="text-sm font-medium text-gray-900 truncate">
                 {cleanedName ? `Hello, ${cleanedName}!` : "Hello, Stranger!"}
               </p>
-              <p className="text-xs text-sidebar-foreground/70">Student</p>
+              <p className="text-xs text-gray-500">Student</p>
             </div>
           )}
         </div>
