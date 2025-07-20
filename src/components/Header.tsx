@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { ProfileEditDialog } from './ProfileEditDialog';
-import { Key, Bell, User, LogIn, LogOut } from 'lucide-react';
+import { Key, Bell, User, LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDarkMode } from '@/hooks/useDarkMode';
 
 interface HeaderProps {
   currentPage: string;
@@ -25,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { signOut } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const handleNotificationClick = () => {
     setCurrentPage('notifications');
@@ -45,6 +48,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className="flex items-center gap-4">
+      {/* Dark Mode Toggle */}
+      <div className="flex items-center gap-2">
+        <Sun className="h-4 w-4 text-muted-foreground" />
+        <Switch
+          checked={isDarkMode}
+          onCheckedChange={toggleDarkMode}
+          aria-label="Toggle dark mode"
+        />
+        <Moon className="h-4 w-4 text-muted-foreground" />
+      </div>
+
       {/* Notification Icon */}
       <Button
         variant="ghost"
@@ -59,9 +73,9 @@ export const Header: React.FC<HeaderProps> = ({
       </Button>
 
       {/* Keys Counter */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
-        <Key className="h-4 w-4 text-yellow-600" />
-        <span className="text-sm font-semibold text-yellow-800">
+      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <Key className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+        <span className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
           {userProgress?.keys || 0} Keys
         </span>
       </div>
@@ -92,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleSignOut}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
           >
             <LogOut className="h-4 w-4" />
             Sign Out

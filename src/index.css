@@ -84,7 +84,7 @@
   html {
     height: 100%;
     min-height: 100vh;
-    background: white;
+    @apply bg-background;
   }
 
   body {
@@ -93,14 +93,13 @@
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    background: white;
   }
 
   /* Ensure full viewport coverage */
   #root {
     height: 100%;
     min-height: 100vh;
-    background: white;
+    @apply bg-background;
   }
 }
 
@@ -132,28 +131,27 @@
 }
 
 .input-label {
-  @apply font-semibold;
+  @apply font-semibold text-foreground;
 }
 
 .input-hint {
-  @apply text-xs text-gray-400 ml-1 mt-1;
+  @apply text-xs text-muted-foreground ml-1 mt-1;
 }
 
 /* Responsive paddings for main areas with consistent background */
 .main-area {
-  @apply px-2 py-2 md:px-7 md:py-5;
+  @apply px-2 py-2 md:px-7 md:py-5 bg-background;
   min-height: calc(100vh - 120px);
-  background: white;
 }
 
 /* Ensure sidebar and main content area maintain full height */
 .app-container {
   min-height: 100vh;
-  background: white;
+  @apply bg-background;
 }
 
 /* Ensure the entire page maintains the solid background */
 [data-sidebar="inset"] {
   min-height: 100vh;
-  background: white;
+  @apply bg-background;
 }

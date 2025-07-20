@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -213,12 +214,12 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2">
+          <div className="text-2xl font-bold mb-2 text-foreground">
             pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
           </div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -241,7 +242,7 @@ const Index = () => {
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <SidebarProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
+        <div className="min-h-screen bg-background flex w-full">
           <AppSidebar
             currentPage={currentPage}
             setCurrentPage={handlePageNavigation}
@@ -249,12 +250,12 @@ const Index = () => {
             userAvatarUrl=""
           />
           <SidebarInset>
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
+            <header className="bg-background border-b border-border sticky top-0 z-40 w-full">
               <div className="flex h-16 shrink-0 items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <div className="flex flex-1 justify-between items-center">
                   <div 
-                    className="text-2xl font-bold cursor-pointer"
+                    className="text-2xl font-bold cursor-pointer text-foreground"
                     onClick={() => handlePageNavigation('home')}
                   >
                     pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
@@ -270,7 +271,7 @@ const Index = () => {
                 </div>
               </div>
             </header>
-            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+            <main className="flex-1 p-4 md:p-8 main-area overflow-auto bg-background">
               <div className="max-w-5xl mx-auto animate-fade-in section-padding">
                 <Routes>
                   <Route path="/" element={
@@ -347,8 +348,8 @@ const Index = () => {
                 </Routes>
               </div>
             </main>
-            <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
-              <div className="text-center text-gray-600">
+            <footer className="bg-background border-t border-border py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
+              <div className="text-center text-muted-foreground">
                 🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">Kousthubhee Krishna K</span>, <span className="text-cyan-600 font-semibold">Srivatsava CK</span>, <span className="text-blue-600 font-semibold">Manibalan</span>
               </div>
               <Button 
@@ -360,10 +361,10 @@ const Index = () => {
                 Reset Progress
               </Button>
               {showConfirm && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
-                    <div className="font-semibold text-lg mb-2">Reset Progress?</div>
-                    <div className="text-gray-700 text-sm mb-4 text-center">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                  <div className="bg-background rounded-lg shadow-lg p-6 max-w-xs w-full border border-border flex flex-col items-center animate-fade-in">
+                    <div className="font-semibold text-lg mb-2 text-foreground">Reset Progress?</div>
+                    <div className="text-muted-foreground text-sm mb-4 text-center">
                       This will erase your checklist progress. Are you sure?
                     </div>
                     <div className="flex gap-3 justify-center">
