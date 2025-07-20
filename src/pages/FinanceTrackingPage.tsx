@@ -47,12 +47,12 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
   console.log('FinanceTrackingPage rendering with selectedTab:', selectedTab);
 
   return (
-    <div className="max-w-7xl mx-auto animate-fade-in">
+    <div className="max-w-7xl mx-auto animate-fade-in bg-background min-h-screen p-6">
       <div className="mb-6">
         <Button 
           variant="outline" 
           onClick={handleBack}
-          className="mb-4"
+          className="mb-4 bg-card text-card-foreground border-border hover:bg-accent hover:text-accent-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Checklist
@@ -79,10 +79,10 @@ export const FinanceTrackingPage = ({ onBack, onComplete, isCompleted = false }:
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-muted">
+          <TabsTrigger value="dashboard" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-background">Dashboard</TabsTrigger>
+          <TabsTrigger value="expenses" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-background">Expenses</TabsTrigger>
+          <TabsTrigger value="reports" className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-background">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6 mt-6">
