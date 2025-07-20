@@ -41,7 +41,6 @@ import { AskMeAnythingPage } from './AskMeAnythingPage';
 import { ChatbotPage } from './ChatbotPage';
 import { HomePage } from '@/components/HomePage';
 import { ErrorBoundary } from "react-error-boundary";
-import { ThemeProvider } from '@/hooks/useTheme';
 
 console.log("[Index.tsx] TOP OF FILE");
 
@@ -214,12 +213,12 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2 text-foreground">
-            pas<span className="text-cyan-500">S</span>2<span className="text-primary">K</span>ampus
+          <div className="text-2xl font-bold mb-2">
+            pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
           </div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -241,157 +240,155 @@ const Index = () => {
 
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
-      <ThemeProvider defaultTheme="light">
-        <SidebarProvider>
-          <div className="min-h-screen bg-background flex w-full app-container">
-            <AppSidebar
-              currentPage={currentPage}
-              setCurrentPage={handlePageNavigation}
-              userName={userProfile?.name || user?.email || 'Guest'}
-              userAvatarUrl=""
-            />
-            <SidebarInset className="bg-background">
-              <header className="bg-card border-b border-border sticky top-0 z-40 w-full">
-                <div className="flex h-16 shrink-0 items-center gap-2 px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <div className="flex flex-1 justify-between items-center">
-                    <div 
-                      className="text-2xl font-bold cursor-pointer text-foreground"
-                      onClick={() => handlePageNavigation('home')}
-                    >
-                      pas<span className="text-cyan-500">S</span>2<span className="text-primary">K</span>ampus
-                    </div>
-                    <Header 
-                      currentPage={currentPage} 
-                      setCurrentPage={handlePageNavigation}
-                      userProgress={userProgress}
-                      userProfile={userProfile}
-                      setUserProfile={setUserProfile}
-                      showAuth={!user}
+      <SidebarProvider>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex w-full">
+          <AppSidebar
+            currentPage={currentPage}
+            setCurrentPage={handlePageNavigation}
+            userName={userProfile?.name || user?.email || 'Guest'}
+            userAvatarUrl=""
+          />
+          <SidebarInset>
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
+              <div className="flex h-16 shrink-0 items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <div className="flex flex-1 justify-between items-center">
+                  <div 
+                    className="text-2xl font-bold cursor-pointer"
+                    onClick={() => handlePageNavigation('home')}
+                  >
+                    pas<span className="text-cyan-600">S</span>2<span className="text-blue-600">K</span>ampus
+                  </div>
+                  <Header 
+                    currentPage={currentPage} 
+                    setCurrentPage={handlePageNavigation}
+                    userProgress={userProgress}
+                    userProfile={userProfile}
+                    setUserProfile={setUserProfile}
+                    showAuth={!user}
+                  />
+                </div>
+              </div>
+            </header>
+            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+              <div className="max-w-5xl mx-auto animate-fade-in section-padding">
+                <Routes>
+                  <Route path="/" element={
+                    <HomePage 
+                      onGetStarted={() => handlePageNavigation('checklist')} 
+                      onPageNavigation={handlePageNavigation} 
                     />
-                  </div>
-                </div>
-              </header>
-              <main className="flex-1 p-4 md:p-8 main-area overflow-auto bg-background">
-                <div className="max-w-5xl mx-auto animate-fade-in section-padding">
-                  <Routes>
-                    <Route path="/" element={
-                      <HomePage 
-                        onGetStarted={() => handlePageNavigation('checklist')} 
-                        onPageNavigation={handlePageNavigation} 
-                      />
-                    } />
-                    <Route path="/checklist" element={
-                      <ChecklistPage 
-                        userProgress={userProgress}
-                        setUserProgress={setUserProgress}
-                        onSchoolSelect={setSelectedSchool}
-                        currentPage={currentPage}
-                        setCurrentPage={handlePageNavigation}
-                      />
-                    } />
-                    <Route path="/documents" element={<DocumentsPage />} />
-                    <Route path="/hub" element={<HubPage />} />
-                    <Route path="/news" element={<NewsPage />} />
-                    <Route path="/affiliation" element={<AffiliationPage />} />
-                    <Route path="/language" element={<LanguagePage />} />
-                    <Route path="/integration" element={
-                      <FrenchIntegrationPage onBack={() => handlePageNavigation('checklist')} />
-                    } />
-                    <Route path="/translate" element={<TranslatePage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/profile" element={
-                      <ProfilePage 
-                        userProfile={userProfile} 
-                        setUserProfile={setUserProfile} 
-                        setCurrentPage={handlePageNavigation}
-                      />
-                    } />
-                    <Route path="/qa" element={
-                      <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">AI Assistant</h1>
-                        <ChatInterface />
-                      </div>
-                    } />
-                    <Route path="/school-insights" element={
-                      <SchoolInsightsPage onBack={() => handlePageNavigation('checklist')} />
-                    } />
-                    <Route path="/pre-arrival-1" element={
-                      <PreArrival1Page 
-                        onBack={() => handlePageNavigation('checklist')} 
-                        onComplete={() => {}} 
-                        isCompleted={false} 
-                        profile={userProfile} 
-                      />
-                    } />
-                    <Route path="/pre-arrival-2" element={
-                      <PreArrival2Page 
-                        onBack={() => handlePageNavigation('checklist')} 
-                      />
-                    } />
-                    <Route path="/post-arrival" element={
-                      <PostArrivalPage 
-                        onBack={() => handlePageNavigation('checklist')} 
-                        onComplete={() => {}} 
-                        isCompleted={false} 
-                      />
-                    } />
-                    <Route path="/finance-tracking" element={
-                      <FinanceTrackingPage onBack={() => handlePageNavigation('checklist')} />
-                    } />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/suggestions" element={
-                      <SuggestionsPage onBack={() => handlePageNavigation('checklist')} />
-                    } />
-                    <Route path="/ask-me-anything" element={<AskMeAnythingPage />} />
-                    <Route path="/chatbot" element={<ChatbotPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-              </main>
-              <footer className="bg-card border-t border-border py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
-                <div className="text-center text-muted-foreground">
-                  🎓 © {new Date().getFullYear()} <span className="text-primary font-semibold">Kousthubhee Krishna K</span>, <span className="text-cyan-500 font-semibold">Srivatsava CK</span>, <span className="text-primary font-semibold">Manibalan</span>
-                </div>
-                <Button 
-                  variant="destructive"
-                  size="sm"
-                  className="mt-1"
-                  onClick={() => setShowConfirm(true)}
-                >
-                  Reset Progress
-                </Button>
-                {showConfirm && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
-                      <div className="font-semibold text-lg mb-2">Reset Progress?</div>
-                      <div className="text-gray-700 text-sm mb-4 text-center">
-                        This will erase your checklist progress. Are you sure?
-                      </div>
-                      <div className="flex gap-3 justify-center">
-                        <Button 
-                          variant="destructive"
-                          size="sm"
-                          onClick={handleResetProgress}
-                        >
-                          Yes, Reset
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowConfirm(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
+                  } />
+                  <Route path="/checklist" element={
+                    <ChecklistPage 
+                      userProgress={userProgress}
+                      setUserProgress={setUserProgress}
+                      onSchoolSelect={setSelectedSchool}
+                      currentPage={currentPage}
+                      setCurrentPage={handlePageNavigation}
+                    />
+                  } />
+                  <Route path="/documents" element={<DocumentsPage />} />
+                  <Route path="/hub" element={<HubPage />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/affiliation" element={<AffiliationPage />} />
+                  <Route path="/language" element={<LanguagePage />} />
+                  <Route path="/integration" element={
+                    <FrenchIntegrationPage onBack={() => handlePageNavigation('checklist')} />
+                  } />
+                  <Route path="/translate" element={<TranslatePage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/profile" element={
+                    <ProfilePage 
+                      userProfile={userProfile} 
+                      setUserProfile={setUserProfile} 
+                      setCurrentPage={handlePageNavigation}
+                    />
+                  } />
+                  <Route path="/qa" element={
+                    <div className="space-y-6">
+                      <h1 className="text-3xl font-bold">AI Assistant</h1>
+                      <ChatInterface />
+                    </div>
+                  } />
+                  <Route path="/school-insights" element={
+                    <SchoolInsightsPage onBack={() => handlePageNavigation('checklist')} />
+                  } />
+                  <Route path="/pre-arrival-1" element={
+                    <PreArrival1Page 
+                      onBack={() => handlePageNavigation('checklist')} 
+                      onComplete={() => {}} 
+                      isCompleted={false} 
+                      profile={userProfile} 
+                    />
+                  } />
+                  <Route path="/pre-arrival-2" element={
+                    <PreArrival2Page 
+                      onBack={() => handlePageNavigation('checklist')} 
+                    />
+                  } />
+                  <Route path="/post-arrival" element={
+                    <PostArrivalPage 
+                      onBack={() => handlePageNavigation('checklist')} 
+                      onComplete={() => {}} 
+                      isCompleted={false} 
+                    />
+                  } />
+                  <Route path="/finance-tracking" element={
+                    <FinanceTrackingPage onBack={() => handlePageNavigation('checklist')} />
+                  } />
+                  <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/suggestions" element={
+                    <SuggestionsPage onBack={() => handlePageNavigation('checklist')} />
+                  } />
+                  <Route path="/ask-me-anything" element={<AskMeAnythingPage />} />
+                  <Route path="/chatbot" element={<ChatbotPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+            </main>
+            <footer className="bg-white border-t border-gray-200 py-6 px-6 flex flex-col items-center gap-3 animate-fade-in">
+              <div className="text-center text-gray-600">
+                🎓 © {new Date().getFullYear()} <span className="text-blue-600 font-semibold">Kousthubhee Krishna K</span>, <span className="text-cyan-600 font-semibold">Srivatsava CK</span>, <span className="text-blue-600 font-semibold">Manibalan</span>
+              </div>
+              <Button 
+                variant="destructive"
+                size="sm"
+                className="mt-1"
+                onClick={() => setShowConfirm(true)}
+              >
+                Reset Progress
+              </Button>
+              {showConfirm && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full border flex flex-col items-center animate-fade-in">
+                    <div className="font-semibold text-lg mb-2">Reset Progress?</div>
+                    <div className="text-gray-700 text-sm mb-4 text-center">
+                      This will erase your checklist progress. Are you sure?
+                    </div>
+                    <div className="flex gap-3 justify-center">
+                      <Button 
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleResetProgress}
+                      >
+                        Yes, Reset
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowConfirm(false)}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
-                )}
-              </footer>
-            </SidebarInset>
-          </div>
-        </SidebarProvider>
-      </ThemeProvider>
+                </div>
+              )}
+            </footer>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
     </ErrorBoundary>
   );
 };
