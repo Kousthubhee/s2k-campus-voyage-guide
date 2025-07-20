@@ -50,18 +50,18 @@ export const Header: React.FC<HeaderProps> = ({
         variant="ghost"
         size="sm"
         onClick={handleNotificationClick}
-        className="relative"
+        className="relative rounded-xl hover:bg-accent"
       >
         <Bell className="h-5 w-5" />
-        <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs p-0">
+        <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs p-0 rounded-full">
           3
         </Badge>
       </Button>
 
-      {/* Keys Counter */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
-        <Key className="h-4 w-4 text-yellow-600" />
-        <span className="text-sm font-semibold text-yellow-800">
+      {/* Keys Counter - Emerald Green for success */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-card rounded-xl border border-border shadow-md">
+        <Key className="h-4 w-4 text-success" />
+        <span className="text-sm font-semibold text-foreground">
           {userProgress?.keys || 0} Keys
         </span>
       </div>
@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
           variant="outline" 
           size="sm"
           onClick={handleAuthClick}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl border-border hover:bg-accent"
         >
           <LogIn className="h-4 w-4" />
           Sign In
@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={() => setIsEditingProfile(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl border-border hover:bg-accent"
           >
             <User className="h-4 w-4" />
             Edit Profile
@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleSignOut}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
+            className="flex items-center gap-2 text-destructive hover:text-destructive/90 rounded-xl hover:bg-destructive/10"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
