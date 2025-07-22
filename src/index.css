@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -66,7 +67,6 @@
 
     --ring: 217.2 32.6% 23.5%;
   }
-}
 
   /* Custom Colors */
   :root {
@@ -84,16 +84,7 @@
       "rlig" 1,
       "calt" 1;
   }
-}
 
-@layer components {
-  .section-padding {
-    @apply py-12 md:py-24;
-  }
-}
-
-/* Mobile-specific optimizations */
-@layer base {
   .safe-area-inset {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -135,6 +126,12 @@
     .mobile-optimized input[type="email"] {
       font-size: 16px; /* Prevents zoom on iOS */
     }
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-12 md:py-24;
   }
 }
 
