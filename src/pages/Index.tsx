@@ -42,6 +42,9 @@ import { ChatbotPage } from './ChatbotPage';
 import { HomePage } from '@/components/HomePage';
 import { AdminLandingPage } from '@/components/AdminLandingPage';
 import { ErrorBoundary } from "react-error-boundary";
+import { MobileAdminLanding } from '@/components/mobile/MobileAdminLanding';
+import { MobileNavigation } from '@/components/mobile/MobileNavigation';
+import { useMobileDetection } from '@/hooks/useMobileDetection';
 
 console.log("[Index.tsx] TOP OF FILE");
 
@@ -88,6 +91,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isMobile } = useMobileDetection();
 
   useEffect(() => {
     if (user && !userProfile) {
@@ -221,7 +225,9 @@ const Index = () => {
   }
 
   if (!isAdminVerified) {
-    return <AdminLandingPage onAccessGranted={handleAdminAccessGranted} />;
+    return isMobile ? 
+      <MobileAdminLanding onAccessGranted={handleAdminAccessGranted} /> :
+      <AdminLandingPage onAccessGranted={handleAdminAccessGranted} />;
   }
 
   if (loading) {
@@ -283,7 +289,7 @@ const Index = () => {
                 </div>
               </div>
             </header>
-            <main className="flex-1 p-4 md:p-8 main-area overflow-auto">
+            <main className={`flex-1 p-4 md:p-8 main-area overflow-auto ${isMobile ? 'pb-20' : ''}`}>
               <div className="max-w-5xl mx-auto animate-fade-in section-padding">
                 <Routes>
                   <Route path="/" element={
@@ -400,6 +406,14 @@ const Index = () => {
               )}
             </footer>
           </SidebarInset>
+          
+          {/* Mobile Navigation */}
+          {isMobile && (
+            <MobileNavigation 
+              currentPage={currentPage} 
+              onNavigate={handlePageNavigation} 
+            />
+          )}
         </div>
       </SidebarProvider>
     </ErrorBoundary>

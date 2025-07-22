@@ -1,4 +1,3 @@
-
 // ADDED: Top of file log
 console.log("[App.tsx] TOP OF FILE");
 
@@ -11,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { NotificationProvider } from "@/hooks/useNotifications";
 import React from "react";
+import { MobileWrapper } from "@/components/mobile/MobileWrapper";
 
 // Simple error boundary for root app
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {
@@ -48,14 +48,16 @@ const App = () => (
       <NotificationProvider>
         <AuthProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/*" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <MobileWrapper>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/*" element={<Index />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </MobileWrapper>
           </TooltipProvider>
         </AuthProvider>
       </NotificationProvider>
