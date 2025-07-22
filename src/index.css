@@ -179,188 +179,237 @@
   background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
 }
 
-/* DARK MODE SPECIFIC FIXES */
+/* COMPREHENSIVE DARK MODE FIXES */
 
-/* Fix all remaining light background sections */
-.dark .bg-white {
-  background-color: hsl(var(--charcoal-gray));
+/* Fix all card and component backgrounds */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-blue-50,
+.dark .bg-blue-100,
+.dark .bg-cyan-50,
+.dark .bg-indigo-50,
+.dark .bg-purple-50,
+.dark .bg-violet-50,
+.dark .bg-pink-50,
+.dark .bg-green-50,
+.dark .bg-yellow-50,
+.dark .bg-orange-50,
+.dark .bg-red-50,
+.dark .bg-slate-50,
+.dark .bg-stone-50,
+.dark .bg-neutral-50,
+.dark .bg-zinc-50 {
+  background-color: hsl(var(--charcoal-gray)) !important;
 }
 
-.dark .bg-gray-50 {
-  background-color: hsl(var(--charcoal-gray));
+/* Fix light backgrounds */
+.dark .bg-gray-200,
+.dark .bg-gray-300,
+.dark .bg-blue-200,
+.dark .bg-blue-300 {
+  background-color: hsl(var(--charcoal-gray)) !important;
 }
 
-.dark .bg-gray-100 {
-  background-color: hsl(var(--charcoal-gray));
-}
-
-.dark .bg-blue-50 {
-  background-color: hsl(var(--charcoal-gray));
-}
-
-.dark .bg-blue-100 {
-  background-color: hsl(var(--charcoal-gray));
-}
-
-/* Fix gradients with solid backgrounds */
-.dark .bg-gradient-to-r {
-  background: hsl(var(--charcoal-gray));
-}
-
-.dark .bg-gradient-to-br {
-  background: hsl(var(--charcoal-gray));
-}
-
-/* Apply vibrant violet gradients for prominent elements */
-.dark .bg-gradient-to-r.from-blue-500.to-cyan-500 {
-  background: linear-gradient(to right, hsl(var(--soft-violet)), hsl(var(--light-lavender)));
-}
-
-.dark .bg-gradient-to-br.from-blue-600.to-purple-700 {
-  background: linear-gradient(to bottom right, hsl(var(--soft-violet)), hsl(var(--light-lavender)));
-}
-
-.dark .bg-gradient-to-r.from-indigo-500.to-purple-600 {
-  background: linear-gradient(to right, hsl(var(--soft-violet)), hsl(var(--light-lavender)));
-}
-
-.dark .bg-gradient-to-r.from-purple-500.to-pink-600 {
-  background: linear-gradient(to right, hsl(var(--soft-violet)), hsl(var(--light-lavender)));
-}
-
-/* Apply violet to all headings and titles in dark mode */
-.dark h1 {
-  color: hsl(263 85% 70%); /* Soft violet for main headings */
-}
-
-.dark h2 {
-  color: hsl(263 85% 70%); /* Soft violet for section titles */
-}
-
-.dark h3 {
-  color: hsl(263 85% 70%); /* Soft violet for subsection titles */
-}
-
-.dark h4, .dark h5, .dark h6 {
-  color: hsl(263 70% 80%); /* Light lavender for smaller headings */
-}
-
-/* Apply violet to specific title classes */
+/* Apply violet to all headings and titles */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
 .dark .text-2xl,
 .dark .text-3xl,
 .dark .text-4xl,
+.dark .text-5xl,
+.dark .text-6xl,
 .dark .font-bold,
-.dark .font-semibold {
-  color: hsl(263 85% 70%);
-}
-
-/* Card titles and important labels */
-.dark .card-title,
 .dark [data-title="true"],
+.dark .card-title,
 .dark .module-title,
 .dark .section-title {
-  color: hsl(263 85% 70%);
+  color: hsl(263 85% 70%) !important; /* Soft violet for all headings */
 }
 
-/* Pure white for body text and paragraphs */
-.dark p, .dark span, .dark div {
-  color: hsl(var(--pure-white));
+/* Pure white for all body text and content */
+.dark p,
+.dark span,
+.dark div,
+.dark .text-base,
+.dark .text-sm,
+.dark .text-lg,
+.dark .text-xl {
+  color: hsl(var(--pure-white)) !important;
 }
 
-/* Fix text colors to use proper contrast */
+/* Fix all gray text colors to use pure white */
 .dark .text-gray-900,
 .dark .text-gray-800,
 .dark .text-gray-700,
 .dark .text-gray-600,
 .dark .text-gray-500,
-.dark .text-gray-400 {
-  color: hsl(var(--pure-white));
+.dark .text-gray-400,
+.dark .text-gray-300,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: hsl(var(--pure-white)) !important;
 }
 
 /* Apply soft violet to highlighted numbers and stats */
 .dark .stat-number,
 .dark .highlight-number,
-.dark .badge-text,
-.dark .count-display {
-  color: hsl(263 85% 70%);
+.dark .count-display,
+.dark .metric-value,
+.dark .stat-value,
+.dark .badge-text {
+  color: hsl(263 85% 70%) !important;
+  font-weight: 600;
 }
 
 /* Apply light lavender for secondary highlights */
-.dark .text-muted-foreground {
-  color: hsl(263 70% 80%);
-}
-
-.dark .secondary-text {
-  color: hsl(263 70% 80%);
-}
-
-/* Hover states with light lavender */
-.dark .hover\:text-blue-600:hover,
-.dark .hover\:text-blue-700:hover,
-.dark a:hover {
-  color: hsl(263 70% 80%);
+.dark .text-muted-foreground,
+.dark .secondary-text,
+.dark .metric-label,
+.dark .stat-label {
+  color: hsl(263 70% 80%) !important;
 }
 
 /* Fix specific color classes */
 .dark .text-blue-600,
 .dark .text-blue-700,
 .dark .text-blue-800,
+.dark .text-blue-900,
+.dark .text-cyan-600,
 .dark .text-cyan-700,
-.dark .text-slate-600,
-.dark .text-slate-700 {
-  color: hsl(263 85% 70%);
+.dark .text-cyan-800,
+.dark .text-indigo-600,
+.dark .text-indigo-700,
+.dark .text-purple-600,
+.dark .text-purple-700,
+.dark .text-violet-600,
+.dark .text-violet-700 {
+  color: hsl(263 85% 70%) !important;
+}
+
+/* Success states use emerald green */
+.dark .text-green-600,
+.dark .text-green-700,
+.dark .text-green-800,
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+  color: hsl(var(--emerald-green)) !important;
+}
+
+/* Error states use coral red */
+.dark .text-red-600,
+.dark .text-red-700,
+.dark .text-red-800,
+.dark .text-rose-600,
+.dark .text-rose-700 {
+  color: hsl(var(--coral-red)) !important;
+}
+
+/* Warning states use yellow */
+.dark .text-yellow-600,
+.dark .text-yellow-700,
+.dark .text-yellow-800,
+.dark .text-amber-600,
+.dark .text-amber-700 {
+  color: hsl(45 93% 67%) !important;
 }
 
 /* Fix borders */
 .dark .border-gray-200,
 .dark .border-gray-300,
 .dark .border-blue-200,
-.dark .border-yellow-200 {
-  border-color: hsl(var(--slate-gray));
+.dark .border-yellow-200,
+.dark .border-green-200,
+.dark .border-red-200,
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: hsl(var(--slate-gray)) !important;
 }
 
-/* Fix specific components */
-.dark .bg-yellow-50 {
-  background-color: hsl(var(--charcoal-gray));
+/* Fix button styling */
+.dark .bg-blue-500,
+.dark .bg-blue-600,
+.dark .bg-indigo-500,
+.dark .bg-indigo-600,
+.dark .bg-purple-500,
+.dark .bg-purple-600,
+.dark .bg-violet-500,
+.dark .bg-violet-600 {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
 }
 
-.dark .text-yellow-800,
-.dark .text-yellow-600,
-.dark .text-yellow-700 {
-  color: hsl(var(--pure-white));
+.dark .hover\:bg-blue-600:hover,
+.dark .hover\:bg-blue-700:hover,
+.dark .hover\:bg-indigo-600:hover,
+.dark .hover\:bg-purple-600:hover,
+.dark .hover\:bg-violet-600:hover {
+  background-color: hsl(var(--light-lavender)) !important;
 }
 
-.dark .text-green-600,
-.dark .text-green-700,
-.dark .text-green-800 {
-  color: hsl(var(--emerald-green));
+/* Fix success buttons */
+.dark .bg-green-500,
+.dark .bg-green-600,
+.dark .bg-emerald-500,
+.dark .bg-emerald-600 {
+  background-color: hsl(var(--emerald-green)) !important;
+  color: hsl(var(--pure-white)) !important;
 }
 
-.dark .text-red-600,
-.dark .text-red-700,
-.dark .text-red-800 {
-  color: hsl(var(--coral-red));
+.dark .hover\:bg-green-600:hover,
+.dark .hover\:bg-emerald-600:hover {
+  background-color: hsl(142 76% 45%) !important;
 }
 
-/* Fix form elements in dark mode */
+/* Fix status badges */
+.dark .bg-blue-100,
+.dark .bg-indigo-100,
+.dark .bg-purple-100,
+.dark .bg-violet-100 {
+  background-color: hsl(var(--soft-violet) / 0.2) !important;
+}
+
+.dark .bg-green-100,
+.dark .bg-emerald-100 {
+  background-color: hsl(var(--emerald-green) / 0.2) !important;
+}
+
+.dark .bg-yellow-100,
+.dark .bg-amber-100 {
+  background-color: hsl(45 93% 47% / 0.2) !important;
+}
+
+.dark .bg-red-100,
+.dark .bg-rose-100 {
+  background-color: hsl(var(--coral-red) / 0.2) !important;
+}
+
+/* Fix form elements */
 .dark input[type="text"],
 .dark input[type="email"],
 .dark input[type="number"],
 .dark input[type="password"],
 .dark textarea,
 .dark select {
-  background-color: hsl(var(--charcoal-gray));
-  border-color: hsl(var(--slate-gray));
-  color: hsl(var(--pure-white));
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
 }
 
 .dark input[type="text"]::placeholder,
 .dark input[type="email"]::placeholder,
 .dark input[type="number"]::placeholder,
 .dark input[type="password"]::placeholder,
-.dark textarea::placeholder,
-.dark select::placeholder {
-  color: hsl(var(--pure-white) / 0.7);
+.dark textarea::placeholder {
+  color: hsl(var(--pure-white) / 0.7) !important;
 }
 
 .dark input[type="text"]:focus,
@@ -369,130 +418,86 @@
 .dark input[type="password"]:focus,
 .dark textarea:focus,
 .dark select:focus {
-  ring-color: hsl(var(--light-lavender));
-  border-color: hsl(var(--light-lavender));
-}
-
-/* Fix buttons in dark mode */
-.dark .bg-blue-500,
-.dark .bg-blue-600 {
-  background-color: hsl(var(--soft-violet));
-}
-
-.dark .hover\:bg-blue-600:hover,
-.dark .hover\:bg-blue-700:hover {
-  background-color: hsl(var(--light-lavender));
-}
-
-.dark .bg-green-500 {
-  background-color: hsl(var(--emerald-green));
-}
-
-.dark .hover\:bg-green-600:hover {
-  background-color: hsl(var(--emerald-green) / 0.9);
-}
-
-.dark .bg-cyan-500 {
-  background-color: hsl(var(--soft-violet));
-}
-
-.dark .hover\:bg-cyan-600:hover {
-  background-color: hsl(var(--light-lavender));
-}
-
-/* Fix status badges with violet highlights */
-.dark .bg-green-100 {
-  background-color: hsl(var(--emerald-green) / 0.2);
-}
-
-.dark .bg-blue-100 {
-  background-color: hsl(var(--soft-violet) / 0.2);
-}
-
-.dark .bg-yellow-100 {
-  background-color: hsl(45 93% 47% / 0.2);
-}
-
-.dark .bg-red-100 {
-  background-color: hsl(var(--coral-red) / 0.2);
+  ring-color: hsl(var(--light-lavender)) !important;
+  border-color: hsl(var(--light-lavender)) !important;
 }
 
 /* Fix cards and surfaces */
 .dark .shadow-sm {
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4) !important;
 }
 
 .dark .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.3);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.3) !important;
 }
 
 /* Fix dropdowns and popovers */
 .dark .bg-white.shadow-lg {
-  background-color: hsl(var(--charcoal-gray));
-  border-color: hsl(var(--slate-gray));
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
 }
 
-/* Fix specific button text colors */
-.dark .text-blue-500 {
-  color: hsl(var(--soft-violet));
-}
-
-.dark .hover\:text-blue-600:hover {
-  color: hsl(var(--light-lavender));
-}
-
-.dark .hover\:text-blue-700:hover {
-  color: hsl(var(--light-lavender));
+/* Fix hover states */
+.dark .hover\:text-blue-600:hover,
+.dark .hover\:text-blue-700:hover,
+.dark .hover\:text-indigo-600:hover,
+.dark .hover\:text-purple-600:hover,
+.dark .hover\:text-violet-600:hover {
+  color: hsl(var(--light-lavender)) !important;
 }
 
 /* Fix link colors */
 .dark a {
-  color: hsl(var(--soft-violet));
+  color: hsl(var(--soft-violet)) !important;
 }
 
 .dark a:hover {
-  color: hsl(var(--light-lavender));
+  color: hsl(var(--light-lavender)) !important;
 }
 
 /* Fix icon colors */
 .dark svg {
-  color: hsl(var(--pure-white));
+  color: hsl(var(--pure-white)) !important;
 }
 
 .dark .text-primary svg {
-  color: hsl(var(--soft-violet));
+  color: hsl(var(--soft-violet)) !important;
 }
 
-/* Fix button states */
+/* Fix button text colors */
 .dark button {
-  color: hsl(var(--pure-white));
+  color: hsl(var(--pure-white)) !important;
 }
 
 .dark button:disabled {
-  color: hsl(var(--pure-white) / 0.5);
+  color: hsl(var(--pure-white) / 0.5) !important;
+  background-color: hsl(var(--slate-gray)) !important;
 }
 
 /* Fix table styling */
 .dark table {
-  background-color: hsl(var(--charcoal-gray));
+  background-color: hsl(var(--charcoal-gray)) !important;
 }
 
-.dark th, .dark td {
-  color: hsl(var(--pure-white));
-  border-color: hsl(var(--slate-gray));
+.dark th,
+.dark td {
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
 }
 
 /* Fix modal and dialog backgrounds */
-.dark .modal, .dark .dialog {
-  background-color: hsl(var(--charcoal-gray));
-  color: hsl(var(--pure-white));
+.dark .modal,
+.dark .dialog,
+.dark [role="dialog"] {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
 }
 
 /* Fix tooltip backgrounds */
 .dark .tooltip {
-  background-color: hsl(var(--charcoal-gray));
-  color: hsl(var(--pure-white));
-  border-color: hsl(var(--slate-gray));
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
 }
 
 /* Fix scrollbar in dark mode */
@@ -501,96 +506,183 @@
 }
 
 .dark ::-webkit-scrollbar-track {
-  background-color: hsl(var(--charcoal-gray));
+  background-color: hsl(var(--charcoal-gray)) !important;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--slate-gray));
+  background-color: hsl(var(--slate-gray)) !important;
   border-radius: 9999px;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--slate-gray) / 0.8);
+  background-color: hsl(var(--slate-gray) / 0.8) !important;
 }
 
-/* Specific component fixes for violet theming */
-
-/* Badge and tag styling */
-.dark .badge,
-.dark .tag {
-  background-color: hsl(var(--soft-violet) / 0.2);
-  color: hsl(263 85% 70%);
-  border-color: hsl(var(--soft-violet));
+/* Language learning module specific fixes */
+.dark .learning-card,
+.dark .lesson-card,
+.dark .topic-card {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
 }
 
-/* Progress bars and indicators */
+.dark .lesson-title,
+.dark .topic-title {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .lesson-description,
+.dark .topic-description {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .lesson-complete,
+.dark .topic-complete {
+  color: hsl(var(--emerald-green)) !important;
+}
+
+/* Step indicator fixes */
+.dark .step-indicator {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .step-active {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .step-complete {
+  background-color: hsl(var(--emerald-green)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Progress indicators */
 .dark .progress-bar {
-  color: hsl(263 85% 70%);
+  background-color: hsl(var(--slate-gray)) !important;
 }
 
-.dark .progress-indicator {
-  background-color: hsl(var(--soft-violet));
-}
-
-/* Alert and notification styling */
-.dark .alert {
-  background-color: hsl(var(--charcoal-gray));
-  border-color: hsl(var(--slate-gray));
-  color: hsl(var(--pure-white));
-}
-
-.dark .alert-title {
-  color: hsl(263 85% 70%);
-}
-
-/* Card headers and footers */
-.dark .card-header h1,
-.dark .card-header h2,
-.dark .card-header h3 {
-  color: hsl(263 85% 70%);
-}
-
-.dark .card-footer {
-  border-color: hsl(var(--slate-gray));
-}
-
-/* Navigation elements */
-.dark .nav-link {
-  color: hsl(var(--pure-white));
-}
-
-.dark .nav-link:hover {
-  color: hsl(263 70% 80%);
-}
-
-.dark .nav-link.active {
-  color: hsl(263 85% 70%);
-}
-
-/* Stats and metrics */
-.dark .metric-value,
-.dark .stat-value {
-  color: hsl(263 85% 70%);
-  font-weight: bold;
-}
-
-.dark .metric-label,
-.dark .stat-label {
-  color: hsl(263 70% 80%);
+.dark .progress-fill {
+  background-color: hsl(var(--soft-violet)) !important;
 }
 
 /* Achievement and success elements */
 .dark .achievement-title,
 .dark .success-message {
-  color: hsl(263 85% 70%);
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .achievement-description,
+.dark .success-description {
+  color: hsl(var(--pure-white)) !important;
 }
 
 /* Profile and user info */
 .dark .profile-name,
 .dark .user-title {
-  color: hsl(263 85% 70%);
+  color: hsl(263 85% 70%) !important;
 }
 
-.dark .profile-subtitle {
-  color: hsl(263 70% 80%);
+.dark .profile-subtitle,
+.dark .user-subtitle {
+  color: hsl(263 70% 80%) !important;
+}
+
+/* Navigation elements */
+.dark .nav-link {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .nav-link:hover {
+  color: hsl(263 70% 80%) !important;
+}
+
+.dark .nav-link.active {
+  color: hsl(263 85% 70%) !important;
+}
+
+/* Fix any remaining gradient issues */
+.dark .bg-gradient-to-r,
+.dark .bg-gradient-to-l,
+.dark .bg-gradient-to-t,
+.dark .bg-gradient-to-b,
+.dark .bg-gradient-to-br,
+.dark .bg-gradient-to-bl,
+.dark .bg-gradient-to-tr,
+.dark .bg-gradient-to-tl {
+  background: hsl(var(--charcoal-gray)) !important;
+}
+
+/* Apply violet gradients for prominent elements */
+.dark .hero-gradient,
+.dark .title-gradient,
+.dark .accent-gradient {
+  background: linear-gradient(to right, hsl(var(--soft-violet)), hsl(var(--light-lavender))) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Override any remaining light text on dark backgrounds */
+.dark .text-black {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Ensure consistent button styling */
+.dark .btn-primary {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--soft-violet)) !important;
+}
+
+.dark .btn-primary:hover {
+  background-color: hsl(var(--light-lavender)) !important;
+  border-color: hsl(var(--light-lavender)) !important;
+}
+
+.dark .btn-secondary {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+.dark .btn-secondary:hover {
+  background-color: hsl(var(--slate-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix notification and alert styling */
+.dark .alert {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .alert-title {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .alert-description {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Ensure consistent spacing and layout */
+.dark .container,
+.dark .max-w-6xl,
+.dark .max-w-4xl,
+.dark .max-w-2xl {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Fix any remaining opacity issues */
+.dark .opacity-75 {
+  color: hsl(var(--pure-white) / 0.75) !important;
+}
+
+.dark .opacity-50 {
+  color: hsl(var(--pure-white) / 0.5) !important;
+}
+
+.dark .opacity-25 {
+  color: hsl(var(--pure-white) / 0.25) !important;
 }
