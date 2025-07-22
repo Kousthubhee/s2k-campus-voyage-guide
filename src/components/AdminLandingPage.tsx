@@ -41,7 +41,7 @@ export const AdminLandingPage: React.FC<AdminLandingPageProps> = ({ onAccessGran
           {/* Main Title */}
           <div className="space-y-4">
             <h1 className="text-3xl font-bold text-white">
-              🔒 Whoa there mate, this area is strictly for admins of pasS2Kampus only.
+              🔒 Hey there, this area is strictly for admins of pasS2Kampus only.
             </h1>
             
             {/* Subtext */}
