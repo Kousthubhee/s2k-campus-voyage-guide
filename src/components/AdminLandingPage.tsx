@@ -20,7 +20,7 @@ export const AdminLandingPage: React.FC<AdminLandingPageProps> = ({ onAccessGran
       setError('');
       onAccessGranted();
     } else {
-      setError("Access denied! That code's as fake as a 3€ croissant.");
+      setError("Access denied! That code's as fake as a 10€ biryani in Montmartre.");
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
       setPassword('');
