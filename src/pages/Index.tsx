@@ -40,6 +40,7 @@ import { SuggestionsPage } from './SuggestionsPage';
 import { AskMeAnythingPage } from './AskMeAnythingPage';
 import { ChatbotPage } from './ChatbotPage';
 import { HomePage } from '@/components/HomePage';
+import { AdminLandingPage } from '@/components/AdminLandingPage';
 import { ErrorBoundary } from "react-error-boundary";
 
 console.log("[Index.tsx] TOP OF FILE");
@@ -77,38 +78,34 @@ const queryClient = new QueryClient();
 
 const Index = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentPage, setCurrentPage] = useState('home'); // Default to home page
+  const [currentPage, setCurrentPage] = useState('home');
   const [userProgress, setUserProgress, resetProgress] = useLocalStorageProgress();
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load user profile when user is available
   useEffect(() => {
     if (user && !userProfile) {
       loadUserProfile();
     }
   }, [user]);
 
-  // Set the currentPage based on the URL path
   useEffect(() => {
     const path = location.pathname.substring(1) || 'home';
     setCurrentPage(path);
   }, [location.pathname]);
 
-  // Check for reset password token on load - Updated to properly detect password recovery
   useEffect(() => {
-    // Check for URL hash parameters (Supabase sends token in hash)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const type = hashParams.get('type');
     const resetParam = hashParams.get('reset-password');
     
-    // Also check query parameters as backup
     const urlParams = new URLSearchParams(window.location.search);
     const queryAccessToken = urlParams.get('access_token');
     const queryType = urlParams.get('type');
@@ -196,7 +193,7 @@ const Index = () => {
   const handleResetProgress = () => {
     resetProgress();
     setShowConfirm(false);
-    setCurrentPage('home'); // Reset to home page
+    setCurrentPage('home');
     navigate('/');
     toast({
       title: "Progress Reset",
@@ -205,10 +202,26 @@ const Index = () => {
     });
   };
 
+  const handleAdminAccessGranted = () => {
+    setIsAdminVerified(true);
+    sessionStorage.setItem('adminVerified', 'true');
+  };
+
+  useEffect(() => {
+    const adminVerified = sessionStorage.getItem('adminVerified');
+    if (adminVerified === 'true') {
+      setIsAdminVerified(true);
+    }
+  }, []);
+
   // DEBUG: Confirm at least Index renders before returning full JSX
   if (!window["IndexDebugOnce"]) {
     window["IndexDebugOnce"] = true;
     console.log("[Index.tsx] Index component did mount");
+  }
+
+  if (!isAdminVerified) {
+    return <AdminLandingPage onAccessGranted={handleAdminAccessGranted} />;
   }
 
   if (loading) {
