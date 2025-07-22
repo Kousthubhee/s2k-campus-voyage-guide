@@ -11,16 +11,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.2",
-    "@capacitor/app": "^7.0.1",
-    "@capacitor/camera": "^7.0.1",
-    "@capacitor/cli": "^7.4.2",
-    "@capacitor/core": "^7.4.2",
-    "@capacitor/haptics": "^7.0.1",
-    "@capacitor/ios": "^7.4.2",
-    "@capacitor/push-notifications": "^7.0.1",
-    "@capacitor/splash-screen": "^7.0.1",
-    "@capacitor/status-bar": "^7.0.1",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@hookform/resolvers": "^3.9.0",

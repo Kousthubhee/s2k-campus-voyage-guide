@@ -6,19 +6,13 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
@@ -26,123 +20,669 @@
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark theme colors */
+    --rich-black: 222 18% 8%;
+    --charcoal-gray: 222 14% 12%;
+    --pure-white: 0 0% 100%;
+    --off-white: 0 0% 95%;
+    --slate-gray: 215 25% 25%;
+    --soft-violet: 263 85% 70%;
+    --light-lavender: 263 70% 80%;
+    --emerald-green: 142 76% 50%;
+    --coral-red: 0 84% 65%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 16.4% 65.1%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --ring: 217.2 32.6% 23.5%;
+    --background: var(--rich-black);
+    --foreground: var(--pure-white);
+    --card: var(--charcoal-gray);
+    --card-foreground: var(--pure-white);
+    --popover: var(--charcoal-gray);
+    --popover-foreground: var(--pure-white);
+    --primary: var(--soft-violet);
+    --primary-foreground: var(--pure-white);
+    --secondary: var(--charcoal-gray);
+    --secondary-foreground: var(--pure-white);
+    --muted: var(--charcoal-gray);
+    --muted-foreground: var(--off-white);
+    --accent: var(--charcoal-gray);
+    --accent-foreground: var(--pure-white);
+    --destructive: var(--coral-red);
+    --destructive-foreground: var(--pure-white);
+    --border: var(--slate-gray);
+    --input: var(--charcoal-gray);
+    --ring: var(--light-lavender);
+    --sidebar-background: var(--rich-black);
+    --sidebar-foreground: var(--pure-white);
+    --sidebar-primary: var(--soft-violet);
+    --sidebar-primary-foreground: var(--pure-white);
+    --sidebar-accent: var(--charcoal-gray);
+    --sidebar-accent-foreground: var(--pure-white);
+    --sidebar-border: var(--slate-gray);
+    --sidebar-ring: var(--light-lavender);
   }
+}
 
-  /* Custom Colors */
-  :root {
-    --rich-black: #0B090A;
-    --eerie-black: #161A1D;
-    --charcoal-gray: #1B1A17;
-    --cool-gray: #8A817A;
-    --soft-white: #F5F3F4;
-    --soft-violet: #A497D9;
+@layer base {
+  * {
+    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+    min-height: 100vh;
   }
 
-  .safe-area-inset {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+  .dark body {
+    background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
   }
-  
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+
+  /* Ensure full viewport coverage */
+  html, body, #root {
+    height: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
   }
-  
-  .mobile-optimized {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  .platform-ios {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  
-  .platform-android {
-    font-family: 'Roboto', sans-serif;
-  }
-  
-  /* Touch-friendly button sizes */
-  @media (max-width: 768px) {
-    .mobile-optimized button {
-      min-height: 44px;
-      min-width: 44px;
-    }
-    
-    .mobile-optimized input[type="text"],
-    .mobile-optimized input[type="password"],
-    .mobile-optimized input[type="email"] {
-      font-size: 16px; /* Prevents zoom on iOS */
-    }
+
+  .dark html, .dark body, .dark #root {
+    background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
   }
 }
 
-@layer components {
+/* Add entrance animation for cards and sections */
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(18px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.33,1,0.68,1);
+}
+
+/* White space for card/section content */
+.section-padding {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+@media (max-width: 640px) {
   .section-padding {
-    @apply py-12 md:py-24;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 }
 
-/* Capacitor specific styles */
-.capacitor-app {
-  overflow-x: hidden;
+/* Form improvements for input spacing */
+.input-group {
+  @apply flex flex-col gap-2;
 }
 
-/* PWA specific styles */
-@media (display-mode: standalone) {
-  .pwa-hidden {
-    display: none;
-  }
+.input-label {
+  @apply font-semibold;
+}
+
+.input-hint {
+  @apply text-xs text-muted-foreground ml-1 mt-1;
+}
+
+/* Responsive paddings for main areas with consistent background */
+.main-area {
+  @apply px-2 py-2 md:px-7 md:py-5;
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+}
+
+.dark .main-area {
+  background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
+}
+
+/* Ensure sidebar and main content area maintain full height */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+}
+
+.dark .app-container {
+  background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
+}
+
+/* Ensure the entire page maintains the gradient background */
+[data-sidebar="inset"] {
+  background: linear-gradient(to bottom right, rgb(248 250 252), rgb(239 246 255));
+}
+
+.dark [data-sidebar="inset"] {
+  background: linear-gradient(to bottom right, hsl(var(--rich-black)), hsl(222 15% 10%));
+}
+
+/* COMPREHENSIVE DARK MODE FIXES */
+
+/* Fix all card and component backgrounds */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-blue-50,
+.dark .bg-blue-100,
+.dark .bg-cyan-50,
+.dark .bg-indigo-50,
+.dark .bg-purple-50,
+.dark .bg-violet-50,
+.dark .bg-pink-50,
+.dark .bg-green-50,
+.dark .bg-yellow-50,
+.dark .bg-orange-50,
+.dark .bg-red-50,
+.dark .bg-slate-50,
+.dark .bg-stone-50,
+.dark .bg-neutral-50,
+.dark .bg-zinc-50 {
+  background-color: hsl(var(--charcoal-gray)) !important;
+}
+
+/* Fix light backgrounds */
+.dark .bg-gray-200,
+.dark .bg-gray-300,
+.dark .bg-blue-200,
+.dark .bg-blue-300 {
+  background-color: hsl(var(--charcoal-gray)) !important;
+}
+
+/* Apply violet to all headings and titles */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark .text-2xl,
+.dark .text-3xl,
+.dark .text-4xl,
+.dark .text-5xl,
+.dark .text-6xl,
+.dark .font-bold,
+.dark [data-title="true"],
+.dark .card-title,
+.dark .module-title,
+.dark .section-title {
+  color: hsl(263 85% 70%) !important; /* Soft violet for all headings */
+}
+
+/* Pure white for all body text and content */
+.dark p,
+.dark span,
+.dark div,
+.dark .text-base,
+.dark .text-sm,
+.dark .text-lg,
+.dark .text-xl {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Fix all gray text colors to use pure white */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-300,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Apply soft violet to highlighted numbers and stats */
+.dark .stat-number,
+.dark .highlight-number,
+.dark .count-display,
+.dark .metric-value,
+.dark .stat-value,
+.dark .badge-text {
+  color: hsl(263 85% 70%) !important;
+  font-weight: 600;
+}
+
+/* Apply light lavender for secondary highlights */
+.dark .text-muted-foreground,
+.dark .secondary-text,
+.dark .metric-label,
+.dark .stat-label {
+  color: hsl(263 70% 80%) !important;
+}
+
+/* Fix specific color classes */
+.dark .text-blue-600,
+.dark .text-blue-700,
+.dark .text-blue-800,
+.dark .text-blue-900,
+.dark .text-cyan-600,
+.dark .text-cyan-700,
+.dark .text-cyan-800,
+.dark .text-indigo-600,
+.dark .text-indigo-700,
+.dark .text-purple-600,
+.dark .text-purple-700,
+.dark .text-violet-600,
+.dark .text-violet-700 {
+  color: hsl(263 85% 70%) !important;
+}
+
+/* Success states use emerald green */
+.dark .text-green-600,
+.dark .text-green-700,
+.dark .text-green-800,
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+  color: hsl(var(--emerald-green)) !important;
+}
+
+/* Error states use coral red */
+.dark .text-red-600,
+.dark .text-red-700,
+.dark .text-red-800,
+.dark .text-rose-600,
+.dark .text-rose-700 {
+  color: hsl(var(--coral-red)) !important;
+}
+
+/* Warning states use yellow */
+.dark .text-yellow-600,
+.dark .text-yellow-700,
+.dark .text-yellow-800,
+.dark .text-amber-600,
+.dark .text-amber-700 {
+  color: hsl(45 93% 67%) !important;
+}
+
+/* Fix borders */
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-blue-200,
+.dark .border-yellow-200,
+.dark .border-green-200,
+.dark .border-red-200,
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix button styling */
+.dark .bg-blue-500,
+.dark .bg-blue-600,
+.dark .bg-indigo-500,
+.dark .bg-indigo-600,
+.dark .bg-purple-500,
+.dark .bg-purple-600,
+.dark .bg-violet-500,
+.dark .bg-violet-600 {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .hover\:bg-blue-600:hover,
+.dark .hover\:bg-blue-700:hover,
+.dark .hover\:bg-indigo-600:hover,
+.dark .hover\:bg-purple-600:hover,
+.dark .hover\:bg-violet-600:hover {
+  background-color: hsl(var(--light-lavender)) !important;
+}
+
+/* Fix success buttons */
+.dark .bg-green-500,
+.dark .bg-green-600,
+.dark .bg-emerald-500,
+.dark .bg-emerald-600 {
+  background-color: hsl(var(--emerald-green)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .hover\:bg-green-600:hover,
+.dark .hover\:bg-emerald-600:hover {
+  background-color: hsl(142 76% 45%) !important;
+}
+
+/* Fix status badges */
+.dark .bg-blue-100,
+.dark .bg-indigo-100,
+.dark .bg-purple-100,
+.dark .bg-violet-100 {
+  background-color: hsl(var(--soft-violet) / 0.2) !important;
+}
+
+.dark .bg-green-100,
+.dark .bg-emerald-100 {
+  background-color: hsl(var(--emerald-green) / 0.2) !important;
+}
+
+.dark .bg-yellow-100,
+.dark .bg-amber-100 {
+  background-color: hsl(45 93% 47% / 0.2) !important;
+}
+
+.dark .bg-red-100,
+.dark .bg-rose-100 {
+  background-color: hsl(var(--coral-red) / 0.2) !important;
+}
+
+/* Fix form elements */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="number"],
+.dark input[type="password"],
+.dark textarea,
+.dark select {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark input[type="text"]::placeholder,
+.dark input[type="email"]::placeholder,
+.dark input[type="number"]::placeholder,
+.dark input[type="password"]::placeholder,
+.dark textarea::placeholder {
+  color: hsl(var(--pure-white) / 0.7) !important;
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="number"]:focus,
+.dark input[type="password"]:focus,
+.dark textarea:focus,
+.dark select:focus {
+  ring-color: hsl(var(--light-lavender)) !important;
+  border-color: hsl(var(--light-lavender)) !important;
+}
+
+/* Fix cards and surfaces */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.4) !important;
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.3) !important;
+}
+
+/* Fix dropdowns and popovers */
+.dark .bg-white.shadow-lg {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix hover states */
+.dark .hover\:text-blue-600:hover,
+.dark .hover\:text-blue-700:hover,
+.dark .hover\:text-indigo-600:hover,
+.dark .hover\:text-purple-600:hover,
+.dark .hover\:text-violet-600:hover {
+  color: hsl(var(--light-lavender)) !important;
+}
+
+/* Fix link colors */
+.dark a {
+  color: hsl(var(--soft-violet)) !important;
+}
+
+.dark a:hover {
+  color: hsl(var(--light-lavender)) !important;
+}
+
+/* Fix icon colors */
+.dark svg {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .text-primary svg {
+  color: hsl(var(--soft-violet)) !important;
+}
+
+/* Fix button text colors */
+.dark button {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark button:disabled {
+  color: hsl(var(--pure-white) / 0.5) !important;
+  background-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix table styling */
+.dark table {
+  background-color: hsl(var(--charcoal-gray)) !important;
+}
+
+.dark th,
+.dark td {
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix modal and dialog backgrounds */
+.dark .modal,
+.dark .dialog,
+.dark [role="dialog"] {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Fix tooltip backgrounds */
+.dark .tooltip {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix scrollbar in dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: hsl(var(--charcoal-gray)) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--slate-gray)) !important;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--slate-gray) / 0.8) !important;
+}
+
+/* Language learning module specific fixes */
+.dark .learning-card,
+.dark .lesson-card,
+.dark .topic-card {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .lesson-title,
+.dark .topic-title {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .lesson-description,
+.dark .topic-description {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .lesson-complete,
+.dark .topic-complete {
+  color: hsl(var(--emerald-green)) !important;
+}
+
+/* Step indicator fixes */
+.dark .step-indicator {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .step-active {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .step-complete {
+  background-color: hsl(var(--emerald-green)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Progress indicators */
+.dark .progress-bar {
+  background-color: hsl(var(--slate-gray)) !important;
+}
+
+.dark .progress-fill {
+  background-color: hsl(var(--soft-violet)) !important;
+}
+
+/* Achievement and success elements */
+.dark .achievement-title,
+.dark .success-message {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .achievement-description,
+.dark .success-description {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Profile and user info */
+.dark .profile-name,
+.dark .user-title {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .profile-subtitle,
+.dark .user-subtitle {
+  color: hsl(263 70% 80%) !important;
+}
+
+/* Navigation elements */
+.dark .nav-link {
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .nav-link:hover {
+  color: hsl(263 70% 80%) !important;
+}
+
+.dark .nav-link.active {
+  color: hsl(263 85% 70%) !important;
+}
+
+/* Fix any remaining gradient issues */
+.dark .bg-gradient-to-r,
+.dark .bg-gradient-to-l,
+.dark .bg-gradient-to-t,
+.dark .bg-gradient-to-b,
+.dark .bg-gradient-to-br,
+.dark .bg-gradient-to-bl,
+.dark .bg-gradient-to-tr,
+.dark .bg-gradient-to-tl {
+  background: hsl(var(--charcoal-gray)) !important;
+}
+
+/* Apply violet gradients for prominent elements */
+.dark .hero-gradient,
+.dark .title-gradient,
+.dark .accent-gradient {
+  background: linear-gradient(to right, hsl(var(--soft-violet)), hsl(var(--light-lavender))) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* Override any remaining light text on dark backgrounds */
+.dark .text-black {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Ensure consistent button styling */
+.dark .btn-primary {
+  background-color: hsl(var(--soft-violet)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--soft-violet)) !important;
+}
+
+.dark .btn-primary:hover {
+  background-color: hsl(var(--light-lavender)) !important;
+  border-color: hsl(var(--light-lavender)) !important;
+}
+
+.dark .btn-secondary {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+.dark .btn-secondary:hover {
+  background-color: hsl(var(--slate-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+}
+
+/* Fix notification and alert styling */
+.dark .alert {
+  background-color: hsl(var(--charcoal-gray)) !important;
+  border-color: hsl(var(--slate-gray)) !important;
+  color: hsl(var(--pure-white)) !important;
+}
+
+.dark .alert-title {
+  color: hsl(263 85% 70%) !important;
+}
+
+.dark .alert-description {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Ensure consistent spacing and layout */
+.dark .container,
+.dark .max-w-6xl,
+.dark .max-w-4xl,
+.dark .max-w-2xl {
+  color: hsl(var(--pure-white)) !important;
+}
+
+/* Fix any remaining opacity issues */
+.dark .opacity-75 {
+  color: hsl(var(--pure-white) / 0.75) !important;
+}
+
+.dark .opacity-50 {
+  color: hsl(var(--pure-white) / 0.5) !important;
+}
+
+.dark .opacity-25 {
+  color: hsl(var(--pure-white) / 0.25) !important;
 }
