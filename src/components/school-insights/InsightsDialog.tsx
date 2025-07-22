@@ -79,7 +79,7 @@ export const InsightsDialog = ({
             {famousPlaces && (
               <div className="bg-green-50 dark:bg-charcoal-gray p-4 rounded-lg border dark:border-slate-gray">
                 <div className="flex items-center gap-2 mb-3">
-                  <MapPin className="h-5 w-5 text-green-600 dark:text-emerald-green" />
+                  <MapPin className="h-5 w-5 text-green-600 dark:text-soft-violet" />
                   <h3 className="font-semibold text-green-900 dark:text-soft-violet">Famous Places</h3>
                 </div>
                 <p className="text-green-800 dark:text-pure-white text-sm">{famousPlaces}</p>
@@ -89,7 +89,7 @@ export const InsightsDialog = ({
             {sportsFacilities && (
               <div className="bg-orange-50 dark:bg-charcoal-gray p-4 rounded-lg border dark:border-slate-gray">
                 <div className="flex items-center gap-2 mb-3">
-                  <Trophy className="h-5 w-5 text-orange-600 dark:text-amber-400" />
+                  <Trophy className="h-5 w-5 text-orange-600 dark:text-soft-violet" />
                   <h3 className="font-semibold text-orange-900 dark:text-soft-violet">Sports & Recreation</h3>
                 </div>
                 <p className="text-orange-800 dark:text-pure-white text-sm">{sportsFacilities}</p>
@@ -99,7 +99,7 @@ export const InsightsDialog = ({
             {studentLife && (
               <div className="bg-purple-50 dark:bg-charcoal-gray p-4 rounded-lg border dark:border-slate-gray">
                 <div className="flex items-center gap-2 mb-3">
-                  <Users className="h-5 w-5 text-purple-600 dark:text-light-lavender" />
+                  <Users className="h-5 w-5 text-purple-600 dark:text-soft-violet" />
                   <h3 className="font-semibold text-purple-900 dark:text-soft-violet">Student Life</h3>
                 </div>
                 <p className="text-purple-800 dark:text-pure-white text-sm">{studentLife}</p>
@@ -115,7 +115,7 @@ export const InsightsDialog = ({
                 {localInsights.map((insight) => (
                   <div key={insight.id} className="border border-gray-200 dark:border-slate-gray rounded-lg p-4 bg-white dark:bg-charcoal-gray">
                     <div className="flex items-start gap-3">
-                      <div className="text-gray-600 dark:text-pure-white mt-1">
+                      <div className="text-gray-600 dark:text-soft-violet mt-1">
                         {getIcon(insight.type)}
                       </div>
                       <div className="flex-1">
