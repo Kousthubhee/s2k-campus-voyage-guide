@@ -21,8 +21,8 @@ export const ChecklistPage = ({
   currentPage,
   setCurrentPage
 }: ChecklistPageProps) => {
-  const { keysEarned } = useLocalStorageProgress();
-
+  const [progress] = useLocalStorageProgress();
+  
   const handleModuleClick = (module: any) => {
     console.log('Module clicked:', module.id, 'Type:', module.type);
     
@@ -76,7 +76,7 @@ export const ChecklistPage = ({
             Complete these modules to prepare for your journey to France
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span>🗝️ Keys available: {keysEarned}</span>
+            <span>🗝️ Keys available: {progress.keys}</span>
           </div>
         </div>
       </div>
@@ -87,8 +87,9 @@ export const ChecklistPage = ({
             key={module.id}
             module={module}
             isCompleted={userProgress.completedModules.includes(module.id)}
-            onClick={() => handleModuleClick(module)}
-            keysAvailable={keysEarned}
+            isUnlocked={userProgress.unlockedModules.includes(module.id)}
+            onModuleClick={handleModuleClick}
+            userKeys={progress.keys}
           />
         ))}
       </div>
