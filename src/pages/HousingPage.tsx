@@ -12,12 +12,43 @@ interface HousingPageProps {
   isCompleted?: boolean;
 }
 
+interface TaskStatus {
+  [key: string]: boolean;
+}
+
 export const HousingPage = ({ onBack, onComplete, isCompleted = false }: HousingPageProps) => {
-  const [selectedTab, setSelectedTab] = useState('directory');
+  const [selectedTab, setSelectedTab] = useState('process');
+  const [taskStatus, setTaskStatus] = useState<TaskStatus>({
+    budgetPlanning: false,
+    crousApplication: false,
+    documentPreparation: false,
+    locationResearch: false,
+    virtualViewing: false
+  });
+
+  const [processStep, setProcessStep] = useState(1);
 
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
   };
+
+  const handleTaskToggle = (taskKey: string) => {
+    setTaskStatus(prev => ({
+      ...prev,
+      [taskKey]: !prev[taskKey]
+    }));
+  };
+
+  const handleStepComplete = (step: number) => {
+    if (step < 3) {
+      setProcessStep(step + 1);
+    } else {
+      onComplete?.();
+    }
+  };
+
+  const completedTasks = Object.values(taskStatus).filter(Boolean).length;
+  const totalTasks = Object.keys(taskStatus).length;
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in">
@@ -52,11 +83,49 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="process">Housing Process</TabsTrigger>
           <TabsTrigger value="directory">Housing Sites</TabsTrigger>
-          <TabsTrigger value="checklist">Housing Checklist</TabsTrigger>
+          <TabsTrigger value="checklist">Checklist</TabsTrigger>
           <TabsTrigger value="tips">Pro Tips</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="process" className="space-y-6 mt-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map((step) => (
+              <Card key={step} className={`${step === processStep ? 'ring-2 ring-primary' : ''} ${step < processStep ? 'bg-green-50' : ''}`}>
+                <CardContent className="flex items-center justify-between p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                      step < processStep ? 'bg-green-500' : step === processStep ? 'bg-primary' : 'bg-gray-300'
+                    }`}>
+                      {step < processStep ? <CheckCircle className="h-5 w-5" /> : step}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">
+                        {step === 1 && "Getting Started"}
+                        {step === 2 && "Main Process"}
+                        {step === 3 && "Finalization"}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {step === 1 && "Initial setup and preparation"}
+                        {step === 2 && "Complete the main requirements"}
+                        {step === 3 && "Wrap up and confirm completion"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => handleStepComplete(step)}
+                    disabled={step !== processStep}
+                    variant={step < processStep ? "secondary" : "default"}
+                  >
+                    {step < processStep ? "Completed" : "Mark Complete"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
 
         <TabsContent value="directory" className="space-y-6 mt-6">
           <HousingSitesDirectory />
@@ -65,45 +134,37 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
         <TabsContent value="checklist" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>📋 Housing Search Checklist</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                📋 Housing Search Checklist
+                <span className="text-sm bg-blue-100 px-2 py-1 rounded">
+                  {completedTasks}/{totalTasks} completed
+                </span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1" />
-                  <div>
-                    <h4 className="font-semibold">Budget Planning</h4>
-                    <p className="text-sm text-muted-foreground">Determine your monthly housing budget (typically 30-40% of income)</p>
+                {[
+                  { key: 'budgetPlanning', title: 'Budget Planning', desc: 'Determine your monthly housing budget (typically 30-40% of income)' },
+                  { key: 'crousApplication', title: 'CROUS Application', desc: 'Apply for university housing through CROUS (most affordable option)' },
+                  { key: 'documentPreparation', title: 'Document Preparation', desc: 'Gather ID, proof of income, guarantor documents, bank statements' },
+                  { key: 'locationResearch', title: 'Location Research', desc: 'Check proximity to university, public transport, and amenities' },
+                  { key: 'virtualViewing', title: 'Virtual Viewing', desc: 'Schedule online tours or request detailed photos and videos' }
+                ].map((task) => (
+                  <div key={task.key} className="flex items-start gap-3">
+                    <input 
+                      type="checkbox" 
+                      className="mt-1" 
+                      checked={taskStatus[task.key]}
+                      onChange={() => handleTaskToggle(task.key)}
+                    />
+                    <div>
+                      <h4 className={`font-semibold ${taskStatus[task.key] ? 'line-through text-muted-foreground' : ''}`}>
+                        {task.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">{task.desc}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1" />
-                  <div>
-                    <h4 className="font-semibold">CROUS Application</h4>
-                    <p className="text-sm text-muted-foreground">Apply for university housing through CROUS (most affordable option)</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1" />
-                  <div>
-                    <h4 className="font-semibold">Document Preparation</h4>
-                    <p className="text-sm text-muted-foreground">Gather ID, proof of income, guarantor documents, bank statements</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1" />
-                  <div>
-                    <h4 className="font-semibold">Location Research</h4>
-                    <p className="text-sm text-muted-foreground">Check proximity to university, public transport, and amenities</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1" />
-                  <div>
-                    <h4 className="font-semibold">Virtual Viewing</h4>
-                    <p className="text-sm text-muted-foreground">Schedule online tours or request detailed photos and videos</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
