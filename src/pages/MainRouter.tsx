@@ -30,7 +30,13 @@ const MainRouter = () => {
       case 'home':
         return <Index onNavigate={handleNavigation} />;
       case 'checklist':
-        return <ChecklistPage onBack={() => setCurrentPage('home')} />;
+        return (
+          <ChecklistPage 
+            onBack={() => setCurrentPage('home')} 
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        );
       case 'finance':
         return <FinanceTrackingPage onBack={() => setCurrentPage('home')} />;
       case 'language':
