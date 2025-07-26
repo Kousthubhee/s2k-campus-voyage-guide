@@ -26,32 +26,43 @@ export const ChecklistPage = ({
   const handleModuleClick = (module: any) => {
     console.log('Module clicked:', module.id, 'Type:', module.type);
     
-    // Handle different module types
+    // Handle different module types with correct routing
     switch (module.id) {
       case 'school':
-        // Navigate to school insights
+        console.log('Navigating to insights page');
+        setCurrentPage('insights');
         break;
       case 'housing':
         console.log('Navigating to housing page');
         setCurrentPage('housing');
         break;
       case 'finance':
+        console.log('Navigating to finance page');
         setCurrentPage('finance');
         break;
       case 'language':
+        console.log('Navigating to language page');
         setCurrentPage('language');
         break;
       case 'pre-arrival-1':
-        // Navigate to pre-arrival 1 page
+        console.log('Navigating to pre-arrival-1 page');
+        // This would need a corresponding case in MainRouter if the page exists
+        console.log('Pre-arrival-1 navigation not yet implemented');
         break;
       case 'pre-arrival-2':
-        // Navigate to pre-arrival 2 page
+        console.log('Navigating to pre-arrival-2 page');
+        // This would need a corresponding case in MainRouter if the page exists
+        console.log('Pre-arrival-2 navigation not yet implemented');
         break;
       case 'post-arrival':
-        // Navigate to post-arrival page
+        console.log('Navigating to post-arrival page');
+        // This would need a corresponding case in MainRouter if the page exists
+        console.log('Post-arrival navigation not yet implemented');
         break;
       case 'integration':
-        // Navigate to integration page
+        console.log('Navigating to integration page');
+        // This would need a corresponding case in MainRouter if the page exists
+        console.log('Integration navigation not yet implemented');
         break;
       default:
         console.log('No navigation defined for module:', module.id);

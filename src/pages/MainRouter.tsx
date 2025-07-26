@@ -20,14 +20,17 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
   >("home");
 
   const handleSetCurrentPage = (page: string) => {
+    console.log('MainRouter: Setting current page to:', page);
     const validPages = ["home", "checklist", "finance", "language", "insights", "profile", "housing"] as const;
     if (validPages.includes(page as any)) {
       setCurrentPage(page as any);
+    } else {
+      console.error('MainRouter: Invalid page requested:', page);
     }
   };
 
   const renderPage = () => {
-    console.log('Current page in MainRouter:', currentPage);
+    console.log('MainRouter: Rendering page:', currentPage);
     
     switch (currentPage) {
       case 'home':
@@ -74,7 +77,7 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
           />
         );
       case 'housing':
-        console.log('Rendering HousingPage');
+        console.log('MainRouter: Rendering HousingPage');
         return (
           <HousingPage 
             onBack={() => setCurrentPage('checklist')}
@@ -98,6 +101,7 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
           />
         );
       default:
+        console.log('MainRouter: Default case, rendering HomePage');
         return (
           <HomePage 
             onGetStarted={() => handleSetCurrentPage('checklist')}
