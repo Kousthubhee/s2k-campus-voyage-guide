@@ -1,10 +1,10 @@
 
-import React, { useEffect } from 'react';
-import { ChecklistModule } from '@/components/ChecklistModule';
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ModuleCard } from '@/components/ModuleCard';
 import checklistModules from '@/constants/checklistModules';
-import { useModuleProgress } from '@/hooks/useModuleProgress';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
+import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
 
 interface ChecklistPageProps {
   userProgress: any;
@@ -21,104 +21,77 @@ export const ChecklistPage = ({
   currentPage,
   setCurrentPage
 }: ChecklistPageProps) => {
-  const { 
-    completions, 
-    markModuleComplete, 
-    markModuleIncomplete, 
-    isModuleComplete, 
-    loading,
-    saveAllChanges,
-    discardChanges,
-    hasUnsavedChanges
-  } = useModuleProgress();
+  const { keysEarned } = useLocalStorageProgress();
 
-  const {
-    hasUnsavedChanges: hasChanges,
-    isSaving,
-    markAsChanged,
-    saveChanges,
-    promptBeforeLeaving
-  } = useUnsavedChanges({
-    onSave: saveAllChanges,
-    onDiscard: discardChanges
-  });
-
-  // Sync database completions with local state
-  useEffect(() => {
-    if (!loading) {
-      const dbCompletedModules = completions.map(c => c.module_id);
-      console.log('Syncing completions to local state:', dbCompletedModules);
-      
-      setUserProgress(prevProgress => ({
-        ...prevProgress,
-        completedModules: dbCompletedModules
-      }));
-    }
-  }, [completions, loading, setUserProgress]);
-
-  // Enhanced userProgress with database tracking and save functionality
-  const enhancedUserProgress = {
-    ...userProgress,
-    completedModules: completions.map(c => c.module_id),
-    markComplete: async (moduleId: string) => {
-      console.log('Enhanced markComplete called for:', moduleId);
-      await markModuleComplete(moduleId);
-      markAsChanged();
-    },
-    markIncomplete: async (moduleId: string) => {
-      console.log('Enhanced markIncomplete called for:', moduleId);
-      await markModuleIncomplete(moduleId);
-      markAsChanged();
-    },
-    isComplete: (moduleId: string) => {
-      return isModuleComplete(moduleId);
+  const handleModuleClick = (module: any) => {
+    console.log('Module clicked:', module.id, 'Type:', module.type);
+    
+    // Handle different module types
+    switch (module.id) {
+      case 'school':
+        // Navigate to school insights
+        break;
+      case 'housing':
+        console.log('Navigating to housing page');
+        setCurrentPage('housing');
+        break;
+      case 'finance':
+        setCurrentPage('finance');
+        break;
+      case 'language':
+        setCurrentPage('language');
+        break;
+      case 'pre-arrival-1':
+        // Navigate to pre-arrival 1 page
+        break;
+      case 'pre-arrival-2':
+        // Navigate to pre-arrival 2 page
+        break;
+      case 'post-arrival':
+        // Navigate to post-arrival page
+        break;
+      case 'integration':
+        // Navigate to integration page
+        break;
+      default:
+        console.log('No navigation defined for module:', module.id);
     }
   };
 
-  // Prompt before navigation
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges()) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading your progress...</div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <ChecklistModule
-        modules={checklistModules}
-        userProgress={enhancedUserProgress}
-        setUserProgress={setUserProgress}
-        onSchoolSelect={onSchoolSelect}
-        currentPage={currentPage}
-        setCurrentPage={async (page: string) => {
-          await promptBeforeLeaving();
-          setCurrentPage(page);
-        }}
-      />
-      
-      <SaveChangesPrompt
-        hasUnsavedChanges={hasUnsavedChanges() || hasChanges}
-        isSaving={isSaving}
-        onSave={saveChanges}
-        onDiscard={() => {
-          discardChanges();
-          markAsChanged();
-        }}
-      />
-    </>
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="mb-6">
+        <Button 
+          variant="outline" 
+          onClick={() => setCurrentPage('home')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-4">Your Study Abroad Checklist</h1>
+          <p className="text-lg text-muted-foreground mb-4">
+            Complete these modules to prepare for your journey to France
+          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span>🗝️ Keys available: {keysEarned}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {checklistModules.map((module) => (
+          <ModuleCard
+            key={module.id}
+            module={module}
+            isCompleted={userProgress.completedModules.includes(module.id)}
+            onClick={() => handleModuleClick(module)}
+            keysAvailable={keysEarned}
+          />
+        ))}
+      </div>
+    </div>
   );
 };

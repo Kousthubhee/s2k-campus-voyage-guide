@@ -27,6 +27,8 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
   };
 
   const renderPage = () => {
+    console.log('Current page in MainRouter:', currentPage);
+    
     switch (currentPage) {
       case 'home':
         return (
@@ -71,17 +73,8 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
             isCompleted={userProgress.completedModules.includes('language')}
           />
         );
-      case 'insights':
-        return (
-          <PersonalizedDashboard />
-        );
-      case 'profile':
-        return (
-          <ProfilePage
-            onBack={() => setCurrentPage('checklist')}
-          />
-        );
       case 'housing':
+        console.log('Rendering HousingPage');
         return (
           <HousingPage 
             onBack={() => setCurrentPage('checklist')}
@@ -92,6 +85,23 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
               });
             }}
             isCompleted={userProgress.completedModules.includes('housing')}
+          />
+        );
+      case 'insights':
+        return (
+          <PersonalizedDashboard />
+        );
+      case 'profile':
+        return (
+          <ProfilePage
+            onBack={() => setCurrentPage('checklist')}
+          />
+        );
+      default:
+        return (
+          <HomePage 
+            onGetStarted={() => handleSetCurrentPage('checklist')}
+            onPageNavigation={handleSetCurrentPage}
           />
         );
     }
