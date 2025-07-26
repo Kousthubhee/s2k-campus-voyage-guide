@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Index } from './Index';
+import Index from './Index';
 import { ChecklistPage } from './ChecklistPage';
 import { FinanceTrackingPage } from './FinanceTrackingPage';
 import { LanguagePage } from './LanguagePage';
@@ -11,14 +12,14 @@ const MainRouter = () => {
   const [currentPage, setCurrentPage] = useState<
     'home' | 'checklist' | 'finance' | 'language' | 'insights' | 'profile'
   >('home');
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     // Redirect to login if not authenticated
-    if (!user && !isLoading) {
+    if (!user && !loading) {
       window.location.href = '/login';
     }
-  }, [user, isLoading]);
+  }, [user, loading]);
 
   const handleNavigation = (page: 'home' | 'checklist' | 'finance' | 'language' | 'insights' | 'profile') => {
     setCurrentPage(page);
@@ -45,7 +46,7 @@ const MainRouter = () => {
 
   return (
     <div>
-      {isLoading ? (
+      {loading ? (
         <div className="flex justify-center items-center h-screen">
           <span className="loading loading-spinner loading-lg"></span>
         </div>

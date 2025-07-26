@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { ChecklistModule } from '@/components/ChecklistModule';
+import SimpleChecklistModule from '@/components/SimpleChecklistModule';
 import { GamificationBadges } from '@/components/finance/GamificationBadges';
 import { AdvancedProgressTracker } from '@/components/progress/AdvancedProgressTracker';
 import { HousingSitesDirectory } from '@/components/housing/HousingSitesDirectory';
@@ -78,7 +78,7 @@ export const ChecklistPage = ({ onBack }: ChecklistPageProps) => {
         </TabsList>
 
         <TabsContent value="checklist" className="space-y-6 mt-6">
-          <ChecklistModule />
+          <SimpleChecklistModule />
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6 mt-6">
