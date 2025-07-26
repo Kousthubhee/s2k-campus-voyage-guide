@@ -1,3 +1,4 @@
+
 import { matchSorter } from 'match-sorter';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -13,6 +14,19 @@ interface MatchResult {
   confidence: number;
   suggestions: FAQ[];
 }
+
+// Handle greetings and basic interactions
+const handleGreetings = (query: string): string | null => {
+  const normalizedQuery = query.toLowerCase().trim();
+  
+  const greetings = ['hi', 'hello', 'hey', 'bonjour', 'salut', 'good morning', 'good afternoon', 'good evening'];
+  
+  if (greetings.some(greeting => normalizedQuery === greeting || normalizedQuery.startsWith(greeting + ' ') || normalizedQuery.endsWith(' ' + greeting))) {
+    return "Hello! I'm your FAQ assistant for studying in France. I can help you with information about visa requirements, housing, finances, student life, and much more. What would you like to know?";
+  }
+  
+  return null;
+};
 
 // Normalize text for better matching
 const normalizeText = (text: string): string => {
@@ -57,6 +71,22 @@ const getKeyTerms = (query: string): string[] => {
 
 export const findBestFAQMatch = (query: string, faqs: FAQ[]): MatchResult => {
   console.log('Finding match for query:', query);
+  
+  // First check if it's a greeting
+  const greetingResponse = handleGreetings(query);
+  if (greetingResponse) {
+    console.log('Detected greeting, returning greeting response');
+    return {
+      faq: {
+        id: 'greeting',
+        category: 'General',
+        question: query,
+        answer: greetingResponse
+      },
+      confidence: 1.0,
+      suggestions: []
+    };
+  }
   
   // Use fuzzy matching with match-sorter as the primary method
   const matches = matchSorter(faqs, query, {

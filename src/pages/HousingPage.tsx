@@ -17,7 +17,7 @@ interface TaskStatus {
 }
 
 export const HousingPage = ({ onBack, onComplete, isCompleted = false }: HousingPageProps) => {
-  const [selectedTab, setSelectedTab] = useState('process');
+  const [selectedTab, setSelectedTab] = useState('directory');
   const [taskStatus, setTaskStatus] = useState<TaskStatus>({
     budgetPlanning: false,
     crousApplication: false,
@@ -25,8 +25,6 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
     locationResearch: false,
     virtualViewing: false
   });
-
-  const [processStep, setProcessStep] = useState(1);
 
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
@@ -37,14 +35,6 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
       ...prev,
       [taskKey]: !prev[taskKey]
     }));
-  };
-
-  const handleStepComplete = (step: number) => {
-    if (step < 3) {
-      setProcessStep(step + 1);
-    } else {
-      onComplete?.();
-    }
   };
 
   const completedTasks = Object.values(taskStatus).filter(Boolean).length;
@@ -83,49 +73,11 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
       </div>
 
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="process">Housing Process</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="directory">Housing Sites</TabsTrigger>
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
           <TabsTrigger value="tips">Pro Tips</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="process" className="space-y-6 mt-6">
-          <div className="space-y-4">
-            {[1, 2, 3].map((step) => (
-              <Card key={step} className={`${step === processStep ? 'ring-2 ring-primary' : ''} ${step < processStep ? 'bg-green-50' : ''}`}>
-                <CardContent className="flex items-center justify-between p-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                      step < processStep ? 'bg-green-500' : step === processStep ? 'bg-primary' : 'bg-gray-300'
-                    }`}>
-                      {step < processStep ? <CheckCircle className="h-5 w-5" /> : step}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">
-                        {step === 1 && "Getting Started"}
-                        {step === 2 && "Main Process"}
-                        {step === 3 && "Finalization"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {step === 1 && "Initial setup and preparation"}
-                        {step === 2 && "Complete the main requirements"}
-                        {step === 3 && "Wrap up and confirm completion"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => handleStepComplete(step)}
-                    disabled={step !== processStep}
-                    variant={step < processStep ? "secondary" : "default"}
-                  >
-                    {step < processStep ? "Completed" : "Mark Complete"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
 
         <TabsContent value="directory" className="space-y-6 mt-6">
           <HousingSitesDirectory />
@@ -165,6 +117,18 @@ export const HousingPage = ({ onBack, onComplete, isCompleted = false }: Housing
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="mt-6">
+                <Button 
+                  onClick={onComplete}
+                  className="w-full"
+                  disabled={completedTasks < totalTasks}
+                >
+                  {completedTasks < totalTasks ? 
+                    `Complete ${totalTasks - completedTasks} more tasks to finish` : 
+                    'Mark Module as Complete'
+                  }
+                </Button>
               </div>
             </CardContent>
           </Card>
