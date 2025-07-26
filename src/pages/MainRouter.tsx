@@ -73,9 +73,7 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
         );
       case 'insights':
         return (
-          <PersonalizedDashboard
-            onBack={() => setCurrentPage('checklist')}
-          />
+          <PersonalizedDashboard />
         );
       case 'profile':
         return (
