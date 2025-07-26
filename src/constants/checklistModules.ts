@@ -3,52 +3,69 @@ const checklistModules = [
   {
     id: 'school',
     title: 'School Insights',
-    description: 'Explore universities and schools across France with detailed information and city insights.',
+    description: 'Research and select your ideal French university',
     icon: '🎓',
-    color: 'bg-blue-500',
-    type: 'navigation'
+    color: 'from-blue-400 to-blue-600',
+    type: 'insights'
   },
   {
     id: 'pre-arrival-1',
-    title: 'Pre-Arrival Setup 1',
-    description: 'Essential documents, visa applications, and initial preparations for your journey.',
+    title: 'Pre-Arrival Checklist (Part 1)',
+    description: 'Essential documents and preparations',
     icon: '📋',
-    color: 'bg-green-500',
-    type: 'module'
+    color: 'from-green-400 to-green-600',
+    type: 'checklist'
   },
   {
     id: 'pre-arrival-2',
-    title: 'Packing Assistant',
-    description: 'Accommodation, banking, and final preparations before departure.',
+    title: 'Pre-Arrival Checklist (Part 2)',
+    description: 'Final preparations before departure',
+    icon: '✈️',
+    color: 'from-purple-400 to-purple-600',
+    type: 'checklist'
+  },
+  {
+    id: 'housing',
+    title: 'Housing Assistant',
+    description: 'Find and secure accommodation in France',
     icon: '🏠',
-    color: 'bg-purple-500',
-    type: 'module'
+    color: 'from-orange-400 to-orange-600',
+    type: 'housing',
+    keysRequired: 1
   },
   {
     id: 'post-arrival',
     title: 'Post-Arrival Tasks',
-    description: 'Essential tasks to complete after arriving in France.',
-    icon: '✅',
-    color: 'bg-orange-500',
-    type: 'module',
+    description: 'Complete essential tasks after arriving in France',
+    icon: '🎯',
+    color: 'from-red-400 to-red-600',
+    type: 'tasks',
     keysRequired: 2
   },
   {
     id: 'integration',
-    title: 'French Integration',
-    description: 'Learn French culture, language basics, and integration tips.',
-    icon: '🇫🇷',
-    color: 'bg-red-500',
-    type: 'navigation',
+    title: 'Integration Guide',
+    description: 'Integrate into French academic and social life',
+    icon: '🤝',
+    color: 'from-teal-400 to-teal-600',
+    type: 'guide',
     keysRequired: 1
   },
   {
     id: 'finance',
     title: 'Finance Tracking',
-    description: 'Manage your expenses and budget while studying in France.',
+    description: 'Manage your finances as an international student',
     icon: '💰',
-    color: 'bg-yellow-500',
-    type: 'module',
+    color: 'from-yellow-400 to-yellow-600',
+    type: 'finance'
+  },
+  {
+    id: 'suggestions',
+    title: 'AI Suggestions',
+    description: 'Get personalized recommendations for your journey',
+    icon: '🤖',
+    color: 'from-indigo-400 to-indigo-600',
+    type: 'ai',
     keysRequired: 3
   }
 ];

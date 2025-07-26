@@ -1,45 +1,96 @@
-
-import { useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { ChecklistPage } from './ChecklistPage';
+import { FinanceTrackingPage } from './FinanceTrackingPage';
+import { LanguagePage } from './LanguagePage';
+import { HousingPage } from './HousingPage';
+import { PersonalizedDashboard } from '@/components/insights/PersonalizedDashboard';
+import { ProfilePage } from './ProfilePage';
+import { HomePage } from '@/components/HomePage';
 
 interface MainRouterProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-  userProfile: any;
   userProgress: any;
   setUserProgress: (progress: any) => void;
-  selectedSchool: any;
-  setSelectedSchool: (school: any) => void;
-  handleProgressUpdate: (progress: any) => void;
-  profile: any;
-  setUserProfile: (profile: any) => void;
+  onSchoolSelect: (school: any) => void;
 }
 
-const MainRouter = ({
-  currentPage,
-  setCurrentPage,
-  userProfile,
-  userProgress,
-  setUserProgress,
-  selectedSchool,
-  setSelectedSchool,
-  handleProgressUpdate,
-  profile,
-  setUserProfile
-}: MainRouterProps) => {
-  const { user, loading } = useAuth();
+const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRouterProps) => {
+  const [currentPage, setCurrentPage] = useState<
+    "home" | "checklist" | "finance" | "language" | "insights" | "profile" | "housing"
+  >("home");
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleSetCurrentPage = (page: string) => {
+    const validPages = ["home", "checklist", "finance", "language", "insights", "profile", "housing"] as const;
+    if (validPages.includes(page as any)) {
+      setCurrentPage(page as any);
+    }
+  };
 
-  // This component is now a legacy router used to support old code
-  // The actual routing happens in Index.tsx with React Router
-  // This function serves as a compatibility layer
-  console.log('MainRouter is now just a compatibility layer - routing happens in Index.tsx');
-  
-  return null;
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage onNavigate={handleSetCurrentPage} />;
+      case 'checklist':
+        return (
+          <ChecklistPage
+            userProgress={userProgress}
+            setUserProgress={setUserProgress}
+            onSchoolSelect={onSchoolSelect}
+            currentPage={currentPage}
+            setCurrentPage={handleSetCurrentPage}
+          />
+        );
+      case 'finance':
+        return (
+          <FinanceTrackingPage
+            onBack={() => setCurrentPage('checklist')}
+            onComplete={() => {
+              setUserProgress({
+                ...userProgress,
+                completedModules: [...userProgress.completedModules, 'finance']
+              });
+            }}
+            isCompleted={userProgress.completedModules.includes('finance')}
+          />
+        );
+      case 'language':
+        return (
+          <LanguagePage
+            onBack={() => setCurrentPage('checklist')}
+            onComplete={() => {
+              setUserProgress({
+                ...userProgress,
+                completedModules: [...userProgress.completedModules, 'language']
+              });
+            }}
+            isCompleted={userProgress.completedModules.includes('language')}
+          />
+        );
+      case 'insights':
+        return (
+          <PersonalizedDashboard
+            onBack={() => setCurrentPage('checklist')}
+          />
+        );
+      case 'profile':
+        return (
+          <ProfilePage
+            onBack={() => setCurrentPage('checklist')}
+          />
+        );
+      case 'housing':
+        return (
+          <HousingPage 
+            onBack={() => setCurrentPage('checklist')}
+          />
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-gray-800">
+      {renderPage()}
+    </div>
+  );
 };
 
 export default MainRouter;
