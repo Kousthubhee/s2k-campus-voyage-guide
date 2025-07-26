@@ -1,16 +1,115 @@
 
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FinanceChartProps {
-  data: Array<{
-    date: string;
-    income: number;
-    expenses: number;
-    balance: number;
-  }>;
+  selectedMonth: string;
+  selectedYear: string;
 }
 
-export function FinanceChart({ data }: FinanceChartProps) {
+interface ChartDataPoint {
+  date: string;
+  income: number;
+  expenses: number;
+  balance: number;
+}
+
+export function FinanceChart({ selectedMonth, selectedYear }: FinanceChartProps) {
+  const { user } = useAuth();
+  const [data, setData] = useState<ChartDataPoint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchChartData = async () => {
+    if (!user) {
+      // Demo data for non-authenticated users
+      const demoData = [
+        { date: '2024-01-01', income: 1200, expenses: 850, balance: 350 },
+        { date: '2024-01-15', income: 1200, expenses: 900, balance: 300 },
+        { date: '2024-01-31', income: 1400, expenses: 950, balance: 450 }
+      ];
+      setData(demoData);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const lastDay = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0).getDate();
+      const startDate = `${selectedYear}-${selectedMonth}-01`;
+      const endDate = `${selectedYear}-${selectedMonth}-${lastDay.toString().padStart(2, '0')}`;
+
+      // Fetch transactions for the month
+      const { data: transactions, error: transError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .order('date', { ascending: true });
+
+      if (transError) throw transError;
+
+      // Create chart data points
+      const chartData: ChartDataPoint[] = [];
+      let cumulativeBalance = 0;
+
+      // Group transactions by day
+      const transactionsByDay = transactions?.reduce((acc, transaction) => {
+        const date = transaction.date;
+        if (!acc[date]) {
+          acc[date] = { income: 0, expenses: 0 };
+        }
+        
+        if (transaction.type === 'income') {
+          acc[date].income += Number(transaction.amount);
+        } else {
+          acc[date].expenses += Number(transaction.amount);
+        }
+        
+        return acc;
+      }, {} as Record<string, { income: number; expenses: number }>) || {};
+
+      // Generate data points for key dates in the month
+      const keyDates = [1, 7, 14, 21, lastDay];
+      
+      keyDates.forEach(day => {
+        const date = `${selectedYear}-${selectedMonth}-${day.toString().padStart(2, '0')}`;
+        const dayData = transactionsByDay[date] || { income: 0, expenses: 0 };
+        
+        cumulativeBalance += dayData.income - dayData.expenses;
+        
+        chartData.push({
+          date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          income: dayData.income,
+          expenses: dayData.expenses,
+          balance: cumulativeBalance
+        });
+      });
+
+      setData(chartData);
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChartData();
+  }, [user, selectedMonth, selectedYear]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading chart...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-64">
       <ResponsiveContainer width="100%" height="100%">
