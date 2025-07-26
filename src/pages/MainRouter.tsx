@@ -29,7 +29,12 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage onGetStarted={() => handleSetCurrentPage('checklist')} />;
+        return (
+          <HomePage 
+            onGetStarted={() => handleSetCurrentPage('checklist')}
+            onPageNavigation={handleSetCurrentPage}
+          />
+        );
       case 'checklist':
         return (
           <ChecklistPage
@@ -80,7 +85,16 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
         );
       case 'housing':
         return (
-          <HousingPage />
+          <HousingPage 
+            onBack={() => setCurrentPage('checklist')}
+            onComplete={() => {
+              setUserProgress({
+                ...userProgress,
+                completedModules: [...userProgress.completedModules, 'housing']
+              });
+            }}
+            isCompleted={userProgress.completedModules.includes('housing')}
+          />
         );
     }
   };
