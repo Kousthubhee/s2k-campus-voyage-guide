@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -9,9 +8,12 @@ import { HousingSitesDirectory } from '@/components/housing/HousingSitesDirector
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
+import checklistModules from '@/constants/checklistModules';
 
 interface ChecklistPageProps {
   onBack: () => void;
+  currentPage: string;
+  setCurrentPage: (page: string) => void;
 }
 
 // Mock data for progress tracker
@@ -49,37 +51,9 @@ const mockProgressItems = [
   }
 ];
 
-export const ChecklistPage = ({ onBack }: ChecklistPageProps) => {
+export const ChecklistPage = ({ onBack, currentPage, setCurrentPage }: ChecklistPageProps) => {
   const [selectedTab, setSelectedTab] = useState('checklist');
   const [progress, setProgress] = useLocalStorageProgress();
-
-  // Mock modules data for the original ChecklistModule
-  const modules = [
-    {
-      id: 'visa-application',
-      title: 'Visa Application',
-      description: 'Complete your student visa application process',
-      tasks: [
-        'Gather required documents',
-        'Fill visa application form',
-        'Schedule appointment',
-        'Attend visa interview'
-      ],
-      isCompleted: false
-    },
-    {
-      id: 'accommodation',
-      title: 'Find Accommodation',
-      description: 'Secure housing for your stay',
-      tasks: [
-        'Research housing options',
-        'Contact landlords',
-        'Schedule viewings',
-        'Sign rental agreement'
-      ],
-      isCompleted: false
-    }
-  ];
 
   const handleSchoolSelect = (schoolId: string) => {
     console.log('School selected:', schoolId);
@@ -117,11 +91,12 @@ export const ChecklistPage = ({ onBack }: ChecklistPageProps) => {
 
         <TabsContent value="checklist" className="space-y-6 mt-6">
           <ChecklistModule
-            modules={modules}
+            modules={checklistModules}
             userProgress={progress}
             setUserProgress={setProgress}
             onSchoolSelect={handleSchoolSelect}
-            onTaskComplete={handleTaskComplete}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
           />
         </TabsContent>
 
