@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import SimpleChecklistModule from '@/components/SimpleChecklistModule';
+import { ChecklistModule } from '@/components/ChecklistModule';
 import { GamificationBadges } from '@/components/finance/GamificationBadges';
 import { AdvancedProgressTracker } from '@/components/progress/AdvancedProgressTracker';
 import { HousingSitesDirectory } from '@/components/housing/HousingSitesDirectory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
 
 interface ChecklistPageProps {
   onBack: () => void;
@@ -50,6 +51,43 @@ const mockProgressItems = [
 
 export const ChecklistPage = ({ onBack }: ChecklistPageProps) => {
   const [selectedTab, setSelectedTab] = useState('checklist');
+  const [progress, setProgress] = useLocalStorageProgress();
+
+  // Mock modules data for the original ChecklistModule
+  const modules = [
+    {
+      id: 'visa-application',
+      title: 'Visa Application',
+      description: 'Complete your student visa application process',
+      tasks: [
+        'Gather required documents',
+        'Fill visa application form',
+        'Schedule appointment',
+        'Attend visa interview'
+      ],
+      isCompleted: false
+    },
+    {
+      id: 'accommodation',
+      title: 'Find Accommodation',
+      description: 'Secure housing for your stay',
+      tasks: [
+        'Research housing options',
+        'Contact landlords',
+        'Schedule viewings',
+        'Sign rental agreement'
+      ],
+      isCompleted: false
+    }
+  ];
+
+  const handleSchoolSelect = (schoolId: string) => {
+    console.log('School selected:', schoolId);
+  };
+
+  const handleTaskComplete = (moduleId: string, taskIndex: number) => {
+    console.log('Task completed:', moduleId, taskIndex);
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-4">
@@ -71,14 +109,20 @@ export const ChecklistPage = ({ onBack }: ChecklistPageProps) => {
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="checklist">Checklist</TabsTrigger>
+          <TabsTrigger value="checklist">Main Checklist</TabsTrigger>
           <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
           <TabsTrigger value="housing">Housing Sites</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
         </TabsList>
 
         <TabsContent value="checklist" className="space-y-6 mt-6">
-          <SimpleChecklistModule />
+          <ChecklistModule
+            modules={modules}
+            userProgress={progress}
+            setUserProgress={setProgress}
+            onSchoolSelect={handleSchoolSelect}
+            onTaskComplete={handleTaskComplete}
+          />
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6 mt-6">

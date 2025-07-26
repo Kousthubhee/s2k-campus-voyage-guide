@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, User, Shield } from 'lucide-react';
+import { ArrowLeft, User, Settings, Shield } from 'lucide-react';
 import { SecurityPrivacySettings } from '@/components/security/SecurityPrivacySettings';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -25,19 +25,23 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
         
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-4">
-            👤 Profile & Settings
+            👤 Your Profile
           </h1>
           <p className="text-lg text-muted-foreground">
-            Manage your account, preferences, and security settings
+            Manage your account settings and preferences
           </p>
         </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">
             <User className="h-4 w-4 mr-2" />
             Profile
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
           </TabsTrigger>
           <TabsTrigger value="security">
             <Shield className="h-4 w-4 mr-2" />
@@ -52,26 +56,28 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Email</label>
-                    <div className="p-2 bg-muted rounded-md">
-                      {user?.email || 'Not available'}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Member Since</label>
-                    <div className="p-2 bg-muted rounded-md">
-                      {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Not available'}
-                    </div>
-                  </div>
+                <div>
+                  <label className="text-sm font-medium">Email</label>
+                  <p className="text-muted-foreground">{user?.email}</p>
                 </div>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Profile editing features coming soon!
-                  </p>
+                <div>
+                  <label className="text-sm font-medium">User ID</label>
+                  <p className="text-muted-foreground font-mono text-xs">{user?.id}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coming Soon: User Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                General user settings and preferences will be available here soon.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
