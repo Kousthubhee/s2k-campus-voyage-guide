@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { ChecklistModule } from '@/components/ChecklistModule';
 import checklistModules from '@/constants/checklistModules';
@@ -21,6 +20,8 @@ export const ChecklistPage = ({
   currentPage,
   setCurrentPage
 }: ChecklistPageProps) => {
+  
+
   const { 
     completions, 
     markModuleComplete, 
@@ -85,7 +86,7 @@ export const ChecklistPage = ({
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeUnload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   if (loading) {
