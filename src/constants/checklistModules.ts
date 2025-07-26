@@ -58,15 +58,6 @@ const checklistModules = [
     icon: '💰',
     color: 'from-yellow-400 to-yellow-600',
     type: 'finance'
-  },
-  {
-    id: 'suggestions',
-    title: 'AI Suggestions',
-    description: 'Get personalized recommendations for your journey',
-    icon: '🤖',
-    color: 'from-indigo-400 to-indigo-600',
-    type: 'ai',
-    keysRequired: 3
   }
 ];
 
