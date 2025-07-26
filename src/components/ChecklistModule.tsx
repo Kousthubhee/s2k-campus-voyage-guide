@@ -94,6 +94,7 @@ export const ChecklistModule = ({
     'post-arrival': 'post-arrival',
     'integration': 'integration',
     'finance': 'finance-tracking',
+    'housing': 'housing',
     'suggestions': 'suggestions',
   };
 
