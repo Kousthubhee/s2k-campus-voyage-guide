@@ -25,6 +25,13 @@ const MainRouter = () => {
     setCurrentPage(page);
   };
 
+  const handleSetCurrentPage = (page: string) => {
+    const validPages = ['home', 'checklist', 'finance', 'language', 'insights', 'profile'] as const;
+    if (validPages.includes(page as any)) {
+      setCurrentPage(page as 'home' | 'checklist' | 'finance' | 'language' | 'insights' | 'profile');
+    }
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'home':
@@ -34,7 +41,7 @@ const MainRouter = () => {
           <ChecklistPage 
             onBack={() => setCurrentPage('home')} 
             currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
+            setCurrentPage={handleSetCurrentPage}
           />
         );
       case 'finance':
