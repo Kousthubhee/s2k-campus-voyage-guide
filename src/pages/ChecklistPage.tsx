@@ -1,120 +1,124 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+
+import React, { useEffect } from 'react';
 import { ChecklistModule } from '@/components/ChecklistModule';
-import { GamificationBadges } from '@/components/finance/GamificationBadges';
-import { AdvancedProgressTracker } from '@/components/progress/AdvancedProgressTracker';
-import { HousingSitesDirectory } from '@/components/housing/HousingSitesDirectory';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLocalStorageProgress } from '@/hooks/useLocalStorageProgress';
 import checklistModules from '@/constants/checklistModules';
+import { useModuleProgress } from '@/hooks/useModuleProgress';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { SaveChangesPrompt } from '@/components/SaveChangesPrompt';
 
 interface ChecklistPageProps {
-  onBack: () => void;
+  userProgress: any;
+  setUserProgress: (progress: any) => void;
+  onSchoolSelect: (school: any) => void;
   currentPage: string;
   setCurrentPage: (page: string) => void;
 }
 
-// Mock data for progress tracker
-const mockProgressItems = [
-  {
-    id: '1',
-    title: 'Complete Visa Application',
-    progress: 85,
-    deadline: new Date('2024-03-15'),
-    priority: 'high' as const,
-    category: 'Visa & Legal'
-  },
-  {
-    id: '2', 
-    title: 'Find Housing',
-    progress: 60,
-    deadline: new Date('2024-04-01'),
-    priority: 'high' as const,
-    category: 'Housing'
-  },
-  {
-    id: '3',
-    title: 'Basic French Learning',
-    progress: 40,
-    deadline: new Date('2024-05-01'),
-    priority: 'medium' as const,
-    category: 'Language'
-  },
-  {
-    id: '4',
-    title: 'Financial Planning',
-    progress: 75,
-    priority: 'medium' as const,
-    category: 'Finance'
+export const ChecklistPage = ({
+  userProgress,
+  setUserProgress,
+  onSchoolSelect,
+  currentPage,
+  setCurrentPage
+}: ChecklistPageProps) => {
+  const { 
+    completions, 
+    markModuleComplete, 
+    markModuleIncomplete, 
+    isModuleComplete, 
+    loading,
+    saveAllChanges,
+    discardChanges,
+    hasUnsavedChanges
+  } = useModuleProgress();
+
+  const {
+    hasUnsavedChanges: hasChanges,
+    isSaving,
+    markAsChanged,
+    saveChanges,
+    promptBeforeLeaving
+  } = useUnsavedChanges({
+    onSave: saveAllChanges,
+    onDiscard: discardChanges
+  });
+
+  // Sync database completions with local state
+  useEffect(() => {
+    if (!loading) {
+      const dbCompletedModules = completions.map(c => c.module_id);
+      console.log('Syncing completions to local state:', dbCompletedModules);
+      
+      setUserProgress(prevProgress => ({
+        ...prevProgress,
+        completedModules: dbCompletedModules
+      }));
+    }
+  }, [completions, loading, setUserProgress]);
+
+  // Enhanced userProgress with database tracking and save functionality
+  const enhancedUserProgress = {
+    ...userProgress,
+    completedModules: completions.map(c => c.module_id),
+    markComplete: async (moduleId: string) => {
+      console.log('Enhanced markComplete called for:', moduleId);
+      await markModuleComplete(moduleId);
+      markAsChanged();
+    },
+    markIncomplete: async (moduleId: string) => {
+      console.log('Enhanced markIncomplete called for:', moduleId);
+      await markModuleIncomplete(moduleId);
+      markAsChanged();
+    },
+    isComplete: (moduleId: string) => {
+      return isModuleComplete(moduleId);
+    }
+  };
+
+  // Prompt before navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading your progress...</div>
+      </div>
+    );
   }
-];
-
-export const ChecklistPage = ({ onBack, currentPage, setCurrentPage }: ChecklistPageProps) => {
-  const [selectedTab, setSelectedTab] = useState('checklist');
-  const [progress, setProgress] = useLocalStorageProgress();
-
-  const handleSchoolSelect = (schoolId: string) => {
-    console.log('School selected:', schoolId);
-  };
-
-  const handleTaskComplete = (moduleId: string, taskIndex: number) => {
-    console.log('Task completed:', moduleId, taskIndex);
-  };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <div className="mb-6">
-        <Button variant="outline" onClick={onBack} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            📋 Your Journey Checklist
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Track your progress and stay organized on your study abroad journey
-          </p>
-        </div>
-      </div>
-
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="checklist">Main Checklist</TabsTrigger>
-          <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
-          <TabsTrigger value="housing">Housing Sites</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="checklist" className="space-y-6 mt-6">
-          <ChecklistModule
-            modules={checklistModules}
-            userProgress={progress}
-            setUserProgress={setProgress}
-            onSchoolSelect={handleSchoolSelect}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-        </TabsContent>
-
-        <TabsContent value="progress" className="space-y-6 mt-6">
-          <AdvancedProgressTracker 
-            items={mockProgressItems}
-            overallProgress={65}
-          />
-        </TabsContent>
-
-        <TabsContent value="housing" className="space-y-6 mt-6">
-          <HousingSitesDirectory />
-        </TabsContent>
-
-        <TabsContent value="achievements" className="space-y-6 mt-6">
-          <GamificationBadges />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <>
+      <ChecklistModule
+        modules={checklistModules}
+        userProgress={enhancedUserProgress}
+        setUserProgress={setUserProgress}
+        onSchoolSelect={onSchoolSelect}
+        currentPage={currentPage}
+        setCurrentPage={async (page: string) => {
+          await promptBeforeLeaving();
+          setCurrentPage(page);
+        }}
+      />
+      
+      <SaveChangesPrompt
+        hasUnsavedChanges={hasUnsavedChanges() || hasChanges}
+        isSaving={isSaving}
+        onSave={saveChanges}
+        onDiscard={() => {
+          discardChanges();
+          markAsChanged();
+        }}
+      />
+    </>
   );
 };
