@@ -15,9 +15,33 @@ interface ProfilePageProps {
   onBack: () => void;
 }
 
+interface ProfileType {
+  id: string;
+  name: string;
+  email: string;
+  about: string;
+  memberSince: string;
+  photo: string;
+  age: string;
+  prevEducation: string;
+  workExperience: string;
+}
+
 export const ProfilePage = ({ onBack }: ProfilePageProps) => {
   const { user } = useAuth();
   const [selectedTab, setSelectedTab] = useState('profile');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [profile, setProfile] = useState<ProfileType>({
+    id: user?.id || '',
+    name: user?.email?.split('@')[0] || 'Student',
+    email: user?.email || '',
+    about: '',
+    memberSince: new Date().toLocaleDateString(),
+    photo: '',
+    age: '',
+    prevEducation: '',
+    workExperience: ''
+  });
 
   // Mock progress data for the tracker
   const progressItems = [
@@ -58,6 +82,10 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
 
   const handleTabChange = (value: string) => {
     setSelectedTab(value);
+  };
+
+  const handleProfileSave = (updatedProfile: ProfileType) => {
+    setProfile(updatedProfile);
   };
 
   return (
@@ -111,11 +139,13 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Profile Information
-                <ProfileEditDialog>
-                  <Button variant="outline" size="sm">
-                    Edit Profile
-                  </Button>
-                </ProfileEditDialog>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
+                  Edit Profile
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -125,8 +155,8 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
                     <User className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold">{user?.email?.split('@')[0] || 'Student'}</h3>
-                    <p className="text-muted-foreground">{user?.email}</p>
+                    <h3 className="text-xl font-semibold">{profile.name}</h3>
+                    <p className="text-muted-foreground">{profile.email}</p>
                     <Badge variant="secondary">International Student</Badge>
                   </div>
                 </div>
@@ -207,6 +237,13 @@ export const ProfilePage = ({ onBack }: ProfilePageProps) => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <ProfileEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        profile={profile}
+        onSave={handleProfileSave}
+      />
     </div>
   );
 };

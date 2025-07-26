@@ -305,7 +305,18 @@ const Index = () => {
                   <Route path="/hub" element={<HubPage />} />
                   <Route path="/news" element={<NewsPage />} />
                   <Route path="/affiliation" element={<AffiliationPage />} />
-                  <Route path="/language" element={<LanguagePage />} />
+                  <Route path="/language" element={
+                    <LanguagePage 
+                      onBack={() => handlePageNavigation('checklist')}
+                      onComplete={() => {
+                        setUserProgress({
+                          ...userProgress,
+                          completedModules: [...userProgress.completedModules, 'language']
+                        });
+                      }}
+                      isCompleted={userProgress.completedModules.includes('language')}
+                    />
+                  } />
                   <Route path="/integration" element={
                     <FrenchIntegrationPage onBack={() => handlePageNavigation('checklist')} />
                   } />
@@ -313,9 +324,7 @@ const Index = () => {
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/profile" element={
                     <ProfilePage 
-                      userProfile={userProfile} 
-                      setUserProfile={setUserProfile} 
-                      setCurrentPage={handlePageNavigation}
+                      onBack={() => handlePageNavigation('checklist')}
                     />
                   } />
                   <Route path="/qa" element={

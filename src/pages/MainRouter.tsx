@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChecklistPage } from './ChecklistPage';
 import { FinanceTrackingPage } from './FinanceTrackingPage';
@@ -28,7 +29,7 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage onNavigate={handleSetCurrentPage} />;
+        return <HomePage onGetStarted={() => handleSetCurrentPage('checklist')} />;
       case 'checklist':
         return (
           <ChecklistPage
@@ -79,9 +80,7 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
         );
       case 'housing':
         return (
-          <HousingPage 
-            onBack={() => setCurrentPage('checklist')}
-          />
+          <HousingPage />
         );
     }
   };
