@@ -74,9 +74,18 @@ export const ModuleCard = ({
           )}
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {module.title}
-        </h3>
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex-1">
+            {module.title}
+          </h3>
+          {!isUnlocked && module.keysRequired && (
+            <div className="flex items-center ml-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900 rounded-full">
+              <Key className="h-3 w-3 text-yellow-600 dark:text-yellow-400 mr-1" />
+              <span className="text-xs text-yellow-700 dark:text-yellow-300">{module.keysRequired}</span>
+            </div>
+          )}
+        </div>
+
         <p className="text-sm text-gray-600 dark:text-white/80 mb-4">
           {module.description}
         </p>

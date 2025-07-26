@@ -17,6 +17,7 @@ interface HousingSite {
 
 export const HousingSitesDirectory = () => {
   const housingSites: HousingSite[] = [
+    // Top Priority - Government & Official
     {
       name: 'CROUS',
       url: 'https://www.messervices.etudiant.gouv.fr',
@@ -28,6 +29,8 @@ export const HousingSitesDirectory = () => {
       cities: ['All major cities'],
       popularity: 'high'
     },
+    
+    // Student-Focused Platforms
     {
       name: 'Studapart',
       url: 'https://www.studapart.com',
@@ -39,6 +42,41 @@ export const HousingSitesDirectory = () => {
       cities: ['Paris', 'Lyon', 'Toulouse', 'Marseille', 'Bordeaux', 'Nice'],
       popularity: 'high'
     },
+    {
+      name: 'Student.com',
+      url: 'https://www.student.com',
+      description: 'Global student accommodation marketplace with verified properties',
+      type: 'student',
+      price: 'free',
+      rating: 4.4,
+      features: ['International students', 'Verified properties', 'Book online', 'Student support'],
+      cities: ['Paris', 'Lyon', 'Toulouse', 'Bordeaux', 'Lille'],
+      popularity: 'high'
+    },
+    {
+      name: 'Lokaviz',
+      url: 'https://www.lokaviz.fr',
+      description: 'CROUS platform for private student accommodation',
+      type: 'student',
+      price: 'free',
+      rating: 4.1,
+      features: ['CROUS endorsed', 'Student-focused', 'Verified landlords', 'Support available'],
+      cities: ['All university cities'],
+      popularity: 'medium'
+    },
+    {
+      name: 'Uniplaces',
+      url: 'https://www.uniplaces.com',
+      description: 'International student housing with verified listings',
+      type: 'student',
+      price: 'commission',
+      rating: 4.2,
+      features: ['Student-verified', 'International support', 'Secure payments', 'Quality guarantee'],
+      cities: ['Paris', 'Lyon', 'Toulouse', 'Bordeaux', 'Montpellier'],
+      popularity: 'medium'
+    },
+
+    // General Marketplaces
     {
       name: 'SeLoger',
       url: 'https://www.seloger.com',
@@ -62,16 +100,40 @@ export const HousingSitesDirectory = () => {
       popularity: 'high'
     },
     {
-      name: 'Student.com',
-      url: 'https://www.student.com',
-      description: 'Global student accommodation marketplace',
-      type: 'student',
+      name: 'PAP (Particulier à Particulier)',
+      url: 'https://www.pap.fr',
+      description: 'Direct rentals from private owners without agency fees',
+      type: 'general',
       price: 'free',
-      rating: 4.4,
-      features: ['International students', 'Verified properties', 'Book online', 'Student support'],
-      cities: ['Paris', 'Lyon', 'Toulouse', 'Bordeaux', 'Lille'],
-      popularity: 'high'
+      rating: 4.0,
+      features: ['No agency fees', 'Direct contact', 'Owner verified', 'Good value'],
+      cities: ['Paris', 'Lyon', 'Marseille', 'Major cities'],
+      popularity: 'medium'
     },
+    {
+      name: 'Logic-Immo',
+      url: 'https://www.logic-immo.com',
+      description: 'Comprehensive rental platform with professional listings',
+      type: 'general',
+      price: 'free',
+      rating: 3.9,
+      features: ['Professional agents', 'Detailed photos', 'Neighborhood info', 'Price trends'],
+      cities: ['All major cities'],
+      popularity: 'medium'
+    },
+    {
+      name: 'Bienici',
+      url: 'https://www.bienici.com',
+      description: 'Modern rental platform with excellent user experience',
+      type: 'general',
+      price: 'free',
+      rating: 4.2,
+      features: ['Modern interface', 'Map search', 'Quick filters', 'Agent contact'],
+      cities: ['Paris', 'Lyon', 'Marseille', 'Nice', 'Toulouse'],
+      popularity: 'medium'
+    },
+
+    // Premium Student Residences
     {
       name: 'Nexity Studéa',
       url: 'https://www.nexity-studea.com',
@@ -84,27 +146,18 @@ export const HousingSitesDirectory = () => {
       popularity: 'medium'
     },
     {
-      name: 'Uniplaces',
-      url: 'https://www.uniplaces.com',
-      description: 'International student housing with verified listings',
+      name: 'Cardinal Campus',
+      url: 'https://www.cardinal-campus.fr',
+      description: 'High-quality student residences with premium services',
       type: 'student',
-      price: 'commission',
-      rating: 4.2,
-      features: ['Student-verified', 'International support', 'Secure payments', 'Quality guarantee'],
-      cities: ['Paris', 'Lyon', 'Toulouse', 'Bordeaux', 'Montpellier'],
-      popularity: 'medium'
-    },
-    {
-      name: 'PAP (Particulier à Particulier)',
-      url: 'https://www.pap.fr',
-      description: 'Direct rentals from private owners without agency fees',
-      type: 'general',
       price: 'free',
-      rating: 4.0,
-      features: ['No agency fees', 'Direct contact', 'Owner verified', 'Good value'],
-      cities: ['Paris', 'Lyon', 'Marseille', 'Major cities'],
+      rating: 4.3,
+      features: ['Premium residences', 'Study rooms', 'Gym access', 'Events'],
+      cities: ['Paris', 'Lyon', 'Montpellier', 'Toulouse'],
       popularity: 'medium'
     },
+
+    // Co-living Spaces
     {
       name: 'The Student Hotel',
       url: 'https://www.thestudenthotel.com',
@@ -115,28 +168,6 @@ export const HousingSitesDirectory = () => {
       features: ['All-inclusive', 'International community', 'Modern amenities', 'Flexible stays'],
       cities: ['Paris', 'Lyon'],
       popularity: 'medium'
-    },
-    {
-      name: 'Spotahome',
-      url: 'https://www.spotahome.com',
-      description: 'Book accommodation online without viewings',
-      type: 'general',
-      price: 'commission',
-      rating: 4.0,
-      features: ['360° videos', 'Online booking', 'No viewings needed', 'Verified properties'],
-      cities: ['Paris', 'Lyon'],
-      popularity: 'low'
-    },
-    {
-      name: 'Airbnb (Monthly)',
-      url: 'https://www.airbnb.com',
-      description: 'Short to medium-term furnished rentals',
-      type: 'short-term',
-      price: 'commission',
-      rating: 4.3,
-      features: ['Immediate booking', 'Furnished', 'Flexible dates', 'Host reviews'],
-      cities: ['All French cities'],
-      popularity: 'high'
     },
     {
       name: 'Chez Nestor',
@@ -150,15 +181,39 @@ export const HousingSitesDirectory = () => {
       popularity: 'medium'
     },
     {
-      name: 'Lokaviz',
-      url: 'https://www.lokaviz.fr',
-      description: 'CROUS platform for private student accommodation',
-      type: 'student',
-      price: 'free',
+      name: 'Urban Campus',
+      url: 'https://urbancampus.com',
+      description: 'Modern co-living with integrated services for students',
+      type: 'coliving',
+      price: 'commission',
       rating: 4.1,
-      features: ['CROUS endorsed', 'Student-focused', 'Verified landlords', 'Support available'],
-      cities: ['All university cities'],
-      popularity: 'medium'
+      features: ['Integrated services', 'Community focus', 'Modern design', 'Flexible terms'],
+      cities: ['Paris', 'Lyon'],
+      popularity: 'low'
+    },
+
+    // Short-term & Flexible Options
+    {
+      name: 'Airbnb (Monthly)',
+      url: 'https://www.airbnb.com',
+      description: 'Short to medium-term furnished rentals with flexible booking',
+      type: 'short-term',
+      price: 'commission',
+      rating: 4.3,
+      features: ['Immediate booking', 'Furnished', 'Flexible dates', 'Host reviews'],
+      cities: ['All French cities'],
+      popularity: 'high'
+    },
+    {
+      name: 'Spotahome',
+      url: 'https://www.spotahome.com',
+      description: 'Book accommodation online without viewings using 360° tours',
+      type: 'general',
+      price: 'commission',
+      rating: 4.0,
+      features: ['360° videos', 'Online booking', 'No viewings needed', 'Verified properties'],
+      cities: ['Paris', 'Lyon'],
+      popularity: 'low'
     },
     {
       name: 'HousingAnywhere',
@@ -171,10 +226,45 @@ export const HousingSitesDirectory = () => {
       cities: ['Paris', 'Lyon', 'Toulouse', 'Nice'],
       popularity: 'low'
     },
+
+    // New Additional Sites
+    {
+      name: 'Immojeune',
+      url: 'https://www.immojeune.com',
+      description: 'Specialized in housing for students and young professionals',
+      type: 'student',
+      price: 'free',
+      rating: 3.8,
+      features: ['Youth-focused', 'Budget-friendly', 'City centers', 'Quick search'],
+      cities: ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux'],
+      popularity: 'medium'
+    },
+    {
+      name: 'Foncia',
+      url: 'https://www.foncia.com',
+      description: 'Major real estate agency with rental properties nationwide',
+      type: 'general',
+      price: 'free',
+      rating: 3.7,
+      features: ['Professional agency', 'Quality properties', 'Support services', 'Insurance'],
+      cities: ['All major cities'],
+      popularity: 'medium'
+    },
+    {
+      name: 'Century 21',
+      url: 'https://www.century21.fr',
+      description: 'International real estate brand with French rental properties',
+      type: 'general',
+      price: 'free',
+      rating: 3.6,
+      features: ['Global brand', 'Professional service', 'Wide network', 'Quality assurance'],
+      cities: ['All major cities'],
+      popularity: 'medium'
+    },
     {
       name: 'Flatlooker',
       url: 'https://www.flatlooker.com',
-      description: 'Student and young professional accommodation search',
+      description: 'Student and young professional accommodation search platform',
       type: 'student',
       price: 'free',
       rating: 3.9,
