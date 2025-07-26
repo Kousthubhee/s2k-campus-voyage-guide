@@ -5,9 +5,48 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Key, Eye, Download, Trash2, AlertTriangle } from 'lucide-react';
+import { useSecuritySettings } from '@/hooks/useSecuritySettings';
 
 export const SecurityPrivacySettings = () => {
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const {
+    settings,
+    loading,
+    activeSessions,
+    updatePassword,
+    toggleTwoFactor,
+    updatePrivacySettings,
+    exportUserData,
+    revokeSession
+  } = useSecuritySettings();
+
+  const [passwordForm, setPasswordForm] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordForm.new !== passwordForm.confirm) {
+      return;
+    }
+
+    await updatePassword(passwordForm.current, passwordForm.new);
+    setPasswordForm({ current: '', new: '', confirm: '' });
+  };
+
+  const handlePrivacyChange = (key: string, value: boolean) => {
+    updatePrivacySettings({ [key]: value });
+  };
+
+  const handleVisibilityChange = (visibility: 'public' | 'private') => {
+    updatePrivacySettings({ profileVisibility: visibility });
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Loading security settings...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -20,15 +59,36 @@ export const SecurityPrivacySettings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
+          <form onSubmit={handlePasswordUpdate}>
             <h4 className="font-semibold mb-3">Password</h4>
             <div className="space-y-3">
-              <Input type="password" placeholder="Current password" />
-              <Input type="password" placeholder="New password" />
-              <Input type="password" placeholder="Confirm new password" />
-              <Button size="sm">Update Password</Button>
+              <Input 
+                type="password" 
+                placeholder="Current password"
+                value={passwordForm.current}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, current: e.target.value }))}
+              />
+              <Input 
+                type="password" 
+                placeholder="New password"
+                value={passwordForm.new}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, new: e.target.value }))}
+              />
+              <Input 
+                type="password" 
+                placeholder="Confirm new password"
+                value={passwordForm.confirm}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm: e.target.value }))}
+              />
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={!passwordForm.current || !passwordForm.new || passwordForm.new !== passwordForm.confirm}
+              >
+                Update Password
+              </Button>
             </div>
-          </div>
+          </form>
 
           <div>
             <h4 className="font-semibold mb-3">Two-Factor Authentication</h4>
@@ -40,17 +100,17 @@ export const SecurityPrivacySettings = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {twoFactorEnabled ? (
+                {settings.twoFactorEnabled ? (
                   <Badge variant="default" className="bg-green-500">Enabled</Badge>
                 ) : (
                   <Badge variant="secondary">Disabled</Badge>
                 )}
                 <Button 
                   size="sm" 
-                  variant={twoFactorEnabled ? "destructive" : "default"}
-                  onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
+                  variant={settings.twoFactorEnabled ? "destructive" : "default"}
+                  onClick={() => toggleTwoFactor(!settings.twoFactorEnabled)}
                 >
-                  {twoFactorEnabled ? 'Disable' : 'Enable'}
+                  {settings.twoFactorEnabled ? 'Disable' : 'Enable'}
                 </Button>
               </div>
             </div>
@@ -59,23 +119,28 @@ export const SecurityPrivacySettings = () => {
           <div>
             <h4 className="font-semibold mb-3">Active Sessions</h4>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Current Device</p>
-                  <p className="text-sm text-muted-foreground">Chrome on Windows • Last active: Now</p>
+              {activeSessions.map((session) => (
+                <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{session.device}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {session.browser} • Last active: {session.lastActive}
+                    </p>
+                  </div>
+                  {session.isCurrent ? (
+                    <Badge variant="default">Current</Badge>
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => revokeSession(session.id)}
+                    >
+                      <Key className="h-4 w-4 mr-2" />
+                      Revoke
+                    </Button>
+                  )}
                 </div>
-                <Badge variant="default">Current</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Mobile Device</p>
-                  <p className="text-sm text-muted-foreground">Safari on iPhone • Last active: 2 hours ago</p>
-                </div>
-                <Button size="sm" variant="outline">
-                  <Key className="h-4 w-4 mr-2" />
-                  Revoke
-                </Button>
-              </div>
+              ))}
             </div>
           </div>
         </CardContent>
@@ -94,15 +159,30 @@ export const SecurityPrivacySettings = () => {
             <h4 className="font-semibold mb-3">Data Collection</h4>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="analytics" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  id="analytics" 
+                  checked={settings.analyticsEnabled}
+                  onChange={(e) => handlePrivacyChange('analyticsEnabled', e.target.checked)}
+                />
                 <label htmlFor="analytics">Allow analytics to improve the platform</label>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="marketing" />
+                <input 
+                  type="checkbox" 
+                  id="marketing"
+                  checked={settings.marketingEnabled}
+                  onChange={(e) => handlePrivacyChange('marketingEnabled', e.target.checked)}
+                />
                 <label htmlFor="marketing">Receive marketing communications</label>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="third-party" />
+                <input 
+                  type="checkbox" 
+                  id="third-party"
+                  checked={settings.thirdPartyEnabled}
+                  onChange={(e) => handlePrivacyChange('thirdPartyEnabled', e.target.checked)}
+                />
                 <label htmlFor="third-party">Share data with educational partners</label>
               </div>
             </div>
@@ -112,11 +192,23 @@ export const SecurityPrivacySettings = () => {
             <h4 className="font-semibold mb-3">Profile Visibility</h4>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <input type="radio" name="visibility" id="public" />
+                <input 
+                  type="radio" 
+                  name="visibility" 
+                  id="public"
+                  checked={settings.profileVisibility === 'public'}
+                  onChange={() => handleVisibilityChange('public')}
+                />
                 <label htmlFor="public">Public (visible to other students)</label>
               </div>
               <div className="flex items-center gap-2">
-                <input type="radio" name="visibility" id="private" defaultChecked />
+                <input 
+                  type="radio" 
+                  name="visibility" 
+                  id="private"
+                  checked={settings.profileVisibility === 'private'}
+                  onChange={() => handleVisibilityChange('private')}
+                />
                 <label htmlFor="private">Private (only visible to you)</label>
               </div>
             </div>
@@ -140,7 +232,7 @@ export const SecurityPrivacySettings = () => {
                 Download a copy of all your data
               </p>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={exportUserData}>
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>

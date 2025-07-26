@@ -34,8 +34,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Ensure profile exists with correct ID when user signs in
+        // Security: Log auth events for monitoring
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('🔐 User signed in:', session.user.id);
+          
+          // Ensure profile exists with correct ID when user signs in
           setTimeout(async () => {
             try {
               console.log('🔍 Checking profile for user:', session.user.id);
@@ -51,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const { error: insertError } = await supabase
                   .from('profiles')
                   .insert({
-                    id: session.user.id, // This is crucial - set ID to auth user ID
+                    id: session.user.id,
                     name: session.user.user_metadata?.name || session.user.email || 'New User',
                     email: session.user.email || ''
                   });
@@ -71,6 +74,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }, 100);
         }
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('🔓 User signed out');
+        }
+        
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('🔄 Token refreshed for user:', session?.user?.id);
+        }
       }
     );
 
@@ -78,16 +89,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      console.log('🔓 Signing out user');
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('❌ Sign out error:', error);
+    }
   };
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`
+    try {
+      console.log('🔐 Starting Google OAuth');
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('❌ Google OAuth error:', error);
+        throw error;
       }
-    });
+    } catch (error) {
+      console.error('❌ Google sign in failed:', error);
+      throw error;
+    }
   };
 
   return (
