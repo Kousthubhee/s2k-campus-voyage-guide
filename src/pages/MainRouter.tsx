@@ -20,18 +20,13 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
   >("home");
 
   const handleSetCurrentPage = (page: string) => {
-    console.log('MainRouter: Setting current page to:', page);
     const validPages = ["home", "checklist", "finance", "language", "insights", "profile", "housing"] as const;
     if (validPages.includes(page as any)) {
       setCurrentPage(page as any);
-    } else {
-      console.error('MainRouter: Invalid page requested:', page);
     }
   };
 
   const renderPage = () => {
-    console.log('MainRouter: Rendering page:', currentPage);
-    
     switch (currentPage) {
       case 'home':
         return (
@@ -76,20 +71,6 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
             isCompleted={userProgress.completedModules.includes('language')}
           />
         );
-      case 'housing':
-        console.log('MainRouter: Rendering HousingPage');
-        return (
-          <HousingPage 
-            onBack={() => setCurrentPage('checklist')}
-            onComplete={() => {
-              setUserProgress({
-                ...userProgress,
-                completedModules: [...userProgress.completedModules, 'housing']
-              });
-            }}
-            isCompleted={userProgress.completedModules.includes('housing')}
-          />
-        );
       case 'insights':
         return (
           <PersonalizedDashboard />
@@ -100,12 +81,17 @@ const MainRouter = ({ userProgress, setUserProgress, onSchoolSelect }: MainRoute
             onBack={() => setCurrentPage('checklist')}
           />
         );
-      default:
-        console.log('MainRouter: Default case, rendering HomePage');
+      case 'housing':
         return (
-          <HomePage 
-            onGetStarted={() => handleSetCurrentPage('checklist')}
-            onPageNavigation={handleSetCurrentPage}
+          <HousingPage 
+            onBack={() => setCurrentPage('checklist')}
+            onComplete={() => {
+              setUserProgress({
+                ...userProgress,
+                completedModules: [...userProgress.completedModules, 'housing']
+              });
+            }}
+            isCompleted={userProgress.completedModules.includes('housing')}
           />
         );
     }
