@@ -81,7 +81,7 @@ export const AdvancedProgressTracker = ({ items, overallProgress }: AdvancedProg
                     <span className="text-sm text-muted-foreground">
                       {formatTimeUntil(item.deadline!)}
                     </span>
-                    <Badge variant={getPriorityColor(item.priority)} size="sm">
+                    <Badge variant={getPriorityColor(item.priority)}>
                       {item.priority}
                     </Badge>
                   </div>
