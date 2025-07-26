@@ -26,6 +26,7 @@ import { HubPage } from './HubPage';
 import { NewsPage } from './NewsPage';
 import { AffiliationPage } from '@/components/AffiliationPage';
 import { LanguagePage } from './LanguagePage';
+import { HousingPage } from './HousingPage';
 import { FrenchIntegrationPage } from '@/components/FrenchIntegrationPage';
 import { TranslatePage } from './TranslatePage';
 import { ContactPage } from './ContactPage';
@@ -299,6 +300,18 @@ const Index = () => {
                       onSchoolSelect={setSelectedSchool}
                       currentPage={currentPage}
                       setCurrentPage={handlePageNavigation}
+                    />
+                  } />
+                  <Route path="/housing" element={
+                    <HousingPage 
+                      onBack={() => handlePageNavigation('checklist')}
+                      onComplete={() => {
+                        setUserProgress({
+                          ...userProgress,
+                          completedModules: [...userProgress.completedModules, 'housing']
+                        });
+                      }}
+                      isCompleted={userProgress.completedModules.includes('housing')}
                     />
                   } />
                   <Route path="/documents" element={<DocumentsPage />} />
