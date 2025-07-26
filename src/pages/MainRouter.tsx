@@ -1,45 +1,59 @@
-
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Index } from './Index';
+import { ChecklistPage } from './ChecklistPage';
+import { FinanceTrackingPage } from './FinanceTrackingPage';
+import { LanguagePage } from './LanguagePage';
+import { ProfilePage } from './ProfilePage';
+import { InsightsPage } from './InsightsPage';
 
-interface MainRouterProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-  userProfile: any;
-  userProgress: any;
-  setUserProgress: (progress: any) => void;
-  selectedSchool: any;
-  setSelectedSchool: (school: any) => void;
-  handleProgressUpdate: (progress: any) => void;
-  profile: any;
-  setUserProfile: (profile: any) => void;
-}
+const MainRouter = () => {
+  const [currentPage, setCurrentPage] = useState<
+    'home' | 'checklist' | 'finance' | 'language' | 'insights' | 'profile'
+  >('home');
+  const { user, isLoading } = useAuth();
 
-const MainRouter = ({
-  currentPage,
-  setCurrentPage,
-  userProfile,
-  userProgress,
-  setUserProgress,
-  selectedSchool,
-  setSelectedSchool,
-  handleProgressUpdate,
-  profile,
-  setUserProfile
-}: MainRouterProps) => {
-  const { user, loading } = useAuth();
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!user && !isLoading) {
+      window.location.href = '/login';
+    }
+  }, [user, isLoading]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleNavigation = (page: 'home' | 'checklist' | 'finance' | 'language' | 'insights' | 'profile') => {
+    setCurrentPage(page);
+  };
 
-  // This component is now a legacy router used to support old code
-  // The actual routing happens in Index.tsx with React Router
-  // This function serves as a compatibility layer
-  console.log('MainRouter is now just a compatibility layer - routing happens in Index.tsx');
-  
-  return null;
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <Index onNavigate={handleNavigation} />;
+      case 'checklist':
+        return <ChecklistPage onBack={() => setCurrentPage('home')} />;
+      case 'finance':
+        return <FinanceTrackingPage onBack={() => setCurrentPage('home')} />;
+      case 'language':
+        return <LanguagePage onBack={() => setCurrentPage('home')} />;
+      case 'insights':
+        return <InsightsPage onBack={() => setCurrentPage('home')} />;
+      case 'profile':
+        return <ProfilePage onBack={() => setCurrentPage('home')} />;
+      default:
+        return <Index onNavigate={handleNavigation} />;
+    }
+  };
+
+  return (
+    <div>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : (
+        user && renderCurrentPage()
+      )}
+    </div>
+  );
 };
 
 export default MainRouter;
